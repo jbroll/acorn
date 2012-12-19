@@ -1,0 +1,22 @@
+
+	double ndotk	   = nhat.dot(r.k);
+	double sin_thet_in = sqrt(1.0 - ndotk*ndotk);
+	double thet_in	   = asin(sin_thet_in);
+	double thet_out	   = asin(n0*sin_thet_in/s.n);
+	double dthet	   = thet_out - thet_in;
+
+	// establish l-vector perp to k-vect and in plane of incidence
+	//
+	Vector3d lvect 	   = nhat - ndotk*r.k;
+	Vector3d lhat;
+
+	if (lvect.norm() > 1.0e-6) {
+	    lhat = lvect/lvect.norm();
+	} else {
+	    lhat = Vector3d(0.0, 0.0, 0.0);
+	}
+
+	// get sign flips
+	//
+	double dnsign = s.n*n0/fabs(s.n*n0);
+	double knsign = -ndotk/fabs(ndotk);
