@@ -54,13 +54,14 @@ int Traverse(double n0, double z, Surface &s, Ray &r)
 	}
     }
 
-    // ray/surface intersection position
+    // Ray/Surface Intersection position
     //
     r.p += d * r.k;
 
+
     // Normal
     //
-    if ( s.R == 0.0 || s.R > 1.0e10 ) {				// Planar
+    if ( s.R == 0.0 || s.R > 1.0e10 ) {		// Planar
 	nhat = Vector3d(0.0, 0.0, 1.0);
     } else {
 	double Rsign = s.R/fabs(s.R);
@@ -84,56 +85,18 @@ int Traverse(double n0, double z, Surface &s, Ray &r)
     }
 }
 
-main(int argc, char **argv)
+trace(double z, double n, Surface *surfs, int nsurf, Ray *rays, int nray)
 {
-    Ray r[9];
-
-    int tray = 9;
-
-    int ray = 0;
-    for ( int i = -1; i < 2; i++ ) {
-	for ( int j = -1; j < 2; j++ ) {
-	    r[ray].p = Vector3d(i*25, j*25, 0.0);
-	    r[ray].k = Vector3d(0, 0, 1.0);
-
-	    ray++;
-	}
-    }
-
-
-    Surface s[3] = {
-	// aper,       R,   K,    n,   thick
-	//
-	  { 0.0,     0.0,  0.0,  1.00,   200.0 }	// Move 200 right from flat surface
-  	, { 0.0,  -400.0, -1.0, -1.00,  -200.0 }	// Reflect off of parabolic mirror
-	, { 0.0,     0.0,  0.0,  1.00,     0.0 }	// Move 200 left to focus.
-    };
-
-    double n = 1.0;		// Air
-    double z = 0.0;		//
-
-    for ( int i = 0; i < 3; i++ ) {
-	prays(r, tray);
-	fprintf(stdout, "\n");
-	for ( int j = 0; j < tray; j++ ) {
+    for ( int i = 0; i < nsurf; i++ ) {
+	//prays(r, tray);
+	//fprintf(stdout, "\n");
+	for ( int j = 0; j < nray; j++ ) {
 	    Traverse(n, z, s[i], r[j]);
 	}
 	n  = s[i].n > 0.0 ? s[i].n : n;
 	z += s[i].thickness;
     }
 
-    prays(r, tray);
+    //prays(r, tray);
 }
-
-
-
-#if 0
-
-
-seqtrace surfs rays
-raytrace surfs rays
-seqtrace surfs rays
-
-#endif
-
 
