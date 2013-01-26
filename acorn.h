@@ -1,4 +1,8 @@
 
+#define X	0
+#define Y	1
+#define Z	2
+
 typedef struct _Surface {
     double	aper;
     double	R;
@@ -15,7 +19,4 @@ typedef struct _Ray {
     Vector3d	k;
 } Ray;
 
-#define X	0
-#define Y	1
-#define Z	2
 
