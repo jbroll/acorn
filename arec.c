@@ -8,6 +8,7 @@
 
 */
 #include <string.h>
+#include <stdlib.h>
 #include <stddef.h>
 
 #include <tcl.h>
@@ -70,7 +71,7 @@ int ARecSetChar(ARecTypeTable *type, Tcl_Obj *obj, void *here) {
 int ARecSetString(ARecTypeTable *type, Tcl_Obj *obj, void *here) {
     	char *str = *((char **)here);
 
-    if ( str ) { free(str); }
+    if ( str ) { free((void *) str); }
 
     *(char **) here = strdup(Tcl_GetString(obj));
 
@@ -274,7 +275,10 @@ int ARecInstObjCmd(data, interp, objc, objv)
     }
 
     if ( n+m-1 < 0 || n+m-1 > inst->nrecs )  {
-	Tcl_AppendStringsToObj(result, Tcl_GetString(inst->type->nameobj), " index out of range ", Tcl_GetString(index), NULL);
+	char index[50];
+	sprintf(index, "%d %d", n, m);
+
+	Tcl_AppendStringsToObj(result, Tcl_GetString(inst->type->nameobj), " index out of range ", index, NULL);
 
 	return TCL_ERROR;
     }
@@ -304,7 +308,10 @@ int ARecInstObjCmd(data, interp, objc, objv)
 
 
     if ( n + m-1 >= inst->nrecs ) {						// All commands below here do not allow extension
-	Tcl_AppendStringsToObj(result , Tcl_GetString(inst->type->nameobj), " index out of range ", Tcl_GetString(index), NULL);
+	char index[50];
+	sprintf(index, "%d %d", n, m);
+
+	Tcl_AppendStringsToObj(result , Tcl_GetString(inst->type->nameobj), " index out of range ", index, NULL);
 	
 	return TCL_ERROR;
     }
@@ -399,7 +406,7 @@ int ARecTypeAddField(Tcl_Interp *interp, ARecType *type, int objc, Tcl_Obj **obj
     int i;
 
     int size = 0;
-    int maxx = 0;
+    int maxx;
 
     ARecDType *dtype;
 
@@ -421,13 +428,13 @@ int ARecTypeAddField(Tcl_Interp *interp, ARecType *type, int objc, Tcl_Obj **obj
 	return TCL_ERROR;
     }
 
-    maxx = dtype->size;
+    maxx = dtype->align;
 
     for ( i = 0; i < type->nfield; i++ ) {
 	size = ARecPadd(size + type->field[i].dtype->size, type->field[i].dtype->align);
 
-	if ( type->field[i].dtype->size > maxx ) {
-	    maxx = type->field[i].dtype->size;
+	if ( type->field[i].dtype->align > maxx ) {
+	    maxx = type->field[i].dtype->align;
 	}
     }
 
@@ -459,7 +466,7 @@ int ARecTypeAddField(Tcl_Interp *interp, ARecType *type, int objc, Tcl_Obj **obj
 	type->field[type->nfield].nameobj = NULL;
     }
 
-    type->size = size;
+    type->size = ARecPadd(size, maxx);
 
     return TCL_OK;
 }
@@ -552,7 +559,7 @@ ARecRealloc(ARecInst *inst, int nrecs, int more)
 
 	inst->recs = Tcl_Realloc((char *) inst->recs, inst->arecs * inst->type->size);
 
-	memset(&inst->recs[inst->nrecs * inst->type->size], 0, inst->type->size * more);
+	memset(&((char *)inst->recs)[inst->nrecs * inst->type->size], 0, inst->type->size * more);
     }
     inst->nrecs = nrecs;
 }
@@ -762,7 +769,19 @@ int ARecGet(Tcl_Interp *interp
 }
 
 
+typedef struct _LngAlign {
+	long	x;
+	char	y;
+} LngAlign;
+
+typedef struct _DblAlign {
+	double	x;
+	char	y;
+} DblAlign;
+
+
 void ARecInit(Tcl_Interp *ip) {
+    ARecDType *dtype;
     int i;
 
     ARecDTypesType.nameobj = Tcl_NewStringObj((char *)ARecDTypesType.nameobj, -1);
@@ -773,6 +792,11 @@ void ARecInit(Tcl_Interp *ip) {
     for ( i = 0 ; i < ARecDTypesType.nfield; i++ ) {
 	ARecDTypesType.field[i].nameobj = Tcl_NewStringObj((char *)ARecDTypesType.field[i].nameobj, -1);
 	Tcl_IncrRefCount(ARecDTypesType.field[i].nameobj);
+    }
+
+    for ( dtype = ARecDTypes; dtype->name != NULL; dtype++ ) {
+	if ( !strcmp(dtype->name, "double") ) { dtype->align = sizeof(DblAlign) - sizeof(double); }
+	if ( !strcmp(dtype->name, "long")   ) { dtype->align = sizeof(LngAlign) - sizeof(double); }
     }
 
     Tcl_CreateObjCommand(

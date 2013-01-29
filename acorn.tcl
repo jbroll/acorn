@@ -47,7 +47,6 @@ namespace eval acorn {
 	arec::typedef ::acorn::Rays {
 	    double	px py pz kx ky kz
 	    int		vignetted;
-	    int		padd;
 	}
 
 	arec::typedef ::acorn::Surfs {
