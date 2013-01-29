@@ -1,8 +1,6 @@
 #include <iostream>
 #include <Eigen/Dense>
 
-#include <stdio.h>
-
 using namespace std;
 using namespace Eigen;
 
@@ -10,6 +8,8 @@ using namespace Eigen;
 
 
 extern "C" {
+#include <stdio.h>
+
     int  SurfSize() { return sizeof(Surface); }
     int  RaysSize() { return sizeof(Ray); }
 

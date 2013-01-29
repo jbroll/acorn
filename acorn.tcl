@@ -2,11 +2,13 @@
 #
 
 critcl::cheaders -I/Users/john/include -I/home/john/include
-critcl::clibraries acorn.o
-critcl::clibraries /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+
+#critcl::clibraries /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+
 critcl::tsources acorn.tcl tcloo.tcl
 
 ::critcl::tcl 8.6
+critcl::clibraries acorn.o -lstdc++
 
 
 source tcloo.tcl
