@@ -1,8 +1,8 @@
 #!/Users/john/bin/tclkit8.6
 #
 
-critcl::cheaders acorn.h -I/Users/john/include
-critcl::tsources acorn.tcl
+critcl::cheaders acorn.h -I/Users/john/include -I/home/john/include
+#critcl::tsources acorn.tcl
 
 critcl::config language c++
 critcl::clibraries -lstdc++

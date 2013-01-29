@@ -3,9 +3,11 @@ arec	= lib/arec/pkgIndex.tcl
 acorn	= lib/acorn/pkgIndex.tcl
 
 $(acorn) : acorn.h acorn.tcl
-	critcl31 -target macosx-x86_32 -force -pkg acorn
-	rm -rf lib/acorn/macosx-ix86
-	mv lib/acorn/macosx-x86_32 lib/acorn/macosx-ix86
+	critcl31 -force -pkg acorn
+	#
+	#critcl31 -target macosx-x86_32 -force -pkg acorn
+	#rm -rf lib/acorn/macosx-ix86
+	#mv lib/acorn/macosx-x86_32 lib/acorn/macosx-ix86
 
 $(arec) : arec.c arec.h arec.tcl
 	critcl31 -target macosx-x86_32 -force -pkg arec
