@@ -15,6 +15,7 @@
 
 Tcl_Obj *ARecGetDouble(ARecTypeTable *type, void *here) { return Tcl_NewDoubleObj(*((double *) here)); }
 Tcl_Obj *ARecGetFloat( ARecTypeTable *type, void *here) { return Tcl_NewDoubleObj(*((float  *) here)); }
+Tcl_Obj *ARecGetLong(  ARecTypeTable *type, void *here) { return Tcl_NewLongObj(  *((long   *) here)); }
 Tcl_Obj *ARecGetInt(   ARecTypeTable *type, void *here) { return Tcl_NewIntObj(   *((int    *) here)); }
 Tcl_Obj *ARecGetUShort(ARecTypeTable *type, void *here) { return Tcl_NewIntObj(   *((unsigned short *) here)); }
 Tcl_Obj *ARecGetShort( ARecTypeTable *type, void *here) { return Tcl_NewIntObj(   *((short  *) here)); }
@@ -32,6 +33,7 @@ int ARecSetFloat( ARecTypeTable *type, Tcl_Obj *obj, void *here) {
 
     return TCL_OK;
 }
+int ARecSetLong(  ARecTypeTable *type, Tcl_Obj *obj, void *here) { return Tcl_GetLongFromObj(  NULL, obj, (long   *) here); }
 int ARecSetInt(   ARecTypeTable *type, Tcl_Obj *obj, void *here) { return Tcl_GetIntFromObj(   NULL, obj, (int    *) here); }
 int ARecSetUShort(ARecTypeTable *type, Tcl_Obj *obj, void *here) {
     	int i;
@@ -83,7 +85,8 @@ int ARecSetString(ARecTypeTable *type, Tcl_Obj *obj, void *here) {
 		, { "uchar",	sizeof(unsigned char)	, 1, NULL, ARecSetUChar,	ARecGetUChar  }
 		, { "short",	sizeof(short)		, 2, NULL, ARecSetShort,	ARecGetShort  }
 		, { "ushort",	sizeof(unsigned short)	, 2, NULL, ARecSetUShort,	ARecGetUShort }
-		, { "int",	sizeof(int)		, 4, NULL, ARecSetInt,	ARecGetInt    }
+		, { "long",	sizeof(long)		, 4, NULL, ARecSetLong,		ARecGetLong    }
+		, { "int",	sizeof(int)		, 4, NULL, ARecSetInt,		ARecGetInt    }
 		, { "float",	sizeof(float)		, 4, NULL, ARecSetFloat,	ARecGetFloat  }
 		, { "double",	sizeof(double)		, 4, NULL, ARecSetDouble,	ARecGetDouble }
 		, { "string",	sizeof(char *)		, 4, NULL, ARecSetString,	ARecGetString }
@@ -445,12 +448,12 @@ int ARecTypeAddField(Tcl_Interp *interp, ARecType *type, int objc, Tcl_Obj **obj
 	}
 
 	type->field[type->nfield].nameobj = objv[i];
+	Tcl_IncrRefCount(objv[i]);
+
 	type->field[type->nfield].offset  = ARecPadd(size, dtype->align);
 	type->field[type->nfield].dtype   = dtype;
 
 	size = ARecPadd(size + dtype->size, dtype->align);
-
-	Tcl_IncrRefCount(objv[i]);
 
 	type->nfield++;
 	type->field[type->nfield].nameobj = NULL;
