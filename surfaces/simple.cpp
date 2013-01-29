@@ -8,6 +8,24 @@ using namespace Eigen;
 
 
 extern "C" {
+
+  static const char *MyNames[]   = { "aperture" , "R"	, "K" , "n" , "thickness" };
+  static const double MyValues[] = { 0.0	, 0.0	, 0.0 , 1.0 , 0.0 };
+
+  int info(int command, char **strings, double **values) 
+  {
+    switch ( command ) {
+	case ACORN_PARAMETERS: {
+	    int nparams = sizeof(MyNames)/sizeof(char *);
+
+	    *strings = (char *)   MyNames;
+	    *values  = (double *) MyValues;
+
+	    return nparams;
+        }
+    }
+  }
+
   void traverse(double n0, double z, Surface &s, Ray &r)
   {
     double d;
@@ -50,6 +68,7 @@ extern "C" {
     r.p += d * r.k;
 
 
+
     // Normal
     //
     if ( s.R == 0.0 || s.R > 1.0e10 ) {		// Planar
@@ -75,5 +94,4 @@ extern "C" {
 	r.k = eta*r.k + ((eta*cosi - sqrt(abs(cost))) * nhat) * (cost > 0);
     }
   }
-
 }

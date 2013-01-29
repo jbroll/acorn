@@ -16,6 +16,9 @@
 #define h2d(r)	( (r) * X_H2D )
 #define d2h(d)	( (d) / X_H2D )
 
+
+#define ACORN_PARAMETERS	1
+
 typedef void (*TraceFunc)(double z, double n, struct _Surface *s, struct _Ray *r);
 
 typedef struct _Surface {
@@ -33,6 +36,8 @@ typedef struct _Surface {
     double	ry;
     double	rz;
 
+    //double	p[100];
+
     char*	name;
     char*	type;
     TraceFunc   traverse;
@@ -44,3 +49,6 @@ typedef struct _Ray {
     int		vignetted;
 } Ray;
 
+extern "C" {
+    void xrays(Ray *r, int n);
+}

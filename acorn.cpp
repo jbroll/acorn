@@ -9,13 +9,38 @@ using namespace Eigen;
 
 extern "C" {
     int  SurfSize() { return sizeof(Surface); }
+    int  RaysSize() { return sizeof(Ray); }
 
-    void trace_surfaces_seq(double z, double n, Surface *surf, int nsurf, Ray *ray, int nray)
+
+    void prays(Ray *ray, int n)
     {
+	for ( int i = 0; i < n; i++ ) {
+	    fprintf(stdout, "%10.5f %10.5f %10.5f\t", ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
+	    fprintf(stdout, "%10.5f %10.5f %10.5f\n", ray[i].k(X), ray[i].k(Y), ray[i].k(Z));
+	}
+    }
+    void xrays(Ray *ray, int n)
+    {
+	for ( int i = 0; i < n; i++ ) {
+	    fprintf(stdout, "%p	%016llx %016llx %016llx\t", &ray[i]
+		    					, ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
+	    fprintf(stdout, "%016llx %016llx %016llx\n" , ray[i].k(X), ray[i].k(Y), ray[i].k(Z));
+	}
+    }
+
+    void trace_surfaces(double z, double n, Surface *surf, int nsurf, Ray *ray, int nray, int once)
+    {
+	int *traversed;
+
+	if ( once ) {					// Allow a ray to traverse only a single surface.
+	    traversed = new int[nray];
+	}
+
 	for ( int i = 0; i < nsurf; i++ ) {
 
 	    Affine3d transform;
 	    Affine3d inverse;
+
 
 	    transform 	= Translation3d(surf[i].x, surf[i].y, surf[i].z)
 			* AngleAxisd(d2r(surf[i].rx), Vector3d(1.0, 0.0, 0.0))
@@ -25,41 +50,34 @@ extern "C" {
 	    inverse 	= transform.inverse();
 
 	    for ( int j = 0; j < nray; j++ ) {
-		if ( ray[j].vignetted ) { continue; }
+		if ( ray[j].vignetted || once && traversed[j] ) { continue; }
 
-		ray[j].p = transform * ray[j].p;
+		ray[j].p = transform * ray[j].p;	// Put the ray into the surface cs.
+		ray[j].k = transform * ray[j].k;
 
 		  surf[i].traverse(n, z, &surf[i], &ray[j]);
 
-		ray[j].p = inverse * ray[j].p;
+		  if ( once ) {
+		      if ( !ray[i].vignetted ) {	// If the ray was not vignetted it has traversed this surface.
+			traversed[i] = 1;		// Don't try this ray again
+		      } 
+		      ray[i].vignetted = 0;
+		  }
+
+		ray[j].p = inverse * ray[j].p;		// Put the ray back into global cs..
+		ray[j].k = inverse * ray[j].k;
 	    }
 
 
 	    n  = surf[i].n > 0.0 ? surf[i].n : n;
 	    z += surf[i].thickness;
 	}
-    }
 
-    void trace_surfaces_nsq(double z0, double n0, Surface *surfs, int nsurf, Ray *rays, int nray)
-    {
-	for ( int j = 0; j < nray; j++ ) {
-	    if ( rays[j].vignetted ) { continue; }
-
-	    double n = n0;
-	    double z = z0;
-
-	    for ( int i = 0; i < nsurf; i++ ) {
-		surfs[i].traverse(n, z, &surfs[i], &rays[j]);
-
-		if ( rays[j].vignetted ) {
-		    rays[j].vignetted = 0;
-		} else {
-		    break;
-		}
-
-		n  = surfs[i].n > 0.0 ? surfs[i].n : n;
-		z += surfs[i].thickness;
+	if ( once ) {
+	    for ( int i = 0 ; i < nray; i++ ) {		// Rays that have not traversed are vignetted.
+		ray[i].vignetted = !traversed[i];
 	    }
+	    delete [] traversed;
 	}
     }
 }
