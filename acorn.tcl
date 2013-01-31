@@ -114,6 +114,7 @@ oo::class create acorn::surface-group {
     constructor { args } {
 	set surfs [lindex $args end]
 	set args  [lrange $args 0 end-1]
+	set surfs [regsub -all -line -- {((^[ \t]*)|([ \t]+))#.*$} $surfs { }]	; # Remove comments
 
 	foreach { name value } [dict merge { type sequential } $args] { set $name $value }
 

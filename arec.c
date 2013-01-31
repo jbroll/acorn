@@ -796,7 +796,7 @@ void ARecInit(Tcl_Interp *ip) {
 
     for ( dtype = ARecDTypes; dtype->name != NULL; dtype++ ) {
 	if ( !strcmp(dtype->name, "double") ) { dtype->align = sizeof(DblAlign) - sizeof(double); }
-	if ( !strcmp(dtype->name, "long")   ) { dtype->align = sizeof(LngAlign) - sizeof(double); }
+	if ( !strcmp(dtype->name, "long")   ) { dtype->align = sizeof(LngAlign) - sizeof(long); }
     }
 
     Tcl_CreateObjCommand(

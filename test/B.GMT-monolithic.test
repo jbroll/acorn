@@ -5,16 +5,27 @@ lappend auto_path ./lib ../lib
 package require acorn
 
 acorn::surface-group create GMT {
-    Start	{ 		                       		        	thickness  18000 }
-    Primary	{ aper 0	R -36000.0	K  -0.99828570	n  -1.00	thickness -18000 }
-    Prime	{                                         			thickness  -2262 }
-    Secondary	{ aper 0	R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262 }
-    .		{ 								thickness   2720 }
-    .		{        							thickness   2180 }
-    .		{         							thickness    620 }
-    .   	{ 								thickness    310 }
-    Fous	{ 								thickness      0 }
+    .		{ 								thickness -23000      		}
+    M2Objc	{ 								thickness  23000      		}
+    Primary	{ aper 0	R -36000.0	K  -0.99828570	n  -1.00	thickness -20262.476419940002	}
+    Secondary	{ aper 0	R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	}
+    .		{ 								thickness   4900      		}
+    .		{        							thickness    620      		}
+    .   	{ 								thickness    310      		}
+    Fous	{ 								thickness      0      		}
 }
+
+
+
+#acorn::Rays new rays 1
+#rays 0 set px -12724.0 py -12724.0 pz 0 kx 0.0 ky 0.0 kz 1.0
+#acorn::trace rays GMT
+#puts "x     	y     	z      	kx	ky	kz"
+#puts "-------	-------	-------	--	--	--"
+#puts [join [map row [rays 0 end get px py pz kx ky kz] { join [map x $row { format "% .7f" $x }] \t }] \n]
+#exit
+
+
 
 acorn::Rays new rays 9
 
