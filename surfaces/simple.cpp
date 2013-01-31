@@ -69,6 +69,7 @@ extern "C" {
 
 
 
+
     // Normal
     //
     if ( s.R == 0.0 || s.R > 1.0e10 ) {		// Planar
@@ -81,17 +82,18 @@ extern "C" {
 	nhat /= nhat.norm();
     }
 
-
-    if ( s.n < 0.0 ) {				// Reflect
-						// http://http.developer.nvidia.com/Cg/reflect.html
-	r.k = r.k - 2 * nhat * (nhat.dot(r.k));
-    } else {					// Refract
+    if ( n0 != s.n ) {
+	if ( s.n < 0.0 ) {			// Reflect
+					    	// http://http.developer.nvidia.com/Cg/reflect.html
+	    r.k = r.k - 2 * nhat * (nhat.dot(r.k));
+	} else {				// Refract
 						// http://http.developer.nvidia.com/Cg/refract.html
-	double eta = n0/s.n;
-	double cosi = (-r.k).dot(nhat);
-	double cost = 1.0 - eta*eta * ( 1.0 - cosi*cosi);
+	    double eta = n0/s.n;
+	    double cosi = (-r.k).dot(nhat);
+	    double cost = 1.0 - eta*eta * ( 1.0 - cosi*cosi);
 
-	r.k = eta*r.k + ((eta*cosi - sqrt(abs(cost))) * nhat) * (cost > 0);
+	    r.k = eta*r.k + ((eta*cosi - sqrt(abs(cost))) * nhat) * (cost > 0);
+	}
     }
   }
 }

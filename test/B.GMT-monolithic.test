@@ -5,25 +5,28 @@ lappend auto_path ./lib ../lib
 package require acorn
 
 acorn::surface-group create GMT {
-    Primary	{ aper 0	R -36000.0	K  -0.99828570	n  -1.00	thickness -1000 }
-    Secondary	{ aper 0	R   4163.900922 K  -0.71692784	n  -1.00	thickness  1000 }
-    .		{ aper 0	R      0.0      K   0.0 n       n   1.00	thickness  4900 }
-    .		{ aper 0	R      0.0      K   0.0 n       n   1.00        thickness   620 }
-    .		{ aper 0	R      0.0      K   0.0 n       n   1.00        thickness   310 }
-    Fous	{ aper 0	R      0.0	K   0.0	n       n   1.00	thickness     0 }
+    Start	{ 		                       		        	thickness  18000 }
+    Primary	{ aper 0	R -36000.0	K  -0.99828570	n  -1.00	thickness -18000 }
+    Prime	{                                         			thickness  -2262 }
+    Secondary	{ aper 0	R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262 }
+    .		{ 								thickness   2720 }
+    .		{        							thickness   2180 }
+    .		{         							thickness    620 }
+    .   	{ 								thickness    310 }
+    Fous	{ 								thickness      0 }
 }
 
 acorn::Rays new rays 9
 
 set i 0
-foreach x { -25 0 25 } {
-    foreach y { -25 0 25 } {
+foreach x { -12700 0 12700 } {
+    foreach y { -12700 0 12700 } {
 	rays $i set px $x py $y pz 0 kx 0.0 ky 0.0 kz 1.0
 	incr i
     }
 }
 
-acorn::trace rays Parabolic
+acorn::trace rays GMT
 
 
 puts "x     	y     	z      "

@@ -49,7 +49,6 @@ namespace eval acorn {
 	arec::typedef ::acorn::Rays {
 	    double	px py pz kx ky kz
 	    int		vignetted;
-	    int		padd;
 	}
 
 	arec::typedef ::acorn::Surfs {
@@ -102,7 +101,7 @@ oo::class create acorn::surface {
 	set type sequential
 	set s [::acorn::Surfs new [namespace current]::surfs 1]
 
-	$s set {*}[dict merge { type simple } $args [list name [string range [self] 2 end]]]
+	$s set {*}[dict merge { type simple n 1.00 } $args [list name [string range [self] 2 end]]]
 
 	$s set traverse $::acorn::SurfaceTypes([$s get type])
     }
@@ -122,7 +121,7 @@ oo::class create acorn::surface-group {
 
 	set i 0
 	foreach { name params } $surfs {
-	    $s $i set {*}[dict merge { type simple } $params [list name $name]]
+	    $s $i set {*}[dict merge { type simple n 1.00 } $params [list name $name]]
 
 	    $s $i set traverse $::acorn::SurfaceTypes([$s $i get type])
 
