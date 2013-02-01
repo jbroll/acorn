@@ -5,8 +5,6 @@ lappend auto_path ./lib ../lib
 package require acorn
 
 acorn::surface-group create GMT {
-    .		{ 								thickness -23000      		}
-    M2Objc	{ 								thickness  23000      		}
     Primary	{ aper 0	R -36000.0	K  -0.99828570	n  -1.00	thickness -20262.476419940002	}
     Secondary	{ aper 0	R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	}
     .		{ 								thickness   4900      		}
