@@ -72,13 +72,13 @@ printformula(double ***y, int i, int n, int m)
 		    if (j==1) 
 			printf("*x"); 
 		    else  
-			printf("*x^%d", j);
+			printf("*pow(x,%d)", j);
 		}
 		if (k) {
 		    if (k==1) 
 			printf("*y"); 
 		    else  
-			printf("*y^%d", k);
+			printf("*pow(y,%d)", k);
 		}
 	    }
 	}
