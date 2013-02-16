@@ -7,12 +7,15 @@ BITS=-m32
 arec	= lib/arec/pkgIndex.tcl
 acorn	= lib/acorn/pkgIndex.tcl
 
+OBJ	= acorn.o aperture.o
+TCL	= acorn.tcl uda.tcl
+
 SURFS	= surfaces/simple.so
 
-$(acorn) : acorn.o acorn.h acorn.tcl $(arec) $(SURFS)
+$(acorn) : acorn.h $(arec) $(SURFS) $(OBJ) $(TCL)
 	#critcl31 -force -pkg acorn
 	#
-	critcl31 -target macosx-x86_32 -force -pkg acorn
+	critcl31-issue21 -target macosx-x86_32 -force -pkg acorn
 	rm -rf lib/acorn/macosx-ix86
 	mv lib/acorn/macosx-x86_32 lib/acorn/macosx-ix86
 
@@ -25,8 +28,11 @@ $(arec) : arec.c arec.h arec.tcl
 acorn.o : acorn.cpp acorn.h
 	g++ $(BITS) -c $(INC) acorn.cpp -o acorn.o
 
+aperture.o : aperture.cpp acorn.h
+	g++ $(BITS) -c $(INC) aperture.cpp -o aperture.o
+
 surfaces/simple.so : surfaces/simple.cpp acorn.h
-	g++ $(BITS) -shared $(INC) surfaces/simple.cpp -o surfaces/simple.so
+	g++ $(BITS) -O3 -shared $(INC) surfaces/simple.cpp -o surfaces/simple.so
 
 
 clean:

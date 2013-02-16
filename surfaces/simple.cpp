@@ -69,7 +69,6 @@ extern "C" {
 
 
 
-
     // Normal
     //
     if ( s.R == 0.0 || s.R > 1.0e10 ) {		// Planar

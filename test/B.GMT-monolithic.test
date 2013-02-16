@@ -3,26 +3,16 @@
 lappend auto_path ./lib ../lib
 
 package require acorn
+source  acorn-model.tcl
 
-acorn::surface-group create GMT {
-    Primary	{ aper 0	R -36000.0	K  -0.99828570	n  -1.00	thickness -20262.476419940002	}
-    Secondary	{ aper 0	R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	}
-    .		{ 								thickness   4900      		}
-    .		{        							thickness    620      		}
-    .   	{ 								thickness    310      		}
-    Fous	{ 								thickness      0      		}
+acorn::model GMT {
+    surface Primary	{ R -36000.0	  K  -0.99828570	n  -1.00	thickness -20262.476419940002	}
+    surface Secondary	{ R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	}
+    surface .		{ 							thickness   4900      		}
+    surface .		{        						thickness    620      		}
+    surface .   	{ 							thickness    310      		}
+    surface Fous	{ 							thickness      0      		}
 }
-
-
-
-#acorn::Rays new rays 1
-#rays 0 set px -12724.0 py -12724.0 pz 0 kx 0.0 ky 0.0 kz 1.0
-#acorn::trace rays GMT
-#puts "x     	y     	z      	kx	ky	kz"
-#puts "-------	-------	-------	--	--	--"
-#puts [join [map row [rays 0 end get px py pz kx ky kz] { join [map x $row { format "% .7f" $x }] \t }] \n]
-#exit
-
 
 
 acorn::Rays new rays 9
@@ -35,7 +25,7 @@ foreach x { -12700 0 12700 } {
     }
 }
 
-acorn::trace rays GMT
+GMT trace rays
 
 
 puts "x     	y     	z      "

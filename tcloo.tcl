@@ -63,7 +63,7 @@ proc procs args {
 }
     #oo::class create X {
     #    constructor {} {
-    #	nsproc a b c 
+    #	procs a b c 
     #    }
     #
     #    method a {} { b }

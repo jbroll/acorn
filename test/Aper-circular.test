@@ -1,0 +1,29 @@
+#!/usr/bin/env tclkit8.6
+#
+lappend auto_path ./lib ../lib
+
+package require acorn
+source  acorn-model.tcl
+
+acorn::model Flat {
+    surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 aper_type circular aper_max 5 }
+    surface C	{ R    0.0	K  0.0	n  1.00	thickness	 400 }
+}
+
+acorn::Rays new rays 9
+
+set i 0
+foreach x { -25 0 25 } {
+    foreach y { -25 0 25 } {
+	rays $i set px $x py $y pz 0 kx 0.0 ky 0.0 kz 1.0 vignetted 0
+	incr i
+    }
+}
+
+Flat trace rays
+
+puts "x     	y     	z      	v"
+puts "-------	-------	-------	-"
+puts [join [map row [rays 0 end get px py pz vignetted] { join [map x $row { format "% .4f" $x }] \t }] \n]
+
+

@@ -24,6 +24,7 @@ namespace eval arec {
     proc float  { args } { $::arec::type add-field float  {*}$args }
     proc double { args } { $::arec::type add-field double {*}$args }
     proc string { args } { $::arec::type add-field string {*}$args }
+    proc char*  { args } { $::arec::type add-field string {*}$args }
 
     proc struct { args } { $::arec::type add-struct {*}$args }
 

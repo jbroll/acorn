@@ -17,8 +17,8 @@ extern "C" {
     void prays(Ray *ray, int n)
     {
 	for ( int i = 0; i < n; i++ ) {
-	    printf("%10.5f %10.5f %10.5f\t", ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
-	    printf("%10.5f %10.5f %10.5f\n", ray[i].k(X), ray[i].k(Y), ray[i].k(Z));
+	    printf("%5d\t%10.4f\t%10.4f\t%10.4f\t", i, ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
+	        printf("%10.4f\t%10.4f\t%10.4f\t%d\n",    ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
 	}
     }
     void xrays(Ray *ray, int n)
@@ -30,57 +30,99 @@ extern "C" {
 	}
     }
 
-    void trace_surfaces(double z, double n, Surface *surf, int nsurf, Ray *ray, int nray, int once)
+    void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray)
     {
-	int *traversed;
+	int *traversed = new int[nray];
 
-	if ( once ) {					// Allow a ray to traverse only a single surface.
-	    traversed = new int[nray];
-	}
+	for ( int h = 0; h < nsurfs; h++ ) {
 
-	for ( int i = 0; i < nsurf; i++ ) {
+	    Surface *surf = surflist[h].surf;
+	    int     nsurf = surflist[h].nsurf;
+	    int      once = surflist[h].type;
 
-	    Affine3d transform;
-	    Affine3d inverse;
+	    if ( once ) { for ( int j = 0; j < nray; j++ ) { traversed[j] = 0; } }
 
 
-	    transform 	= Translation3d(surf[i].x, surf[i].y, surf[i].z)
-			* AngleAxisd(d2r(surf[i].rx), Vector3d(1.0, 0.0, 0.0))
-			* AngleAxisd(d2r(surf[i].ry), Vector3d(0.0, 1.0, 0.0))
-			* AngleAxisd(d2r(surf[i].rz), Vector3d(0.0, 0.0, 1.0));
+	    for ( int i = 0; i < nsurf; i++ ) {
+		Affine3d transform;
+		Affine3d inverse;
 
-	    inverse 	= transform.inverse();
+	    //printf("%s	%d\n", surf[i].name, once);
 
-	    for ( int j = 0; j < nray; j++ ) {
-		if ( ray[j].vignetted || once && traversed[j] ) { continue; }
 
-		ray[j].p = transform * ray[j].p;	// Put the ray into the surface cs.
-		ray[j].k = transform * ray[j].k;
+		transform 	= Translation3d(surf[i].x, surf[i].y, surf[i].z)
+			    * AngleAxisd(d2r(surf[i].rx), Vector3d(1.0, 0.0, 0.0))
+			    * AngleAxisd(d2r(surf[i].ry), Vector3d(0.0, 1.0, 0.0))
+			    * AngleAxisd(d2r(surf[i].rz), Vector3d(0.0, 0.0, 1.0));
 
-		  surf[i].traverse(n, z, &surf[i], &ray[j]);
+		inverse 	= transform.inverse();
 
-		  if ( once ) {
-		      if ( !ray[i].vignetted ) {	// If the ray was not vignetted it has traversed this surface.
-			traversed[i] = 1;		// Don't try this ray again
-		      } 
-		      ray[i].vignetted = 0;
-		  }
+		aper_init(&surf[i], transform);
 
-		ray[j].p = inverse * ray[j].p;		// Put the ray back into global cs..
-		ray[j].k = inverse * ray[j].k;
+
+
+		for ( int j = 0; j < nray; j++ ) {
+		    Vector3d saveP = ray[j].p;
+		    Vector3d saveK = ray[j].k;
+
+			//printf("Ray  ");
+			//prays(&ray[j], 1);
+
+		    if ( ray[j].vignetted ) { continue; }
+
+		    ray[j].p = transform * ray[j].p;		// Put the ray into the surface cs.
+		    ray[j].k = transform * ray[j].k;
+
+
+		    surf[i].traverse(n, z, &surf[i], &ray[j]);
+
+		    ray[j].vignetted = aper_clip(&surf[i], &ray[j]);
+
+		    if ( once ) {
+			//printf("Here ");
+			//prays(&ray[j], 1);
+
+			  if ( !ray[j].vignetted ) {		// If the ray was not vignetted it has traversed this surface.
+			//printf("Trav ");
+			//prays(&ray[j], 1);
+			      traversed[j] = 1;			// Don't try this ray again
+			      ray[j].vignetted = 1;
+			  } else {
+			//printf("Ving ");
+			//prays(&ray[j], 1);
+			      ray[j].p = saveP;			// Reset
+			      ray[j].k = saveK;
+
+			      ray[j].vignetted = 0;		// Try again on next surface
+
+			      continue;
+			  }
+		    }
+
+		    ray[j].p = inverse * ray[j].p;		// Put the ray back into global cs..
+		    ray[j].k = inverse * ray[j].k;
+
+			//printf("Next ");
+			//prays(&ray[j], 1);
+		}
+
+		if ( !once ) {
+		    n  = surf[i].n > 0.0 ? surf[i].n : n;
+		    z += surf[i].thickness;
+		}
 	    }
+			//printf("Done ");
+			//prays(&ray[0], 1);
 
-
-	    n  = surf[i].n > 0.0 ? surf[i].n : n;
-	    z += surf[i].thickness;
-	}
-
-	if ( once ) {
-	    for ( int i = 0 ; i < nray; i++ ) {		// Rays that have not traversed are vignetted.
-		ray[i].vignetted = !traversed[i];
+	    if ( once ) {
+		for ( int j = 0 ; j < nray; j++ ) {		// Rays that have not traversed are vignetted.
+		    ray[j].vignetted = !traversed[j];
+		}
+		n  = surf[0].n > 0.0 ? surf[0].n : n;
+		z += surf[0].thickness;
 	    }
-	    delete [] traversed;
 	}
+	delete [] traversed;
     }
 }
 

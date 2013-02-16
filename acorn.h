@@ -22,7 +22,6 @@
 typedef void (*TraceFunc)(double z, double n, struct _Surface *s, struct _Ray *r);
 
 typedef struct _Surface {
-    double	aper;
     double	R;
     double	K;
     double	n;
@@ -36,12 +35,28 @@ typedef struct _Surface {
     double	ry;
     double	rz;
 
+    char*	aper_type;
+    double	aper_min;
+    double	aper_max;
+    string	aper_param;
+
+    char*	aperture;
+    long	aper_data;
+    long	aper_leng;
+    long	aper_priv;
+    
     //double	p[100];
 
     char*	name;
     char*	type;
     TraceFunc   traverse;
 } Surface;
+
+typedef struct _SurfaceList {
+    Surface 	*surf;
+    int		 nsurf;
+    int		 type;
+} SurfaceList;
 
 typedef struct _Ray {
     Vector3d	p;
@@ -50,5 +65,12 @@ typedef struct _Ray {
 } Ray;
 
 extern "C" {
+    int  SurfSize(void);
+    int  RaysSize(void);
+
     void xrays(Ray *r, int n);
+    void prays(Ray *r, int n);
+
+    void aper_init(Surface *s, Affine3d transform);
+    int  aper_clip(Surface *s, Ray *r);
 }

@@ -1,0 +1,58 @@
+#!/usr/bin/env tclkit8.6
+#
+lappend auto_path ./lib ../lib
+
+package require acorn
+
+source acorn-model.tcl
+
+acorn::model GMT {
+    surface-group-non-sequential Primary 		\
+	default { R -36000.0	  K  -0.99828570	n  -1.00	thickness -20262.476419940002   aper_type UDA aper_param m1aper1e.uda } {
+
+	surface P1	{ rz   0 }
+	surface P2	{ rz  60 }
+	surface P3	{ rz 120 }
+	surface P4	{ rz 180 }
+	surface P5	{ rz 240 }
+	surface P6	{ rz 300 }
+
+	surface P7	{ aper_type circular aper_max 4200 }
+    }
+
+    surface-group-non-sequential Secondary		\
+    	default { R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	aper_type UDA aper_param m2aper1e.uda } {
+
+	surface P1	{ rz   0 }
+	surface P2	{ rz  60 }
+	surface P3	{ rz 120 }
+	surface P4	{ rz 180 }
+	surface P5	{ rz 240 }
+	surface P6	{ rz 300 }
+
+	surface P7	{ aper_type circular aper_max 4200 }
+    }
+
+    surface .		{ 							thickness   4900      		}
+    surface .		{        						thickness    620      		}
+    surface .   	{ 							thickness    310      		}
+    surface Focus	{ 							thickness      0      		}
+}
+
+proc acorn-print-model { m } {
+    foreach { type surf } [$m surfaces] {
+	puts $type
+	puts "	[join [$surf 0 end get] "\n	"]"
+	puts \n
+    }
+}
+
+
+acorn::mkrays rays nx 400 x0 -12700 x1 12700 ny 400 y0 -12700 y1 12700
+
+GMT trace rays
+
+puts "ray	x	y	z	kx	ky	kz	v"
+puts "---	-	-	-	--	--	--	-"
+
+acorn::prays rays
