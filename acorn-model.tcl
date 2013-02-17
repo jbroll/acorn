@@ -4,7 +4,7 @@ oo::class create ::acorn::Model {
     accessor type current surfaces default
 
     constructor { args } {
-	procs surface surface-group surface-group-non-sequential
+	procs surface coordinate-break surface-group surface-group-non-sequential
 
 	set type sequential
 	set basedef { type simple n 1.00 }
@@ -24,6 +24,8 @@ oo::class create ::acorn::Model {
 
 	set current Surface-Add-Error
     }
+    method coordinate-break { name args } { surface name [list {*}[join $args] type coordbk] }
+
     method surface { name args } {
 	set i [$current length]
 
@@ -81,18 +83,17 @@ oo::class create ::acorn::Model {
 
 	rename slist {}
     }
-}
 
-proc acorn::model { args } { tailcall acorn::Model create {*}$args }
-
-proc acorn-print-model { m } {
-    foreach { type surf } [$m surfaces] {
-	puts $type
-	puts "	[join [$surf 0 end get] "\n	"]"
-	puts \n
+    method print {} {
+	foreach { type surf } $surfaces {
+	    puts "$type : $surf :"
+	    puts "	[join [$surf 0 end get] "\n	"]"
+	    puts \n
+	}
     }
 }
 
+proc acorn::model { args } { tailcall acorn::Model create {*}$args }
 
 proc acorn::mkrays { name args } {
     if { $name eq "-" } { set name rays[incr ::acorn::RAYS] }
@@ -101,6 +102,12 @@ proc acorn::mkrays { name args } {
 
     set args [dict merge { nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - } $args]
     dict with args {
+	if { [info exists box] } {
+	    set x0 [expr -$box]
+	    set x1 [expr  $box]
+	    set y0 [expr -$box]
+	    set y1 [expr  $box]
+	}
 
 	set i 0
 	foreach x [jot $nx $x0 $x1 $xi] {
@@ -115,8 +122,9 @@ proc acorn::mkrays { name args } {
 }
 
 proc acorn::prays { rays } {
+    puts "i	x	y	z	kz	ky	kz	v"
+    puts "-	-	-	-	--	--	--	-"
     acorn::_prays [$rays getptr] [$rays length]
 }
 
-#acorn::mkrays rays nx 11 x0 -12700 x1 12700 ny 11 y0 -12700 y1 12700
 

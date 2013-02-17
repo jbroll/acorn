@@ -39,14 +39,6 @@ acorn::model GMT {
     surface Focus	{ 							thickness      0      		}
 }
 
-proc acorn-print-model { m } {
-    foreach { type surf } [$m surfaces] {
-	puts $type
-	puts "	[join [$surf 0 end get] "\n	"]"
-	puts \n
-    }
-}
-
 
 acorn::mkrays rays nx 400 x0 -12700 x1 12700 ny 400 y0 -12700 y1 12700
 

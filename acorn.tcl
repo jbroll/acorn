@@ -3,7 +3,7 @@
 
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
-critcl::tsources acorn.tcl tcloo.tcl func.tcl uda.tcl
+critcl::tsources func.tcl tcloo.tcl acorn.tcl uda.tcl
 critcl::csources acorn.cpp aperture.cpp
 
 ::critcl::tcl 8.6
@@ -42,6 +42,8 @@ namespace eval acorn {
 	    }
 	}
 
+	set ::acorn::SurfaceTypes(coordbk)	-1
+
 	foreach type [glob ./surfaces/*.so] {
 	    set ::acorn::SurfaceTypes([file rootname [file tail $type]]) [acorn::getsymbol $type traverse]
 	}
@@ -73,7 +75,8 @@ namespace eval acorn {
 	    string	aperture;
 	    long	aper_data;
 	    long	aper_leng;
-	    long	aper_priv;
+
+	    foreach i [iota 0 255] { double p$i }
 
 	    string	name
 	    string	type

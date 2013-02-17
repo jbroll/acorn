@@ -57,9 +57,6 @@ extern "C" {
 
 		inverse 	= transform.inverse();
 
-		aper_init(&surf[i], transform);
-
-
 
 		for ( int j = 0; j < nray; j++ ) {
 		    Vector3d saveP = ray[j].p;
@@ -72,6 +69,8 @@ extern "C" {
 
 		    ray[j].p = transform * ray[j].p;		// Put the ray into the surface cs.
 		    ray[j].k = transform * ray[j].k;
+
+		    if ( (long) surf[i].traverse == COORDBK ) { continue; }
 
 
 		    surf[i].traverse(n, z, &surf[i], &ray[j]);

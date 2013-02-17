@@ -16,7 +16,7 @@ int Binom(n,k) {
     return Fact(n) / Fact(k) / Fact(n-k);
 }
 
-CalcZern(int n, int m, double **f, double scaling) {
+void CalcZern(int n, int m, double **f, double scaling) {
     int p, q, l, xpow, ypow;
     float factor;
     int i,j,k;
@@ -50,7 +50,7 @@ CalcZern(int n, int m, double **f, double scaling) {
 
 #define MAXZERN 100
 
-printformula(double ***y, int i, int n, int m)
+void printformula(double ***y, int i, int n, int m)
 {
     int j,k;
     double norm;
@@ -89,7 +89,7 @@ printformula(double ***y, int i, int n, int m)
 }
 
 
-main(int argc, char **argv) {
+int main(int argc, char **argv) {
 
 
     int nzern = atoi(argv[1]);
@@ -139,5 +139,7 @@ main(int argc, char **argv) {
 	    i++;
 	}
     }
+
+    return 0;
 }
 

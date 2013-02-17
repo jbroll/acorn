@@ -22,44 +22,23 @@ extern "C" {
 	return c;
     }
 
-    void aper_init(Surface *s, Affine3d transform)
-    {
-	int i;
-
-
-	if ( s->aper_type ) {
-	    if ( !strcmp(s->aper_type, "circular") ) { return; }
-	    if ( !strcmp(s->aper_type, "annulus") )  { return; }
-	    if ( !strcmp(s->aper_type, "UDA") )      {
-		if (  s->aper_priv ) { free((void *) s->aper_priv);  s->aper_priv = 0; }
-		if ( !s->aper_priv ) { s->aper_priv = (long) malloc(s->aper_leng * sizeof(Vector3d)); }
-
-		Vector3d *aper_data = (Vector3d *) s->aper_data;
-		Vector3d *aper_priv = (Vector3d *) s->aper_priv;
-
-		for ( i = 0; i < s->aper_leng; i++ ) {
-		    aper_priv[i] = transform * aper_data[i];
-		}
-	    }
-	}
-	fflush(stdout);
-    }
-
     int aper_clip(Surface *s, Ray *r)
     {
 	if ( s->aper_type ) {
 	    if ( !strcmp(s->aper_type, "circular") ) {
 		return r->p(X)*r->p(X)+r->p(Y)*r->p(Y) > s->aper_max*s->aper_max;
 	    }
+
 	    if ( !strcmp(s->aper_type, "annulus") )  {
 		return r->p(X)*r->p(X)+r->p(Y)*r->p(Y) > s->aper_max*s->aper_max
 		    || r->p(X)*r->p(X)+r->p(Y)*r->p(Y) < s->aper_max*s->aper_min ;
 	    }
 
-	    if ( !strcmp(s->aper_type, "UDA") && s->aper_leng )      { return !pnpoly(s->aper_leng, (Vector3d *)s->aper_data, r->p[X], r->p[Y]); }
+	    if ( !strcmp(s->aper_type, "UDA") && s->aper_leng ) {
+		return !pnpoly(s->aper_leng, (Vector3d *)s->aper_data, r->p[X], r->p[Y]);
+	    }
 	}
 
-	fflush(stdout);
 	return 0;
     }
 }

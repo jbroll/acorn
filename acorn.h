@@ -16,6 +16,10 @@
 #define h2d(r)	( (r) * X_H2D )
 #define d2h(d)	( (d) / X_H2D )
 
+// Special surface types
+//
+#define COORDBK	-1
+
 
 #define ACORN_PARAMETERS	1
 
@@ -43,9 +47,8 @@ typedef struct _Surface {
     char*	aperture;
     long	aper_data;
     long	aper_leng;
-    long	aper_priv;
     
-    //double	p[100];
+    double	p[256];
 
     char*	name;
     char*	type;

@@ -11,21 +11,8 @@ acorn::model Parabolic {
     surface C	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
-acorn::Rays new rays 9
-
-set i 0
-foreach x { -25 0 25 } {
-    foreach y { -25 0 25 } {
-	rays $i set px $x py $y pz 0 kx 0.0 ky 0.0 kz 1.0
-	incr i
-    }
-}
+acorn::mkrays rays nx 25 ny 25 box 25
 
 Parabolic trace rays
 
-
-puts "x     	y     	z      "
-puts "-------	-------	-------"
-puts [join [map row [rays 0 end get px py pz] { join [map x $row { format "% .4f" $x }] \t }] \n]
-
-
+acorn::prays rays

@@ -10,9 +10,11 @@ acorn	= lib/acorn/pkgIndex.tcl
 OBJ	= acorn.o aperture.o
 TCL	= acorn.tcl uda.tcl
 
-SURFS	= surfaces/simple.so
+SURFS	= surfaces/simple.so surfaces/zernike.so
 
-$(acorn) : acorn.h $(arec) $(SURFS) $(OBJ) $(TCL)
+all : $(acorn) $(SURFS)
+
+$(acorn) : acorn.h $(arec) $(OBJ) $(TCL)
 	#critcl31 -force -pkg acorn
 	#
 	critcl31-issue21 -target macosx-x86_32 -force -pkg acorn
@@ -34,6 +36,8 @@ aperture.o : aperture.cpp acorn.h
 surfaces/simple.so : surfaces/simple.cpp acorn.h
 	g++ $(BITS) -O3 -shared $(INC) surfaces/simple.cpp -o surfaces/simple.so
 
+surfaces/zernike.so : surfaces/zernike.cpp acorn.h
+	g++ $(BITS) -O3 -shared $(INC) surfaces/zernike.cpp zernike/zernike.o -o surfaces/zernike.so
 
 clean:
 	rm -f acorn.o
