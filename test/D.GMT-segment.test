@@ -44,7 +44,4 @@ acorn::mkrays rays nx 400 x0 -12700 x1 12700 ny 400 y0 -12700 y1 12700
 
 GMT trace rays
 
-puts "ray	x	y	z	kx	ky	kz	v"
-puts "---	-	-	-	--	--	--	-"
-
 acorn::prays rays

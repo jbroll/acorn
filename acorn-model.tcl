@@ -16,7 +16,7 @@ oo::class create ::acorn::Model {
 
 	foreach { name value } [dict merge { type sequential } $args] { set $name $value }
 
-	set current [::acorn::Surfs new [namespace current]::surfs[incr [namespace current]::SURFS] 0]
+	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
 
 	eval $body
 
@@ -44,7 +44,7 @@ oo::class create ::acorn::Model {
 
 	if { [$current length] } {
 	    lappend surfaces $type $current
-	    set current [::acorn::Surfs new [namespace current]::surfs[incr [namespace current]::SURFS] 0]
+	    set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
 	}
 
 	set body [lindex $args end]
@@ -55,7 +55,7 @@ oo::class create ::acorn::Model {
 	eval $body
 
 	if { [$current length] } { lappend surfaces $type $current }
-	set current [::acorn::Surfs new [namespace current]::surfs[incr [namespace current]::SURFS] 0]
+	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
 
 	set default $savedefault
 	set type    $savetype
@@ -63,7 +63,7 @@ oo::class create ::acorn::Model {
     method surface-group-non-sequential { name args } { tailcall surface-group $name type non-sequential {*}$args }
 
     method trace { rays } {
-	::acorn::SurfaceList new slist 0
+	::acorn::SurfaceList create slist 0
 
 	set i 0
 	foreach { type surf } $surfaces {
@@ -98,7 +98,7 @@ proc acorn::model { args } { tailcall acorn::Model create {*}$args }
 proc acorn::mkrays { name args } {
     if { $name eq "-" } { set name rays[incr ::acorn::RAYS] }
 
-    acorn::Rays new $name 0
+    acorn::Rays create $name 0
 
     set args [dict merge { nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - } $args]
     dict with args {

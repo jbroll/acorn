@@ -34,7 +34,7 @@ oo::class create UDA {
 	procs ARC BRK CIR ELI LIN POL REC !
 	namespace unknown { my unknown }
 
-	set polygon [acorn::Polygon new [namespace current]::polygon]
+	set polygon [acorn::Polygon create [namespace current]::polygon]
 	set inpath  -1
 
 	switch $type {

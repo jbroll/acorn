@@ -10,20 +10,9 @@ acorn::model Flat {
     surface C	{ R    0.0	K  0.0	n  1.00	thickness	 400 }
 }
 
-acorn::Rays new rays 9
-
-set i 0
-foreach x { -25 0 25 } {
-    foreach y { -25 0 25 } {
-	rays $i set px $x py $y pz 0 kx 0.0 ky 0.0 kz 1.0 vignetted 0
-	incr i
-    }
-}
+acorn::mkrays rays nx 3 ny 3 box 25
 
 Flat trace rays
 
-puts "x     	y     	z      	v"
-puts "-------	-------	-------	-"
-puts [join [map row [rays 0 end get px py pz vignetted] { join [map x $row { format "% .4f" $x }] \t }] \n]
-
+acorn::prays rays
 

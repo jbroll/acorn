@@ -15,21 +15,9 @@ acorn::model GMT {
 }
 
 
-acorn::Rays new rays 9
-
-set i 0
-foreach x { -12700 0 12700 } {
-    foreach y { -12700 0 12700 } {
-	rays $i set px $x py $y pz 0 kx 0.0 ky 0.0 kz 1.0
-	incr i
-    }
-}
+acorn::mkrays rays nx 3 ny 3 box 12700
 
 GMT trace rays
 
-
-puts "x     	y     	z      "
-puts "-------	-------	-------"
-puts [join [map row [rays 0 end get px py pz] { join [map x $row { format "% .4f" $x }] \t }] \n]
-
+acorn::prays rays
 
