@@ -53,6 +53,8 @@ typedef struct _Surface {
     char*	name;
     char*	type;
     TraceFunc   traverse;
+
+    char*	glass;
 } Surface;
 
 typedef struct _SurfaceList {
