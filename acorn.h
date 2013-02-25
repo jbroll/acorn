@@ -24,6 +24,7 @@
 #define ACORN_PARAMETERS	1
 
 typedef void (*TraceFunc)(double z, double n, struct _Surface *s, struct _Ray *r);
+typedef int  (*InfosFunc)(int info, char **str, double **val);
 
 typedef struct _Surface {
     double	R;
@@ -53,6 +54,7 @@ typedef struct _Surface {
     char*	name;
     char*	type;
     TraceFunc   traverse;
+    InfosFunc   info;
 
     char*	glass;
 } Surface;

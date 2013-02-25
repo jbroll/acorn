@@ -1,18 +1,23 @@
 
+
+arec array  type
+arec struct type
+arec C and tcl parse alike
+
 arec minimize list nesting.
+
+add glass
+add ZMX parser
 
 add coord break		- Need test data
 add verbose debug
 add Zernike		- 
 
 add lenslets
-
-
 add Para-axial
 
-add glass catalog
 
-add ZMX parser
+
 
 
 jottable 10 x | column -N y | headoff | xpaset ds9 plot new name p scatter 

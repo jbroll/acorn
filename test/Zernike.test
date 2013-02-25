@@ -5,16 +5,15 @@ lappend auto_path ./lib ../lib
 package require acorn
 source  acorn-model.tcl
 
-acorn::model Parabolic {
+acorn::model Zern {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	-200 }
+    surface B	{ R -400.0	K -1.0	n -1.00	thickness	-200 type zernike nradius 25 nzterms 10 z4 .0001 }
     surface C	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
-Parabolic A set R 0
 
-acorn::mkrays rays nx 3 ny 3 box 25
+acorn::mkrays rays nx 25 ny 25 box 25
 
-Parabolic trace rays
+Zern trace rays
 
 acorn::prays rays

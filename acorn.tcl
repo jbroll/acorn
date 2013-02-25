@@ -17,6 +17,7 @@ source tcloo.tcl
 
 namespace eval acorn {
     variable SurfaceTypes
+    variable SurfaceInfos
 
     critcl::ccode {
 	#include <dlfcn.h>
@@ -28,6 +29,7 @@ namespace eval acorn {
 	    void xrays(void *r, int n);
 	    void prays(void *r, int n);
 	    void trace_rays(double z, double n, void *surflist, int nsurfs, void *ray, int nray);
+	    typedef int  (*InfosFunc)(int info, char ***str, double **val);
 	}
     }
 
@@ -46,10 +48,11 @@ namespace eval acorn {
 
 	foreach type [glob ./surfaces/*.so] {
 	    set ::acorn::SurfaceTypes([file rootname [file tail $type]]) [acorn::getsymbol $type traverse]
+	    set ::acorn::SurfaceInfos([file rootname [file tail $type]]) [acorn::getsymbol $type info]
 	}
 
 	arec::typedef ::acorn::Rays {
-	    double	px py pz kx ky kz
+	    double	px, py, pz, kx, ky, kz;
 	    int		vignetted;
 	}
 
@@ -81,6 +84,9 @@ namespace eval acorn {
 	    string	name
 	    string	type
 	    long	traverse
+	    long	infos
+
+	    string	glass
 	}
 	arec::typedef ::acorn::SurfaceList {
 	    long 	 surf;
@@ -99,11 +105,30 @@ namespace eval acorn {
 	void *handle = dlopen(libso, RTLD_NOW);
 	void *addres = dlsym(handle, symbol);
 
-		//printf("%p\n", addres);
-
 	return (long) addres;
     }
 
+    critcl::cproc infos { Tcl_Interp* ip int info long infos } ok {
+    	char   **str;
+	double *val;
+
+	int n = ((InfosFunc) infos)(info, &str, &val);
+
+	Tcl_Obj *result = Tcl_GetObjResult(ip);
+	Tcl_Obj  	 *strs = Tcl_NewObj();
+	Tcl_Obj  	 *vals = Tcl_NewObj();
+	int i;
+
+	for ( i = 0; i < n; i++ ) {
+	    Tcl_ListObjAppendElement(ip, strs , Tcl_NewStringObj(str[i], -1));
+	    Tcl_ListObjAppendElement(ip, vals , Tcl_NewDoubleObj(val[i]));
+	}	
+
+	Tcl_ListObjAppendElement(ip, result, strs);
+	Tcl_ListObjAppendElement(ip, result, vals);
+
+	return TCL_OK;
+    }
     critcl::cproc trace_rays { double z double n long s int nsurf long r int nray } void {
                   trace_rays(z, n, (void *) s, nsurf, (void *) r, nray); 
     }

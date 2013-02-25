@@ -9,8 +9,8 @@ using namespace Eigen;
 
 extern "C" {
 
-  static const char *MyNames[]   = { "aperture" , "R"	, "K" , "n" , "thickness" };
-  static const double MyValues[] = { 0.0	, 0.0	, 0.0 , 1.0 , 0.0 };
+  static const char *MyNames[]   = { };
+  static const double MyValues[] = { };
 
   int info(int command, char **strings, double **values) 
   {
@@ -21,7 +21,7 @@ extern "C" {
 	    *strings = (char *)   MyNames;
 	    *values  = (double *) MyValues;
 
-	    return nparams;
+	    return 0;
         }
     }
   }

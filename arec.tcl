@@ -12,7 +12,7 @@ namespace eval arec {
     proc typedef { type body } {
 	lappend  ::arec::types [set ::arec::type [::arec::add_type $type]]
 
-	eval $body
+	eval [::string map { , { } } $body]
     }
 
     proc char   { args } { ::$::arec::type add-field char   {*}$args }

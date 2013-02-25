@@ -1,13 +1,13 @@
 
 
 INC= -I/Users/john/include -I/home/john/include
-BITS=-m32
+BITS=-m32  -msse3
 #BITS=-m64 -fPIC
 
 arec	= lib/arec/pkgIndex.tcl
 acorn	= lib/acorn/pkgIndex.tcl
 
-OBJ	= acorn.o aperture.o glass/glass.o
+OBJ	= acorn.o glass/glass.o
 TCL	= acorn.tcl uda.tcl
 
 SURFS	= surfaces/simple.so surfaces/zernike.so
@@ -31,7 +31,7 @@ acorn.o : acorn.cpp acorn.h
 	g++ $(BITS) -c $(INC) acorn.cpp -o acorn.o
 
 aperture.o : aperture.cpp acorn.h
-	g++ $(BITS) -c $(INC) aperture.cpp -o aperture.o
+	g++ $(BITS) -03 -c $(INC) aperture.cpp -o aperture.o
 
 surfaces/simple.so : surfaces/simple.cpp acorn.h
 	g++ $(BITS) -O3 -shared $(INC) surfaces/simple.cpp -o surfaces/simple.so

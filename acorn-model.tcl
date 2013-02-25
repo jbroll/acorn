@@ -1,6 +1,20 @@
 
+    proc mappair { map params } {
+	set reply {}
+	foreach { name value } $params { lappend reply [dict get $map $name] $value }
+	set reply
+    }
+    proc maplist { map params } {
+	set reply {}
+	foreach name $params { lappend reply [dict get $map $name] }
+	set reply
+    }
+
+
+
+
 oo::class create ::acorn::Model {
-    variable type current surfaces default basedef
+    variable type current surfaces default basedef basemap
     accessor type current surfaces default
 
     constructor { args } {
@@ -9,6 +23,7 @@ oo::class create ::acorn::Model {
 	set type sequential
 	set basedef { type simple n 1.00 }
 	set default {}
+	set basemap { type type R R K K n n thickness thickness aper_type aper_type aper_param aper_param x x y y z z rx rx ry ry rz rz }
 
 
 	set body [lindex $args end]
@@ -26,16 +41,38 @@ oo::class create ::acorn::Model {
     }
     method coordinate-break { name args } { surface name [list {*}[join $args] type coordbk] }
 
+
+    method surfset1 { obj surf parmap cmd args } {
+	switch $cmd {
+	    set { $obj $surf $cmd {*}[mappair $parmap $args] }
+	    get { $obj $surf $cmd {*}[maplist $parmap $args] }
+	}
+    }
+
+
     method surface { name args } {
 	set i [$current length]
 
-	$current $i set {*}[dict merge $basedef $default [join $args] [list name $name]]
+	set params [dict merge $basedef $default [join $args]]
+	set type   [dict get   $params type]
 
-	$current $i set traverse $::acorn::SurfaceTypes([$current $i get type])
+	$current $i set traverse $::acorn::SurfaceTypes($type)		; # Get the surface traverse and infos functions
+	$current $i set infos    $::acorn::SurfaceInfos($type)
+
+	lassign [::acorn::infos 1 [$current $i get infos]] params values
+
+	set k 0
+	set parmap {}
+	foreach param $params { lappend parmap $param p$k; incr k }
+
+	set parmap [dict merge $basemap $parmap]
+
+	$current $i set {*}[dict merge $basedef $default [mappair $parmap [join $args]] [list name $name]]
 	$current $i set aperture [::acorn::Aperture [$current get aper_type] [$current get aper_param]]
 
 	if { $name ne "." } {
-	    catch { ::oo::objdefine [self] [subst { forward $name $current $i; export $name }] }
+	    ::oo::objdefine [self] [list forward $name [self] surfset1 $current $i $parmap]
+	    ::oo::objdefine [self] [list export $name]
 	}
     }
     method surface-group { name args } {
@@ -66,6 +103,7 @@ oo::class create ::acorn::Model {
 	::acorn::SurfaceList create slist 0
 
 	set i 0
+
 	foreach { type surf } $surfaces {
 	    slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
 

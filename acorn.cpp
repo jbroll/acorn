@@ -42,13 +42,9 @@ extern "C" {
 
 	    if ( once ) { for ( int j = 0; j < nray; j++ ) { traversed[j] = 0; } }
 
-
 	    for ( int i = 0; i < nsurf; i++ ) {
 		Affine3d transform;
 		Affine3d inverse;
-
-	    //printf("%s	%d\n", surf[i].name, once);
-
 
 		transform 	= Translation3d(surf[i].x, surf[i].y, surf[i].z)
 			    * AngleAxisd(d2r(surf[i].rx), Vector3d(1.0, 0.0, 0.0))
