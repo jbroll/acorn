@@ -10,7 +10,7 @@ using namespace Eigen;
 extern "C" {
 
   static const char *MyNames[]   = { "nx", "ny", "width" };
-  static const double MyValues[] = { 0, 0, 0};
+  static const double MyValues[] = { 20, 20, 5 };
 
   int info(int command, char **strings, double **values) 
   {
@@ -39,27 +39,30 @@ extern "C" {
 	    *yh = (xg - (2.0 * r) * (*xh) * (1.0/2.0) ) / (2.0 * r);
     }
 
-    int LensCenter(int nx, int ny, double wx, double x, double y, double *cx, double *cy)
+    int LensCenter(char *symetry, int nx, int ny, double wx, double x, double y, double *cx, double *cy)
     {
-	xy2hex(x, y, wx, cx, cy);	// Compute which hex the ray goes through
+	if ( !strcmp(symetry, "hex") ) {
+	    xy2hex(x, y, wx, cx, cy);	// Compute which hex the ray goes through
 
-	if ( x > 0 ) { 			// Round to center of hex
-	    x = floor(*cx + 0.5);
+	    if ( x > 0 ) { 			// Round to center of hex
+		x = floor(*cx + 0.5);
+	    } else {
+		x =  ceil(*cx - 0.5);
+	    }
+	    if ( y > 0 ) { 			// Round to center of hex
+		y = floor(*cy + 0.5);
+	    } else {
+		y =  ceil(*cy - 0.5);
+	    }
+
+
+	    hex2xy(x, y, wx, cx, cy);	// Compute x, y at center of hex
+
+
+	    if ( *cx > (nx-0.5)*wx ) return -1;
+	    if ( *cy > (ny-0.5)*wx ) return -1;
 	} else {
-	    x =  ceil(*cx - 0.5);
 	}
-	if ( y > 0 ) { 			// Round to center of hex
-	    y = floor(*cy + 0.5);
-	} else {
-	    y =  ceil(*cy - 0.5);
-	}
-
-
-	hex2xy(x, y, wx, cx, cy);	// Compute x, y at center of hex
-
-
-	if ( *cx > (nx-0.5)*wx ) return -1;
-	if ( *cy > (ny-0.5)*wx ) return -1;
 
 	return 0;
     }
@@ -83,7 +86,7 @@ extern "C" {
     if ( s.R == 0.0 )  {			// Planar
 	d = (z - r.p(Z))/r.k(Z);
     } else {					// http://www-physics.ucsd.edu/~tmurphy/astr597/exercises/raytrace-3d.pdf
-	LensCenter(s.p[0], s.p[1], s.p[2], r.p(X), r.p(Y), &cx, &cy);
+	LensCenter(s.s[0], s.p[0], s.p[1], s.p[2], r.p(X), r.p(Y), &cx, &cy);
 
 	r.p(X) -= cx;
 	r.p(Y) -= cy;
