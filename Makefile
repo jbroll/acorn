@@ -10,7 +10,7 @@ acorn	= lib/acorn/pkgIndex.tcl
 OBJ	= acorn.o glass/glass.o
 TCL	= acorn.tcl uda.tcl
 
-SURFS	= surfaces/simple.so surfaces/zernike.so
+SURFS	= surfaces/simple.so surfaces/zernike.so surfaces/lens-array.so
 
 all : $(acorn) $(SURFS)
 
@@ -38,6 +38,9 @@ surfaces/simple.so : surfaces/simple.cpp acorn.h
 
 surfaces/zernike.so : surfaces/zernike.cpp acorn.h
 	g++ $(BITS) -O3 -shared $(INC) surfaces/zernike.cpp zernike/zernike.o -o surfaces/zernike.so
+	
+surfaces/lens-array.so : surfaces/lens-array.cpp acorn.h
+	g++ $(BITS) -O3 -shared $(INC) surfaces/lens-array.cpp -o surfaces/lens-array.so
 	
 glass/glass.o : glass/glass.c
 	gcc $(BITS) -O3 -c $(INC) glass/glass.c glass/glass.o -o glass/glass.o

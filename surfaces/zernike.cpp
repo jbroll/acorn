@@ -57,6 +57,8 @@ extern "C" {
 	    return nparams;
         }
     }
+
+    return 0;
   }
 
   void traverse(double n0, double z, Surface &s, Ray &r)

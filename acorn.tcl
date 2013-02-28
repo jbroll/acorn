@@ -80,6 +80,7 @@ namespace eval acorn {
 	    long	aper_leng;
 
 	    foreach i [iota 0 255] { double p$i }
+	    foreach i [iota 0  31] { char*  s$i }
 
 	    string	name
 	    string	type

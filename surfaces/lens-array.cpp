@@ -9,8 +9,8 @@ using namespace Eigen;
 
 extern "C" {
 
-  static const char *MyNames[]   = { };
-  static const double MyValues[] = { };
+  static const char *MyNames[]   = { "nx", "ny", "width" };
+  static const double MyValues[] = { 0, 0, 0};
 
   int info(int command, char **strings, double **values) 
   {
@@ -21,11 +21,48 @@ extern "C" {
 	    *strings = (char *)   MyNames;
 	    *values  = (double *) MyValues;
 
-	    return 0;
+	    return 3;
         }
     }
     return 0;
   }
+
+    void hex2xy(int xh, int yh, double r, double *xg, double *yg)
+    {
+	    *yg = (2.0 * r) * xh * (sqrt(3)/2.0);
+	    *xg = (2.0 * r) * xh * (1.0/2.0) + (2.0 * r) * yh;
+    }
+
+    void xy2hex(double xg, double yg, double r, double *xh, double *yh)
+    {
+	    *xh = (2.0/sqrt(3)) * yg / (2.0 * r);
+	    *yh = (xg - (2.0 * r) * (*xh) * (1.0/2.0) ) / (2.0 * r);
+    }
+
+    int LensCenter(int nx, int ny, double wx, double x, double y, double *cx, double *cy)
+    {
+	xy2hex(x, y, wx, cx, cy);	// Compute which hex the ray goes through
+
+	if ( x > 0 ) { 			// Round to center of hex
+	    x = floor(*cx + 0.5);
+	} else {
+	    x =  ceil(*cx - 0.5);
+	}
+	if ( y > 0 ) { 			// Round to center of hex
+	    y = floor(*cy + 0.5);
+	} else {
+	    y =  ceil(*cy - 0.5);
+	}
+
+
+	hex2xy(x, y, wx, cx, cy);	// Compute x, y at center of hex
+
+
+	if ( *cx > (nx-0.5)*wx ) return -1;
+	if ( *cy > (ny-0.5)*wx ) return -1;
+
+	return 0;
+    }
 
   void traverse(double n0, double z, Surface &s, Ray &r)
   {
@@ -40,9 +77,17 @@ extern "C" {
 
     Vector3d nhat;
 
+    double cx = 0, cy = 0;
+
+
     if ( s.R == 0.0 )  {			// Planar
 	d = (z - r.p(Z))/r.k(Z);
     } else {					// http://www-physics.ucsd.edu/~tmurphy/astr597/exercises/raytrace-3d.pdf
+	LensCenter(s.p[0], s.p[1], s.p[2], r.p(X), r.p(Y), &cx, &cy);
+
+	r.p(X) -= cx;
+	r.p(Y) -= cy;
+
 	double Rsign = s.R/fabs(s.R);
 
 	if ( s.K < -1.0 ) { Ksign = -1.0; }
@@ -81,6 +126,9 @@ extern "C" {
 	    -Rsign * sqrt(s.R * s.R - (s.K+1)*(r.p(X) * r.p(X) + r.p(Y) * r.p(Y))));
 	nhat /= nhat.norm();
     }
+
+    r.p(X) += cx;
+    r.p(Y) += cy;
 
     if ( n0 != s.n ) {
 	if ( s.n < 0.0 ) {			// Reflect

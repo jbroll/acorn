@@ -50,6 +50,7 @@ typedef struct _Surface {
     long	aper_leng;
     
     double	p[256];
+    char*	s[32];
 
     char*	name;
     char*	type;

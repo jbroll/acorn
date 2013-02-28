@@ -63,7 +63,12 @@ oo::class create ::acorn::Model {
 
 	set k 0
 	set parmap {}
-	foreach param $params { lappend parmap $param p$k; incr k }
+	foreach param $params { lappend parmap $param p$k; incr k }	; # Query for and map parameters
+
+	lassign [::acorn::infos 2 [$current $i get infos]] params values
+
+	set k 0
+	foreach param $params { lappend parmap $param s$k; incr k }	; # Query for and map strings
 
 	set parmap [dict merge $basemap $parmap]
 
