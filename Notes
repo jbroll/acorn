@@ -4,6 +4,8 @@ arec array  type
 arec struct type
 arec C and tcl parse alike
 
+	x 1 5 k 5 set 4 t 6
+
 arec minimize list nesting.
 
 add glass
