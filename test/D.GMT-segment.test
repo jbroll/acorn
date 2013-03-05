@@ -23,14 +23,14 @@ acorn::model GMT {
     surface-group-non-sequential Secondary		\
     	default { R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	aper_type UDA aper_param m2aper1e.uda } {
 
-	surface P1	{ rz   0 }
-	surface P2	{ rz  60 }
-	surface P3	{ rz 120 }
-	surface P4	{ rz 180 }
-	surface P5	{ rz 240 }
-	surface P6	{ rz 300 }
+	surface S1	{ rz   0 }
+	surface S2	{ rz  60 }
+	surface S3	{ rz 120 }
+	surface S4	{ rz 180 }
+	surface S5	{ rz 240 }
+	surface S6	{ rz 300 }
 
-	surface P7	{ aper_type circular aper_max 4200 }
+	surface S7	{ aper_type circular aper_max 4200 }
     }
 
     surface .		{ 							thickness   4900      		}

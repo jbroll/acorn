@@ -1,0 +1,24 @@
+#!/Users/john/bin/tclkit8.6
+#
+
+lappend auto_path lib /Users/john/lib
+
+package require Canvas3d
+package require tripack
+
+source common.tcl
+
+set surf [list [list 2.5 2.5 1]]
+foreach i { -2 -1 0 1 2 } {
+    foreach j { -2 -1 0 1 2 } {
+	lappend surf [list $i $j 1]
+    }
+}
+
+
+set p [trimesh $surf]
+
+puts $p
+
+puts [.win create polygon $p -color red -style outline]
+

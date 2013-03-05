@@ -1,25 +1,16 @@
 
-#STARBASE=/Users/john/src/starbase
-STARBASE=/data/mmti/src/starbase
 
-#FC=gfortran-mp-4.7 -m32 -g
+FC=gfortran-mp-4.7 -m32 -g
 #FC=gcc -m32 -g
-FC=f77 -m32
+#FC=f77 -m32
 
-CFLAGS= -m32 -I$(STARBASE)/include -DSTDC_HEADERS -g
-LDFLAGS= -L$(STARBASE)/tablelib -L$(STARBASE)/utillib -ltable -lutil -lm
+CFLAGS= -m32
 
-all: src.f tripack.f fitztable
+tripack	= lib/tripack/pkgIndex.tcl
 
+all : $(tripack)
 
-src.f : src.f.orig
-	./fproc < src.f.orig > src.f
-
-tripack.f : tripack.f.orig
-	./fproc < tripack.f.orig > tripack.f
-
-fitztable : fitztable.c src.o tripack.o
-	$(CC) $(CFLAGS) -o fitztable fitztable.c src.o tripack.o $(LDFLAGS)
-
-clean:
-	rm -f *.f *.o
+$(tripack) : tripack.tcl tripack.o
+	critcl31-issue21 -target macosx-x86_32 -force -pkg tripack
+	rm -rf lib/tripack/macosx-ix86
+	mv lib/tripack/macosx-x86_32 lib/tripack/macosx-ix86
