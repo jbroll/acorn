@@ -151,14 +151,6 @@ proc ::acorn::Aperture { type param } {
     }
 }
 
-proc map { args } {
-    uplevel [subst {
-	set _[info frame] {}
-	foreach {*}[lrange $args 0 end-1] { lappend _[info frame] \[[lindex $args end]] }
-	set _[info frame]
-    }]
-}
-
 package provide acorn 1.0
 
 if { [::critcl::compiled] } {

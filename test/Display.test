@@ -1,0 +1,135 @@
+#!/usr/bin/env tclkit8.6
+#
+lappend auto_path /Users/john/lib ./lib ../lib tripack/lib
+
+package require acorn
+package require tripack
+
+source acorn-model.tcl
+source 3d.tcl
+
+source display-common.tcl
+
+
+acorn::model GMT {
+    surface-group-non-sequential Primary 		\
+	default { R -36000.0	  K  -0.99828570	n  -1.00	thickness -20262.476419940002   aper_type UDA aper_param m1aper1e.uda } {
+
+	surface P1	{ rz   0 }
+	surface P2	{ rz  60 }
+	surface P3	{ rz 120 }
+	surface P4	{ rz 180 }
+	surface P5	{ rz 240 }
+	surface P6	{ rz 300 }
+
+	surface P7	{ aper_type circular aper_max 4200 }
+    }
+
+    surface-group-non-sequential Secondary		\
+    	default { R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	aper_type UDA aper_param m2aper1e.uda } {
+
+	surface S1	{ rz   0 }
+	surface S2	{ rz  60 }
+	surface S3	{ rz 120 }
+	surface S4	{ rz 180 }
+	surface S5	{ rz 240 }
+	surface S6	{ rz 300 }
+
+	surface S7	{ aper_type circular aper_max 570 }
+    }
+
+    surface .		{ 						thickness   4900      		}
+    surface .		{        					thickness    620      		}
+    surface .   	{ 						thickness    310      		}
+    surface Focus	{ 						thickness      0      		}
+}
+
+proc 3d::transform3p { T points } {
+    map { x y z } [3d::transform $T {*}[join $points]] { list $x $y $z }
+}
+proc 3d::bbox { points } {
+    set x0  10e15;   set x1 -10e15
+    set y0  10e15;   set y1 -10e15
+    set z0  10e15;   set z1 -10e15
+    
+    foreach { x y z } [join $points] {
+	if { $x < $x0 } { set x0 $x };   if { $x > $x1 } { set x1 $x }
+	if { $y < $y0 } { set y0 $y };   if { $y > $y1 } { set y1 $y }
+	if { $z < $z0 } { set z0 $z };   if { $z > $z1 } { set z1 $z }
+    }
+
+    list x0 $x0 x1 $x1 y0 $y0 y1 $y1 z0 $z0 z1 $z1
+}
+
+proc surface-polygon { m s { zz 0 } } {
+
+    # Obtain a polygon defining the aperture
+    #
+    if { [$m $s get aper_type] ne "UDA" } {
+	set P [map { x y } [polygon 0 0 [$m $s get aper_max] [$m $s get aper_max] -sides 64] { list $x $y 0 }]
+    } else {
+	set P [[$m $s get aperture] 1 end-2 get x y z]
+    }
+
+    # Transform the aperture to the surface position
+    #
+    foreach {*}[lindex [$m $s getdict x y z rx ry rz] 0] { break }
+
+     set T [3d::transforms [3d::rotate z [expr -($rz)] deg] [3d::rotate y $ry deg] [3d::rotate x $rx deg] [3d::translate $x $y [expr { $z }]]]
+     set P [3d::transform3p $T $P]
+     set N [llength $P]
+
+    set R [acorn::Rays create R 0]
+
+    foreach { px py pz } [join $P] {						; # Put the aperture points in a Rays array
+	$R [$R length] set px $px py $py pz $pz kx 0 ky 0 kz 1
+    }
+
+    acorn::mkrays R nx 10 ny 10 pz $zz {*}[3d::bbox $P]				; # ray box of interior points
+
+    $m trace1 $s R $zz								; # Trace the rays to the surface.
+
+    # Remove vignetted points that are not part of the aperture polygon
+    #
+    set i 0
+    set p [map { x y z v } [join [R 0 end get px py pz vignetted]] { if { [incr i] > $N && $v } { continue };  list $x $y $z }]
+    rename R {}	
+
+    trimesh $p
+}
+
+
+proc display { m } {
+    set colors { red green blue yellow cyan magenta }
+    set z 0
+    set c 0
+
+    foreach { type surf } [$m surfaces] {
+	set color [lindex $colors [expr $c%[llength $colors]]]
+
+	foreach j [iota 0 [$surf length]-1] {
+	    set name [$surf $j get name]
+
+	    switch [$m $name get aper_type] {
+	     UDA -
+	     circular {
+		.win create polygon [surface-polygon $m $name $z] -color $color   -style outline
+	     }
+	    }
+
+	    if { $type eq "sequential" } {
+		set z [expr { $z + [$surf $j get thickness] }]
+		incr c
+	    } 
+	}
+	if { $type ne "sequential" } {
+	    set z [expr { $z + [$surf 0 get thickness] }]
+	    incr c
+	}
+    }
+}
+
+display GMT
+
+.win transform -camera {} "lookat all"
+

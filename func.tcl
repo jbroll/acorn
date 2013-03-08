@@ -7,14 +7,14 @@ proc sum { lst } { foldl + 0 $lst }
 proc sqr { x   } { expr $x * $x }
 proc max { x y } { expr $x > $y ? $x : $y }
 
-proc jot { n { fr - } { to - } { by - }  } {
 
-    if {  $n eq "-" } { set  n 10 } 
-    if { $fr eq "-" } { set fr  0 }
-    if { $to eq "-" } { set to [expr { $fr+$to*$by }] }
-    if { $by eq "-" } { set by [expr { ($to-$fr)/($n-1) }]  }
+proc jot { { nx - } { x0 - } { x1 - } { xi - } } {
+    if { $nx eq "-" } { set nx 10 }
+    if { $x0 eq "-" } { set x0  0 }
+    if { $x1 eq "-" } { set x1 [expr $x0+$nx-1] }
+    if { $xi eq "-" } { set xi [expr { ($x1-$x0)/($nx-1) }] }
 
-    iota $fr $to $by
+    iota $x0 $x1 $xi
 }
 
 
@@ -26,9 +26,17 @@ proc iota { fr { to {} } { in 1 } } {
     set fr [expr $fr]
     set to [expr $to]
 
-    for { set res {} } { $fr <= $to } { incr fr $in } {lappend res $fr } 
+    for { set res {} } { $fr <= $to } { set fr [expr $fr+$in] } {lappend res $fr } 
     set res
 }
+
+proc zip { args } {
+    set n [iota 0 [expr [llength $args]-1]]
+
+    join [map {*}[join [map a $n { list $a [lindex $args $a] }]] "list [join [map i $n { concat $$i }]]"]
+}
+
+
 
 proc map { args } {
     uplevel [subst {

@@ -27,7 +27,7 @@ arec::typedef ::acorn::Polygon {
 #
 
 oo::class create UDA {
-    variable polygon inpath
+    variable polygon inpath break
     accessor polygon
 
     constructor { type args } {
@@ -36,6 +36,7 @@ oo::class create UDA {
 
 	set polygon [acorn::Polygon create [namespace current]::polygon]
 	set inpath  -1
+	set break    1
 
 	switch $type {
 	    source { source [lindex $args 0] } 
@@ -67,7 +68,9 @@ oo::class create UDA {
     method BRK {} 				{
 	if { $inpath != -1 } { LIN {*}[lindex [$polygon $inpath get x y] 0] }
 
-	$polygon [$polygon length]  set x 0  y 0 
+	if { $break } { $polygon [$polygon length]  set x 0  y 0 }
+	set inpath -1
+	set break   0
     }
     method !   { args } {}
 
@@ -76,7 +79,12 @@ oo::class create UDA {
 
 	switch -regexp -- [lindex $args 0] {
 	    [-+0-9]* {
-		if { [lindex $args 0] == 0 && [lindex $args 1] == 0 } {
+		set x [lindex $args 0]
+		set y [lindex $args 1]
+
+		if { $inpath != -1 } { lassign [lindex [$polygon $inpath get x y] 0] x0 y0 }
+
+		if { ( $x == 0 && $y == 0 ) || ( $inpath >= 0 && $x == $x0 && $y == $y0 ) } {
 		    BRK
 		} else {
 		    LIN {*}$args
@@ -87,5 +95,5 @@ oo::class create UDA {
 }
 
 #UDA create m1aper source m1aper1e.uda
-#puts [[m1aper polygon] 1 end get]
+#puts [[m1aper polygon] 0 end get]
 

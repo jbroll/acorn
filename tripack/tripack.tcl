@@ -68,7 +68,12 @@ critcl::cproc trimesh { Tcl_Interp* ip Tcl_Obj* points } ok {
     trmesh_(&n, x, y, list, lptr, lend, &lnew, &ier);
 
     if ( ier != 0 ) {
-	Tcl_AppendStringsToObj(result, "cannot mesh", NULL);
+	Tcl_AppendStringsToObj(result, "cannot mesh:", NULL);
+	switch ( ier ) {
+	    case -1 : Tcl_AppendStringsToObj(result, "too few points", NULL);			break;
+	    case -3 : Tcl_AppendStringsToObj(result, "first 3 points are colinear", NULL);	break;
+	    default : Tcl_AppendStringsToObj(result, "points are coincident", NULL);		break;
+	}
 	return TCL_ERROR;
     }
 

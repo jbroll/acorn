@@ -73,6 +73,7 @@ extern "C" {
 
 		    ray[j].vignetted = aper_clip(&surf[i], &ray[j]);
 
+
 		    if ( once ) {
 			//printf("Here ");
 			//prays(&ray[j], 1);

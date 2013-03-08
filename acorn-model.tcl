@@ -1,4 +1,6 @@
 
+source ngon.tcl
+
     proc mappair { map params } {
 	set reply {}
 	foreach { name value } $params { lappend reply [dict get $map $name] $value }
@@ -45,8 +47,13 @@ oo::class create ::acorn::Model {
 
     method surfset1 { obj surf parmap cmd args } {
 	switch $cmd {
-	    set { $obj $surf $cmd {*}[mappair $parmap $args] }
-	    get { $obj $surf $cmd {*}[maplist $parmap $args] }
+	    length  { $obj $surf $cmd }
+	    get     { $obj $surf $cmd {*}[maplist $parmap $args] }
+	    set     { $obj $surf $cmd {*}[mappair $parmap $args] }
+	    getdict { $obj $surf $cmd {*}[maplist $parmap $args] }
+	    setdict { $obj $surf $cmd {*}[mappair $parmap $args] }
+	    getlist { $obj $surf $cmd {*}[maplist $parmap $args] }
+	    setlist { $obj $surf $cmd {*}$args] }
 	}
     }
 
@@ -147,6 +154,28 @@ oo::class create ::acorn::Model {
 	rename slist {}
     }
 
+    method trace1 { surface rays { z 0 } } {
+	::acorn::SurfaceList create slist 0
+
+	foreach { type surf } $surfaces {			# Find the surface to trace
+	    foreach j [iota 0 [$surf length]-1] {
+		if { [$surf $j get name] eq $surface } { break }
+	    }
+	    if { [$surf $j get name] eq $surface } { break }
+	}
+
+	set aper [lindex [lindex [$surf $j get aperture] 0] 0]
+
+	if { $aper ne {} } {
+	    $surf $j set aper_data [$aper getptr]
+	    $surf $j set aper_leng [$aper length]
+	}
+	slist 0 set surf [expr { [$surf getptr]+[acorn::Surfs size]*$j }] nsurf 1 type 0
+
+
+	acorn::trace_rays $z 1 [slist getptr] [slist length] [$rays getptr] [$rays length]
+    }
+
     method print {} {
 	foreach { type surf } $surfaces {
 	    puts "$type : $surf :"
@@ -160,8 +189,9 @@ proc acorn::model { args } { tailcall acorn::Model create {*}$args }
 
 proc acorn::mkrays { name args } {
     if { $name eq "-" } { set name rays[incr ::acorn::RAYS] }
+    set pz 0
 
-    acorn::Rays create $name 0
+    if { [info commands $name] eq {} } { acorn::Rays create $name 0 }
 
     set args [dict merge { nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - } $args]
     dict with args {
@@ -175,7 +205,7 @@ proc acorn::mkrays { name args } {
 	set i 0
 	foreach x [jot $nx $x0 $x1 $xi] {
 	    foreach y [jot $ny $y0 $y1 $yi] {
-		$name $i set px $x py $y pz 0 kx 0.0 ky 0.0 kz 1.0 vignetted 0
+		$name [$name length] set px $x py $y pz $pz kx 0.0 ky 0.0 kz 1.0 vignetted 0
 		incr i
 	    }
 	}

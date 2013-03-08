@@ -85,7 +85,6 @@ oo::class create AGF {
 }
 
 
-
 proc load-glass { glasscats pathlist } {
     foreach path $pathlist {
 	foreach catalog [glob $pathlist/*.agf] {
