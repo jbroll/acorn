@@ -14,7 +14,6 @@ source ngon.tcl
 
 
 
-
 oo::class create ::acorn::Model {
     variable grouptype current surfaces default basedef basemap anonsurf
     accessor grouptype current surfaces default
@@ -83,6 +82,8 @@ oo::class create ::acorn::Model {
 	$current $i set {*}[dict merge $basedef $default [mappair $parmap [join $args]] [list name $name]]
 	$current $i set aperture [::acorn::Aperture [$current get aper_type] [$current get aper_param]]
 
+	$current $i set glass_ptr [glass-lookup [$current $i get glass]]
+
 	if { $name eq "." } {
 	    set name anon[incr anonsurf]
 	    $current $i set name $name
@@ -130,11 +131,10 @@ oo::class create ::acorn::Model {
 	}
     }
 
-    method trace { rays } {
+    method trace { rays { wave 5000 } } {
 	::acorn::SurfaceList create slist 0
 
 	set i 0
-
 	foreach { type surf } $surfaces {
 	    slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
 
@@ -146,6 +146,9 @@ oo::class create ::acorn::Model {
 		    $surf $j set aper_leng [$aper length]
 		}
 
+		if { [$surf $j get glass] ne {{{}}} } {
+		    $surf $j set n [acorn::glass_indx [$surf $j get glass_ptr] $wave]
+		}
 	    }
 	    incr i
 	}
@@ -219,5 +222,7 @@ proc acorn::prays { rays } {
     puts "-	-	-	-	--	--	--	-"
     acorn::_prays [$rays getptr] [$rays length]
 }
+
+glass-loader glass
 
 

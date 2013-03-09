@@ -38,13 +38,11 @@ arec::typedef ::acorn::Glass {
 }
 
 arec::typedef ::acorn::GlassCat {
+    char*	name
     char*	catalog
-    long	glass
+    char*	glass
 }
 
-
-# The UDA file is read in and reduced to a polygon definition
-#
 
 oo::class create AGF {
     variable glass current CC
@@ -67,7 +65,7 @@ oo::class create AGF {
 	$glass $current set name $name formula $formula MIL $MIL Nd $Nd Vd $Vd exclude $exclude status $status
     }
     method GC { args } { $glass $current set comment [join $args] }
-    method ED { TCE TCE100300 density dPgF ignthermal } {
+    method ED { TCE TCE100300 density dPgF ignthermal args } {
 	$glass $current set TCE $TCE TCE100300 $TCE100300 density $density dPgF $dPgF ignthermal $ignthermal
     }
     method CD { args } {
@@ -85,17 +83,29 @@ oo::class create AGF {
 }
 
 
-proc load-glass { glasscats pathlist } {
+proc glass-loader { pathlist } {
+    ::acorn::GlassCat create GlassCats 0
+
     foreach path $pathlist {
 	foreach catalog [glob $pathlist/*.agf] {
-	    AGF create $catalog source glass/schott.agf
+	    set agf [AGF create agf[incr ::AGF] source $catalog]
 
-	    $galsscats [$galsscats length] set catalog $catalog glass [[$catalog glass] getptr]
+	    GlassCats [GlassCats length] set name [file rootname $catalog] catalog $catalog glass $agf
 	}
-    }
+     }
+
+     set ::Glass() 0
+     set ::Glass({}) 0
+     set ::Glass({{}}) 0
+     set ::Glass({{{}}}) 0
+
+     foreach cat [GlassCats 0 end get glass] {
+         set i -1
+         foreach name [[$cat glass] 0 end get name] {
+	     set ::Glass($name) [[$cat glass] [incr i] getptr]
+	 }
+     }
 }
 
-# ::acorn::GlassCat create GlassCats 0
-#
-# load-glass GlassCats glass
-#
+proc glass-lookup { glass } {	return $::Glass($glass) }
+

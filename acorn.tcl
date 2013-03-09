@@ -3,13 +3,13 @@
 
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
-critcl::tsources func.tcl tcloo.tcl acorn.tcl uda.tcl
+critcl::tsources func.tcl tcloo.tcl uda.tcl agf.tcl acorn.tcl
 critcl::csources acorn.cpp aperture.cpp
 
 ::critcl::tcl 8.6
 ::critcl::config language c++ 
 
-critcl::clibraries -lstdc++
+critcl::clibraries glass/acorn-glass.o glass/glass.o -lstdc++
 
 
 source tcloo.tcl
@@ -25,11 +25,14 @@ namespace eval acorn {
 	extern "C" {
 	    int  SurfSize(void);
 	    int  RaysSize(void);
+	    int  GlasSize(void);
 
 	    void xrays(void *r, int n);
 	    void prays(void *r, int n);
 	    void trace_rays(double z, double n, void *surflist, int nsurfs, void *ray, int nray);
 	    typedef int  (*InfosFunc)(int info, char ***str, double **val);
+
+	    double glass_indx(void *glass, double wave);
 	}
     }
 
@@ -88,6 +91,7 @@ namespace eval acorn {
 	    long	infos
 
 	    string	glass
+	    long	glass_ptr
 	}
 	arec::typedef ::acorn::SurfaceList {
 	    long 	 surf;
@@ -95,12 +99,14 @@ namespace eval acorn {
 	    int		 type;
 	}
 
-	if { [acorn::RaysSize] != [::acorn::Rays  size] } { error "acorn size mismatch [acorn::RaysSize] != [::acorn::Rays  size]" }
-	if { [acorn::SurfSize] != [::acorn::Surfs size] } { error "acorn size mismatch [acorn::SurfSize] != [::acorn::Surfs size]" }
+	if { [acorn::RaysSize] != [::acorn::Rays  size] } { error "acorn size mismatch Rays  [acorn::RaysSize] != [::acorn::Rays  size]" }
+	if { [acorn::SurfSize] != [::acorn::Surfs size] } { error "acorn size mismatch Surfs [acorn::SurfSize] != [::acorn::Surfs size]" }
+	if { [acorn::GlasSize] != [::acorn::Glass size] } { error "acorn size mismatch Glass [acorn::GlasSize] != [::acorn::Glass size]" }
     }
 
-    critcl::cproc SurfSize {} int { return SurfSize(); }
     critcl::cproc RaysSize {} int { return RaysSize(); }
+    critcl::cproc SurfSize {} int { return SurfSize(); }
+    critcl::cproc GlasSize {} int { return GlasSize(); }
 
     critcl::cproc getsymbol { Tcl_Interp* interp char* libso char* symbol } long {
 	void *handle = dlopen(libso, RTLD_NOW);
@@ -132,6 +138,9 @@ namespace eval acorn {
     }
     critcl::cproc trace_rays { double z double n long s int nsurf long r int nray } void {
                   trace_rays(z, n, (void *) s, nsurf, (void *) r, nray); 
+    }
+    critcl::cproc glass_indx { long glass double wave } double {
+                  return glass_indx((void*)glass, wave); 
     }
 
     critcl::cproc _prays { long r int nray } void { prays((void *) r, nray); }

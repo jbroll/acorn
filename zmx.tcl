@@ -18,7 +18,7 @@ oo::class create ZMX {
 	      TOL  TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVM XDAT XFLN YFLN
 
 	switch $type {
-	    source { eval [string map { $ \\$ ; \\; [ \\[ } [string range [cat [lindex $args 0] unicode] 1 end]] }
+	    source { eval [string map { $ \\$ ; \\; [ \\[ } [cat [lindex $args 0]]] }
 	    string { eval {*}$args }
 	}
 

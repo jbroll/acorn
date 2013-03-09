@@ -7,8 +7,8 @@ BITS=-m32  -msse3
 arec	= lib/arec/pkgIndex.tcl
 acorn	= lib/acorn/pkgIndex.tcl
 
-OBJ	= acorn.o glass/glass.o
-TCL	= acorn.tcl uda.tcl
+OBJ	= acorn.o glass/glass.o glass/acorn-glass.o
+TCL	= acorn.tcl uda.tcl agf.tcl
 
 SURFS	= surfaces/simple.so surfaces/zernike.so surfaces/lens-array.so
 
@@ -43,7 +43,10 @@ surfaces/lens-array.so : surfaces/lens-array.cpp acorn.h
 	g++ $(BITS) -O3 -shared $(INC) surfaces/lens-array.cpp -o surfaces/lens-array.so
 	
 glass/glass.o : glass/glass.c
-	gcc $(BITS) -O3 -c $(INC) glass/glass.c glass/glass.o -o glass/glass.o
+	gcc $(BITS) -O3 -c $(INC) glass/glass.c -o glass/glass.o
+
+glass/acorn-glass.o : glass/acorn-glass.c glass/glass.h
+	gcc $(BITS) -O3 -c $(INC) glass/acorn-glass.c -o glass/acorn-glass.o
 
 clean:
 	rm -f acorn.o

@@ -319,7 +319,7 @@ int ARecInstObjCmd(data, ip, objc, objv)
 	return TCL_OK;
     );
     ARecCmd(ip, inst, "getptr", " ", objc == 2, objc, objv,
-	Tcl_SetLongObj(result, (long)inst->recs);
+	Tcl_SetLongObj(result, (long)recs);
 	return TCL_OK;
     );
     ARecCmd(ip, inst, "setbytes", " ", objc == 3, objc, objv,

@@ -58,6 +58,7 @@ typedef struct _Surface {
     InfosFunc   info;
 
     char*	glass;
+    void*	glass_ptr;
 } Surface;
 
 typedef struct _SurfaceList {
