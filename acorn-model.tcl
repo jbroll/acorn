@@ -1,6 +1,4 @@
 
-source ngon.tcl
-
     proc mappair { map params } {
 	set reply {}
 	foreach { name value } $params { lappend reply [dict get $map $name] $value }
@@ -13,8 +11,86 @@ source ngon.tcl
     }
 
 
+oo::class create ::acorn::BaseModel {
+    variable surfaces
+    accessor surfaces
+
+    method surfset1 { obj surf parmap cmd args } {
+	switch $cmd {
+	    length  { $obj $surf $cmd }
+	    get     { $obj $surf $cmd {*}[maplist $parmap $args] }
+	    set     { $obj $surf $cmd {*}[mappair $parmap $args] }
+	    getdict { $obj $surf $cmd {*}[maplist $parmap $args] }
+	    setdict { $obj $surf $cmd {*}[mappair $parmap $args] }
+	    getlist { $obj $surf $cmd {*}[maplist $parmap $args] }
+	    setlist { $obj $surf $cmd {*}$args] }
+	}
+    }
+
+    method trace { rays { wave 5000 } } {
+	::acorn::SurfaceList create slist 0
+
+	set i 0
+	foreach { type surf } $surfaces {
+	    slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
+
+	    foreach j [iota 0 [$surf length]-1] {
+		set aper [lindex [lindex [$surf $j get aperture] 0] 0]
+
+		if { $aper ne {} } {
+		    $surf $j set aper_data [$aper getptr]
+		    $surf $j set aper_leng [$aper length]
+		}
+
+		if { [$surf $j get glass] ne {{{}}} } {
+		    if { [$surf $j get glass_ptr] == -1 } {
+			$surf $j set n -1
+		    } else {
+			$surf $j set n [acorn::glass_indx [$surf $j get glass_ptr] $wave]
+		    }
+		}
+	    }
+	    incr i
+	}
+	acorn::trace_rays 0 1 [slist getptr] [slist length] [$rays getptr] [$rays length]
+
+	rename slist {}
+    }
+
+    method trace1 { surface rays { z 0 } } {
+	::acorn::SurfaceList create slist 0
+
+	foreach { type surf } $surfaces {			# Find the surface to trace
+	    foreach j [iota 0 [$surf length]-1] {
+		if { [$surf $j get name] eq $surface } { break }
+	    }
+	    if { [$surf $j get name] eq $surface } { break }
+	}
+
+	set aper [lindex [lindex [$surf $j get aperture] 0] 0]
+
+	if { $aper ne {} } {
+	    $surf $j set aper_data [$aper getptr]
+	    $surf $j set aper_leng [$aper length]
+	}
+	slist 0 set surf [expr { [$surf getptr]+[acorn::Surfs size]*$j }] nsurf 1 type 0
+
+
+	acorn::trace_rays $z 1 [slist getptr] [slist length] [$rays getptr] [$rays length]
+    }
+
+    method print {} {
+	foreach { type surf } $surfaces {
+	    puts "$type : $surf :"
+	    puts "	[join [$surf 0 end getdict name type R K n thickness] "\n	"]"
+	    puts \n
+	}
+    }
+}
 
 oo::class create ::acorn::Model {
+    superclass ::acorn::BaseModel
+
     variable grouptype current surfaces default basedef basemap anonsurf
     accessor grouptype current surfaces default
 
@@ -37,25 +113,14 @@ oo::class create ::acorn::Model {
 
 	eval $body
 
-	if { [$current length] } { lappend surfaces $grouptype $current }
+	if { [$current length] } { lappend surfaces $grouptype $current 
+	} else {
+	    rename $current {}
+	}
 
 	set current Surface-Add-Error
     }
     method coordinate-break { name args } { surface name [list {*}[join $args] grouptype coordbk] }
-
-
-    method surfset1 { obj surf parmap cmd args } {
-	switch $cmd {
-	    length  { $obj $surf $cmd }
-	    get     { $obj $surf $cmd {*}[maplist $parmap $args] }
-	    set     { $obj $surf $cmd {*}[mappair $parmap $args] }
-	    getdict { $obj $surf $cmd {*}[maplist $parmap $args] }
-	    setdict { $obj $surf $cmd {*}[mappair $parmap $args] }
-	    getlist { $obj $surf $cmd {*}[maplist $parmap $args] }
-	    setlist { $obj $surf $cmd {*}$args] }
-	}
-    }
-
 
     method surface { name args } {
 	set i [$current length]
@@ -88,7 +153,6 @@ oo::class create ::acorn::Model {
 	    set name anon[incr anonsurf]
 	    $current $i set name $name
 	}
-
 
 	::oo::objdefine [self] [list forward $name [self] surfset1 $current $i $parmap]
 	::oo::objdefine [self] [list export $name]
@@ -130,62 +194,6 @@ oo::class create ::acorn::Model {
 	    incr i
 	}
     }
-
-    method trace { rays { wave 5000 } } {
-	::acorn::SurfaceList create slist 0
-
-	set i 0
-	foreach { type surf } $surfaces {
-	    slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
-
-	    foreach j [iota 0 [$surf length]-1] {
-		set aper [lindex [lindex [$surf $j get aperture] 0] 0]
-
-		if { $aper ne {} } {
-		    $surf $j set aper_data [$aper getptr]
-		    $surf $j set aper_leng [$aper length]
-		}
-
-		if { [$surf $j get glass] ne {{{}}} } {
-		    $surf $j set n [acorn::glass_indx [$surf $j get glass_ptr] $wave]
-		}
-	    }
-	    incr i
-	}
-	acorn::trace_rays 0 1 [slist getptr] [slist length] [$rays getptr] [$rays length]
-
-	rename slist {}
-    }
-
-    method trace1 { surface rays { z 0 } } {
-	::acorn::SurfaceList create slist 0
-
-	foreach { type surf } $surfaces {			# Find the surface to trace
-	    foreach j [iota 0 [$surf length]-1] {
-		if { [$surf $j get name] eq $surface } { break }
-	    }
-	    if { [$surf $j get name] eq $surface } { break }
-	}
-
-	set aper [lindex [lindex [$surf $j get aperture] 0] 0]
-
-	if { $aper ne {} } {
-	    $surf $j set aper_data [$aper getptr]
-	    $surf $j set aper_leng [$aper length]
-	}
-	slist 0 set surf [expr { [$surf getptr]+[acorn::Surfs size]*$j }] nsurf 1 type 0
-
-
-	acorn::trace_rays $z 1 [slist getptr] [slist length] [$rays getptr] [$rays length]
-    }
-
-    method print {} {
-	foreach { type surf } $surfaces {
-	    puts "$type : $surf :"
-	    puts "	[join [$surf 0 end get] "\n	"]"
-	    puts \n
-	}
-    }
 }
 
 proc acorn::model { args } { tailcall acorn::Model create {*}$args }
@@ -222,7 +230,5 @@ proc acorn::prays { rays } {
     puts "-	-	-	-	--	--	--	-"
     acorn::_prays [$rays getptr] [$rays length]
 }
-
-glass-loader glass
 
 

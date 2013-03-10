@@ -43,6 +43,10 @@ extern "C" {
 	    if ( once ) { for ( int j = 0; j < nray; j++ ) { traversed[j] = 0; } }
 
 	    for ( int i = 0; i < nsurf; i++ ) {
+		//printf("Name %s %f\n", surf[i].name, surf[i].n);
+
+		if ( isinf(surf[i].thickness) ) { continue; }
+
 		Affine3d transform;
 		Affine3d inverse;
 

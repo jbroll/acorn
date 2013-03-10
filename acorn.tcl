@@ -3,7 +3,7 @@
 
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
-critcl::tsources func.tcl tcloo.tcl uda.tcl agf.tcl acorn.tcl
+critcl::tsources func.tcl tcloo.tcl uda.tcl agf.tcl zmx.tcl acorn.tcl
 critcl::csources acorn.cpp aperture.cpp
 
 ::critcl::tcl 8.6
@@ -47,7 +47,8 @@ namespace eval acorn {
 	    }
 	}
 
-	set ::acorn::SurfaceTypes(coordbk)	-1
+	set ::acorn::SurfaceTypes(coordbrk)	-1
+	set ::acorn::SurfaceInfos(coordbrk)	-1
 
 	foreach type [glob ./surfaces/*.so] {
 	    set ::acorn::SurfaceTypes([file rootname [file tail $type]]) [acorn::getsymbol $type traverse]
@@ -102,6 +103,8 @@ namespace eval acorn {
 	if { [acorn::RaysSize] != [::acorn::Rays  size] } { error "acorn size mismatch Rays  [acorn::RaysSize] != [::acorn::Rays  size]" }
 	if { [acorn::SurfSize] != [::acorn::Surfs size] } { error "acorn size mismatch Surfs [acorn::SurfSize] != [::acorn::Surfs size]" }
 	if { [acorn::GlasSize] != [::acorn::Glass size] } { error "acorn size mismatch Glass [acorn::GlasSize] != [::acorn::Glass size]" }
+
+	glass-loader glass
     }
 
     critcl::cproc RaysSize {} int { return RaysSize(); }

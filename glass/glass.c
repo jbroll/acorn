@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include <math.h>
 
 #define N0	1
@@ -77,15 +78,16 @@ double schottE3(double y, double t, double p, double *c)
 double sellmeier1(double y, double t, double p, double *c)
 {
     double n2m1 = 
-	  c[0] * pow(y, 2)/ pow(y, 2) * c[1]
-	+ c[2] * pow(y, 2)/ pow(y, 2) * c[3]
-	+ c[4] * pow(y, 2)/ pow(y, 2) * c[5];
+	  c[0] * pow(y, 2)/ (pow(y, 2) - c[1])
+	+ c[2] * pow(y, 2)/ (pow(y, 2) - c[3])
+	+ c[4] * pow(y, 2)/ (pow(y, 2) - c[5]);
 
-    return sqrt(n2m1)+1.0;
+    return sqrt(n2m1+1.0);
 }
 
 double sellmeier2(double y, double t, double p, double *c)
 {
+
     double n2m1 = 
 	  c[0] * pow(y, 2)/ pow(y, 2) * c[1]
 	+ c[2] * pow(y, 2)/ pow(y, 2) * c[3]
@@ -166,6 +168,8 @@ double handbook2(double y, double t, double p, double *c)
 
 double glass_index(int formula, double wave, double temp, double pres, double *c)
 {
+    wave /= 10000.0;
+
     switch ( formula ) {
 	case Schott	:	return schott    (wave, temp, pres, c);
 	case Sellmeier1	:	return sellmeier1(wave, temp, pres, c);
@@ -184,5 +188,4 @@ double glass_index(int formula, double wave, double temp, double pres, double *c
 
 	return 0.0;
 }
-
 

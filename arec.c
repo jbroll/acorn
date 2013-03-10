@@ -249,6 +249,7 @@ int ARecInstObjCmd(data, ip, objc, objv)
 	    if ( Tcl_GetIntFromObj(ip, objv[2], &n) != TCL_OK  ) { return TCL_ERROR; }
 
 	    ARecRealloc(inst, n, 0);
+	    inst->nrecs = n;
 	}
 
 	Tcl_SetIntObj(result, inst->nrecs);

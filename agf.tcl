@@ -99,6 +99,8 @@ proc glass-loader { pathlist } {
      set ::Glass({{}}) 0
      set ::Glass({{{}}}) 0
 
+     set ::Glass(MIRROR) -1
+
      foreach cat [GlassCats 0 end get glass] {
          set i -1
          foreach name [[$cat glass] 0 end get name] {
