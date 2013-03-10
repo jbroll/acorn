@@ -10,21 +10,31 @@ array set ZMXSurfaceMap {
     standard	 simple
     coordbrk	 coordbrk
     us_array.dll lens-array
-    nsc_zsur	 zernike
     szernpha	 zernike
+    nsc_ssur	 simple
+    nsc_zsur	 zernike
+    nsc_annu	 simple
+}
+
+array set ZMXNonSeqParamMap {
+    simple,1	R
+    simple,2	K
+
+    zernike,1	R
+    zernike,2	K
 }
 
 oo::class create ZMX {
     superclass ::acorn::BaseModel
 
-    variable grouptype current surf surfaces default basedef basemap anonsurf		\
-	Id Name Notes Temp Pres								\
+    variable grouptype current surf surftype surfaces default basedef basemap anonsurf		\
+	Id Name Notes Temp Pres									\
 	params comment nonseqid nonseq
 
     accessor grouptype current surfaces default
 
     constructor { type args } {
-	procs CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD FLAP FLOA FTYP FWGN GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
+	procs TRAC BLNK CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD FLAP FLOA FTYP FWGN GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
 	      NSCD NSCS NSOA NSOD NSOH NSOO NSOP NSOQ NSOS NSOU NSOV NSOW PARM PFIL PICB POLS POPS PUSH PWAV PZUP RAIM ROPD SDMA SLAB STOP SURF		\
 	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVM XDAT XFLN YFLN RSCE MOFF
 
@@ -34,6 +44,7 @@ oo::class create ZMX {
 	set basemap { type type R R K K n n thickness thickness aperture aperture aper_type aper_type aper_param aper_param aper_min aper_min aper_max aper_max x x y y z z rx rx ry ry rz rz }
 	set anonsurf 0
 
+	set surftype {}
 	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
 	set surf 0
 
@@ -62,13 +73,10 @@ oo::class create ZMX {
      # Common surface definition commands
      #
      method TYPE { type args } { 
-	if { $type eq "USERSURF" } {
-	    set args [lassign $args type]
-	}
 
 	# Move on to a new surface group?
 	#
-	if { [$current length] && ( $grouptype eq "NONSEQCO" || $type eq "NONSEQCO" ) } {
+	if { [$current length] && ( $grouptype eq "non-sequential" || $type eq "NONSEQCO" ) } {
 	    lappend surfaces $grouptype $current 
 
 	    set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
@@ -84,8 +92,16 @@ oo::class create ZMX {
 	}
 
 	set grouptype sequential
+	my Process-Type $type {*}$args
+     }
+
+     method Process-Type { type args } {
+	if { $type eq "USERSURF" } {
+	    set args [lassign $args type]
+	}
 
 	set type $::ZMXSurfaceMap([string tolower $type])
+	set surftype $type
 
 	set surf [$current length]
 
@@ -121,9 +137,10 @@ oo::class create ZMX {
 	::oo::objdefine [self] [list forward $Id [self] surfset1 $current $surf $parmap]
 	::oo::objdefine [self] [list export  $Id]
 
-	set name [string map { { } {} } [join [map word $comment { string totitle $word }]]]
 
 	if { $comment ne {} } {
+	    set name [string map { { } {} } [join [map word $comment { string totitle $word }]]]
+
 	    ::oo::objdefine [self] [list forward $name [self] surfset1 $current $surf $parmap]
 	    ::oo::objdefine [self] [list export  $name]
 	}
@@ -131,10 +148,7 @@ oo::class create ZMX {
      }
      method CURV { curv  args } { if { $curv } { $current $surf set R [expr { 1.0/$curv }] }  	 }
      method CONI { conic args } { $current $surf set K $conic 	 }
-     method COMM { args }  {
-	 set comment $args
-	 #$current $surf set comment $args
-     }
+     method COMM { args }  { set comment $args }
      method PARM { n value } { $current $surf set p$n $value }
      method DISZ { thick } { $current $surf set thickness $thick }
      method DIAM { diam args } {
@@ -168,6 +182,8 @@ oo::class create ZMX {
 	 $current $surf set glass_ptr [glass-lookup $name]
      }
 
+     method BLNK { args } {}
+     method TRAC { args } {}
      method MOFF { args } {}
      method GLCZ { args } {}
      method RSCE { args } {}
@@ -177,11 +193,14 @@ oo::class create ZMX {
      #
      method NSOH { type args } {
 	switch $type {
-	 NSC_ZSUR {
+	 default {
+	    $current length $nonseq
+
 	    lassign $args a b comment
+
 	    my SURF $nonseqid-[incr nonseq]
 	    my COMM $comment
-	    my TYPE $type
+	    my Process-Type $type
 	 }
 	}
      }
@@ -194,7 +213,9 @@ oo::class create ZMX {
 	$current $surf set aperture [::acorn::Aperture [$current get aper_type] [$current get aper_param]]
      }
      method NSCS { args } {}
-     method NSOD { args } {}
+     method NSOD { n value a b c d e f } {
+	 catch { $current $surf set $::ZMXNonSeqParamMap($surftype,$n) $value } reply
+     }
      method NSCD { args } {}
      method NSOO { args } {}
      method NSOP { args } {}
