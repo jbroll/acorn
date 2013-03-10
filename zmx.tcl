@@ -9,7 +9,7 @@ lappend auto_path lib
 array set ZMXSurfaceMap {
     standard	 simple
     coordbrk	 coordbrk
-    us_array.dll lens-array
+    us_array.dll lens-array-rect
     szernpha	 zernike
     nsc_ssur	 simple
     nsc_zsur	 zernike
@@ -22,6 +22,14 @@ array set ZMXNonSeqParamMap {
 
     zernike,1	R
     zernike,2	K
+
+}
+
+array set ZMXUserSurfMap {
+    lens-array,1	nx
+    lens-array,2	ny
+    lens-array,3	width
+    lens-array,4	height
 }
 
 oo::class create ZMX {
@@ -99,9 +107,22 @@ oo::class create ZMX {
 	if { $type eq "USERSURF" } {
 	    set args [lassign $args type]
 	}
+	set args {}
 
 	set type $::ZMXSurfaceMap([string tolower $type])
+	switch $type {
+	    lens-array-rect {
+		set type lens-array
+		set args { symetry rect }
+	    }
+	    lens-array-hex {
+		set type lens-array
+		set args { symetry hex }
+	    }
+	}
+
 	set surftype $type
+
 
 	set surf [$current length]
 

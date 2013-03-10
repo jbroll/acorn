@@ -9,19 +9,29 @@ using namespace Eigen;
 
 extern "C" {
 
-  static const char *MyNames[]   = { "nx", "ny", "width" };
-  static const double MyValues[] = { 20, 20, 5 };
+  static const char  *MyParamsNames[]   = { "nx", "ny", "width" };
+  static const double MyParamsValues[] = { 20, 20, 5 };
+  static const char  *MyStringNames[]   = { "symetry" };
+  static const char  *MyStringValues[] = { "rect" };
 
-  int info(int command, char **strings, double **values) 
+  int info(int command, char **strings, void **values) 
   {
     switch ( command ) {
 	case ACORN_PARAMETERS: {
-	    int nparams = sizeof(MyNames)/sizeof(char *);
+	    int nparams = sizeof(MyParamsNames)/sizeof(char *);
 
-	    *strings = (char *)   MyNames;
-	    *values  = (double *) MyValues;
+	    *strings = (char *)   MyParamsNames;
+	    *values  = (double *) MyParamsValues;
 
-	    return 3;
+	    return nparams;
+        }
+	case ACORN_STRINGS: {
+	    int nparams = sizeof(MyStringNames)/sizeof(char *);
+
+	    *strings = (char *)   MyStringNames;
+	    *values  = (double *) MyStringValues;
+
+	    return nparams;
         }
     }
     return 0;

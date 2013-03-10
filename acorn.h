@@ -22,6 +22,7 @@
 
 
 #define ACORN_PARAMETERS	1
+#define ACORN_STRINGS		2
 
 typedef void (*TraceFunc)(double z, double n, struct _Surface *s, struct _Ray *r);
 typedef int  (*InfosFunc)(int info, char **str, double **val);
