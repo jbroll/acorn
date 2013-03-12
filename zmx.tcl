@@ -16,7 +16,7 @@ array set ZMXSurfaceMap {
     nsc_annu	 simple
 }
 
-array set ZMXNonSeqParamMap {
+array set ZMXNSODMap {
     simple,1	R
     simple,2	K
 
@@ -37,7 +37,7 @@ oo::class create ZMX {
 
     variable grouptype current surf surftype surfaces default basedef basemap anonsurf		\
 	Id Name Notes Temp Pres									\
-	params comment nonseqid nonseq
+	params comment nonseqid nonseq nsoexit
 
     accessor grouptype current surfaces default
 
@@ -215,6 +215,8 @@ oo::class create ZMX {
      method NSOH { type args } {
 	switch $type {
 	 default {
+	    if { $nonseq == 0 } { set nsoexit [$current 0 get p0 p1 p2 p3 p4 p5 p6] }
+
 	    $current length $nonseq
 
 	    lassign $args a b comment
@@ -235,11 +237,17 @@ oo::class create ZMX {
      }
      method NSCS { args } {}
      method NSOD { n value a b c d e f } {
-	 catch { $current $surf set $::ZMXNonSeqParamMap($surftype,$n) $value } reply
+	 catch { $current $surf set $::ZMXNSODMap($surftype,$n) $value } reply
+     }
+     method NSOP { dx dy dz rx ry rz args } {
+	 $current $surf x $dx y $dy z $dz rx $rx ry $ry rz $rx
+
+	 if { [lindex $args 0] eq MIRROR } {
+	     $current $surf n -1 
+	 }
      }
      method NSCD { args } {}
      method NSOO { args } {}
-     method NSOP { args } {}
      method NSOQ { args } {}
      method NSOS { args } {}
      method NSOU { args } {}
