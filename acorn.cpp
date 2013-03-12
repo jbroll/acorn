@@ -9,6 +9,8 @@ using namespace Eigen;
 
 extern "C" {
 #include <stdio.h>
+#include "tcl.h"
+#include "tpool/tpool.h"
 
     int  SurfSize() { return sizeof(Surface); }
     int  RaysSize() { return sizeof(Ray); }
@@ -121,6 +123,34 @@ extern "C" {
 	    }
 	}
 	delete [] traversed;
+    }
+
+    typedef struct _TraceWork {
+	double		 z;
+	double		 n;
+	SurfaceList 	*surflist;
+	int		 nsurfs;
+	Ray 		*ray;
+	int		 nray;
+    } TraceWork;
+
+    void trace_rays_worker(TraceWork *work) {
+	 trace_rays(work->z, work->n, work->surflist, work->nsurfs, work->ray, work->nray);
+    }
+    void trace_rays_thread(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, void *tp, int nthread)
+    {
+	TraceWork data[32];
+
+	for ( int i = 0; i < nthread; i++ ) {
+	    data[i].z        = z;
+	    data[i].n        = n;
+	    data[i].surflist = surflist;
+	    data[i].nsurfs   = nsurfs;
+	    data[i].ray      = &ray[nray/nthread];
+	    data[i].nray     =      nray%nthread;
+
+	    TPoolThreadStart( (TPool*) tp, (TPoolWork) trace_rays_worker, &data[i]);
+	}
     }
 }
 
