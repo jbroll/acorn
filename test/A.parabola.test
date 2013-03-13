@@ -2,8 +2,9 @@
 #
 lappend auto_path ./lib ../lib
 
-package require acorn
+source tcloo.tcl
 source  acorn-model.tcl
+package require acorn
 
 acorn::model Parabolic {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }

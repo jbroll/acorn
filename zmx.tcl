@@ -19,9 +19,11 @@ array set ZMXSurfaceMap {
 array set ZMXNSODMap {
     simple,1	R
     simple,2	K
+    simple,3	aper_max
 
     zernike,1	R
     zernike,2	K
+    zernike,3	aper_max
 
 }
 
@@ -49,7 +51,9 @@ oo::class create ZMX {
 	set grouptype sequential
 	set basedef { type simple n 1.00 }
 	set default {}
-	set basemap { type type R R K K n n thickness thickness aperture aperture aper_type aper_type aper_param aper_param aper_min aper_min aper_max aper_max x x y y z z rx rx ry ry rz rz }
+	set basemap { 	type type R R K K n n thickness thickness
+	    		aperture aperture aper_type aper_type aper_param aper_param aper_min aper_min aper_max aper_max
+			x x y y z z rx rx ry ry rz rz }
 	set anonsurf 0
 
 	set surftype {}
@@ -88,7 +92,7 @@ oo::class create ZMX {
 	    lappend surfaces $grouptype $current 
 
 	    set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
-	    set surf 0
+	    set surf   0
 	}
 
 	if { $type eq "NONSEQCO" } {
@@ -171,13 +175,10 @@ oo::class create ZMX {
      method CONI { conic args } { $current $surf set K $conic 	 }
      method COMM { args }  { set comment $args }
      method PARM { n value } { $current $surf set p$n $value }
-     method DISZ { thick } { $current $surf set thickness $thick }
-     method DIAM { diam args } {
-	 if { $diam } {
-	    $current $surf set aper_type circular 
-	    $current $surf set aper_max  [expr $diam/2.0] 
-	 }
+     method DISZ { thick } { 
+	 if { $grouptype ne "non-sequential" } { $current $surf set thickness $thick }
      }
+     method DIAM { diam args } {	# This is Zemax computed semi-diameter, not the aperture size.  }
      method SQOB { args } { # aperture obscuration is true }
      method OBSC { args } { # aperture obscuration is true }
      method ELOB { args } { # aperture obscuration is true }
@@ -224,6 +225,8 @@ oo::class create ZMX {
 	    my SURF $nonseqid-[incr nonseq]
 	    my COMM $comment
 	    my Process-Type $type
+
+	    $current $surf set thickness [lindex $nsoexit 0 3]
 	 }
 	}
      }
@@ -240,10 +243,10 @@ oo::class create ZMX {
 	 catch { $current $surf set $::ZMXNSODMap($surftype,$n) $value } reply
      }
      method NSOP { dx dy dz rx ry rz args } {
-	 $current $surf x $dx y $dy z $dz rx $rx ry $ry rz $rx
+	 $current $surf set x $dx y $dy z $dz rx $rx ry $ry rz $rz
 
-	 if { [lindex $args 0] eq MIRROR } {
-	     $current $surf n -1 
+	 if { [lindex $args 0] eq "MIRROR" } {
+	     $current $surf set n -1 
 	 }
      }
      method NSCD { args } {}

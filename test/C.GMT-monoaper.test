@@ -2,8 +2,9 @@
 #
 lappend auto_path ./lib ../lib
 
-package require acorn
+source tcloo.tcl
 source  acorn-model.tcl
+package require acorn
 
 acorn::model GMT {
     surface Primary	{ R -36000.0	  K  -0.99828570	n  -1.00	thickness -20262.476419940002 
@@ -18,8 +19,9 @@ acorn::model GMT {
 }
 
 
-acorn::mkrays rays nx 3 ny 3 box 12700
+acorn::mkrays rays nx 5 ny 5 box 12700
 
+#GMT print
 GMT trace rays
 
 acorn::prays rays

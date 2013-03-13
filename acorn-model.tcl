@@ -82,7 +82,7 @@ oo::class create ::acorn::BaseModel {
     method print {} {
 	foreach { type surf } $surfaces {
 	    puts "$type : $surf :"
-	    puts "	[join [$surf 0 end getdict name type R K n thickness] "\n	"]"
+	    puts "	[join [$surf 0 end getdict name type R K n thickness x y z rx ry rz aper_type aper_data aperture aper_param aper_min aper_max] "\n	"]"
 	    puts \n
 	}
     }
@@ -145,7 +145,7 @@ oo::class create ::acorn::Model {
 	set parmap [dict merge $basemap $parmap]
 
 	$current $i set {*}[dict merge $basedef $default [mappair $parmap [join $args]] [list name $name]]
-	$current $i set aperture [::acorn::Aperture [$current get aper_type] [$current get aper_param]]
+	$current $i set aperture [::acorn::Aperture [lindex [$current $i get aper_type] 0] [$current get aper_param]]
 
 	$current $i set glass_ptr [glass-lookup [$current $i get glass]]
 

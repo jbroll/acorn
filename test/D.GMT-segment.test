@@ -2,9 +2,11 @@
 #
 lappend auto_path ./lib ../lib
 
-package require acorn
+source tcloo.tcl
 
 source acorn-model.tcl
+package require acorn
+
 
 acorn::model GMT {
     surface-group-non-sequential Primary 		\
@@ -42,6 +44,6 @@ acorn::model GMT {
 
 acorn::mkrays rays nx 400 x0 -12700 x1 12700 ny 400 y0 -12700 y1 12700
 
-GMT trace rays 5000
+GMT trace rays
 
 acorn::prays rays

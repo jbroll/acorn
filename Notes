@@ -8,15 +8,20 @@ arec C and tcl parse alike
 
 arec minimize list nesting.
 
-add glass
-add ZMX parser
+
+add merit functions
+add plots
+
+add Para-axial
+add Zernike		- 
 
 add coord break		- Need test data
 add verbose debug
-add Zernike		- 
 
-add lenslets
-add Para-axial
+add lenslets		- Test
+
+add glass	- Done
+add ZMX parser	- Done
 
 
 

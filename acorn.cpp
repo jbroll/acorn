@@ -19,8 +19,8 @@ extern "C" {
     void prays(Ray *ray, int n)
     {
 	for ( int i = 0; i < n; i++ ) {
-	    printf("%5d\t%10.4f\t%10.4f\t%10.4f\t", i, ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
-	        printf("%10.4f\t%10.4f\t%10.4f\t%d\n",    ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
+	    printf("%5d\t%10.8f\t%10.8f\t%10.8f\t", i, ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
+	        printf("%10.8f\t%10.8f\t%10.8f\t%d\n",    ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
 	}
     }
     void xrays(Ray *ray, int n)
@@ -47,15 +47,23 @@ extern "C" {
 	    for ( int i = 0; i < nsurf; i++ ) {
 		if ( isinf(surf[i].thickness) ) { continue; }
 
-		Affine3d transform;
-		Affine3d inverse;
+		Affine3d txforward;
+		Affine3d txreverse;
+		Affine3d rtforward;
+		Affine3d rtreverse;
 
-		transform 	= Translation3d(surf[i].x, surf[i].y, surf[i].z)
+		txforward 	= Translation3d(-surf[i].x, -surf[i].y, -surf[i].z)
 			    * AngleAxisd(d2r(surf[i].rx), Vector3d(1.0, 0.0, 0.0))
 			    * AngleAxisd(d2r(surf[i].ry), Vector3d(0.0, 1.0, 0.0))
 			    * AngleAxisd(d2r(surf[i].rz), Vector3d(0.0, 0.0, 1.0));
 
-		inverse 	= transform.inverse();
+		rtforward 	=
+			      AngleAxisd(d2r(surf[i].rx), Vector3d(1.0, 0.0, 0.0))
+			    * AngleAxisd(d2r(surf[i].ry), Vector3d(0.0, 1.0, 0.0))
+			    * AngleAxisd(d2r(surf[i].rz), Vector3d(0.0, 0.0, 1.0));
+
+		txreverse 	= txforward.inverse();
+		rtreverse 	= rtforward.inverse();
 
 
 		for ( int j = 0; j < nray; j++ ) {
@@ -67,8 +75,15 @@ extern "C" {
 
 		    if ( ray[j].vignetted ) { continue; }
 
-		    ray[j].p = transform * ray[j].p;		// Put the ray into the surface cs.
-		    ray[j].k = transform * ray[j].k;
+		    //if ( surf[i].z != 0 ) { prays(&ray[j], 1); }
+
+		    ray[j].p = txforward * ray[j].p;		// Put the ray into the surface cs.
+		    ray[j].k = rtforward * ray[j].k;
+
+			//printf("Conv ");
+			//prays(&ray[j], 1);
+
+		    //if ( surf[i].z != 0 ) { prays(&ray[j], 1); }
 
 		    if ( (long) surf[i].traverse == COORDBK ) { continue; }
 
@@ -99,11 +114,12 @@ extern "C" {
 			  }
 		    }
 
-		    ray[j].p = inverse * ray[j].p;		// Put the ray back into global cs..
-		    ray[j].k = inverse * ray[j].k;
+		    ray[j].p = txreverse * ray[j].p;		// Put the ray back into global cs..
+		    ray[j].k = rtreverse * ray[j].k;
 
 			//printf("Next ");
 			//prays(&ray[j], 1);
+		//if ( surf[i].z != 0 ) { prays(&ray[j], 1); }
 		}
 
 		if ( !once ) {
