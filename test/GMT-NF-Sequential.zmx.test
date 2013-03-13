@@ -11,9 +11,9 @@ package require acorn
 
 ZMX create GMT source zmx-models/GMT-NF-Sequential.zmx
 
-acorn::mkrays rays nx 400 x0 -12700 x1 12700 ny 400 y0 -12700 y1 12700
+acorn::mkrays rays nx 5 x0 -12700 x1 12700 ny 5 y0 -12700 y1 12700
 
-GMT print
+#GMT print
 GMT trace rays
 
 acorn::prays rays
