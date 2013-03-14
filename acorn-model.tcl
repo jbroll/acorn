@@ -82,7 +82,7 @@ oo::class create ::acorn::BaseModel {
     method print {} {
 	foreach { type surf } $surfaces {
 	    puts "$type : $surf :"
-	    puts "	[join [$surf 0 end getdict name type R K n thickness x y z rx ry rz aper_type aper_data aperture aper_param aper_min aper_max] "\n	"]"
+	    puts "	[join [$surf 0 end getdict name type R K n thickness glass x y z rx ry rz aper_type aper_data aperture aper_param aper_min aper_max] "\n	"]"
 	    puts \n
 	}
     }
@@ -100,7 +100,9 @@ oo::class create ::acorn::Model {
 	set grouptype sequential
 	set basedef { type simple n 1.00 }
 	set default {}
-	set basemap { type type R R K K n n thickness thickness aperture aperture aper_type aper_type aper_param aper_param aper_min aper_min aper_max aper_max x x y y z z rx rx ry ry rz rz }
+	set basemap { 	type type R R K K n n thickness thickness glass glass
+	    		aperture aperture aper_type aper_type aper_param aper_param aper_min aper_min aper_max aper_max
+			x x y y z z rx rx ry ry rz rz }
 	set anonsurf 0
 
 
