@@ -21,7 +21,7 @@ extern "C" {
 	for ( int i = 0; i < n; i++ ) {
 	    printf("%5d\t%10.6f\t%10.6f\t%10.6f\t", i, ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
 	    printf("%10.6f\t%10.6f\t%10.6f\t%d\n",     ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
-	}
+}
     }
     void xrays(Ray *ray, int n)
     {
@@ -45,26 +45,27 @@ extern "C" {
 	    if ( once ) { for ( int j = 0; j < nray; j++ ) { traversed[j] = 0; } }
 
 	    for ( int i = 0; i < nsurf; i++ ) {
-		if ( isinf(surf[i].thickness) ) { continue; }
+		if ( isinf(surf[i].p[Px_thickness]) ) { continue; }
 
 		Affine3d txforward;
 		Affine3d txreverse;
 		Affine3d rtforward;
 		Affine3d rtreverse;
 
-		txforward 	= Translation3d(-surf[i].x, -surf[i].y, -surf[i].z)
-			    * AngleAxisd(d2r(surf[i].rx), Vector3d(1.0, 0.0, 0.0))
-			    * AngleAxisd(d2r(surf[i].ry), Vector3d(0.0, 1.0, 0.0))
-			    * AngleAxisd(d2r(surf[i].rz), Vector3d(0.0, 0.0, 1.0));
+		txforward 	= Translation3d(-surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz])
+			    * AngleAxisd(d2r(surf[i].p[Px_rx]), Vector3d(1.0, 0.0, 0.0))
+			    * AngleAxisd(d2r(surf[i].p[Px_ry]), Vector3d(0.0, 1.0, 0.0))
+			    * AngleAxisd(d2r(surf[i].p[Px_rz]), Vector3d(0.0, 0.0, 1.0));
 
 		rtforward 	=
-			      AngleAxisd(d2r(surf[i].rx), Vector3d(1.0, 0.0, 0.0))
-			    * AngleAxisd(d2r(surf[i].ry), Vector3d(0.0, 1.0, 0.0))
-			    * AngleAxisd(d2r(surf[i].rz), Vector3d(0.0, 0.0, 1.0));
+			      AngleAxisd(d2r(surf[i].p[Px_rx]), Vector3d(1.0, 0.0, 0.0))
+			    * AngleAxisd(d2r(surf[i].p[Px_ry]), Vector3d(0.0, 1.0, 0.0))
+			    * AngleAxisd(d2r(surf[i].p[Px_rz]), Vector3d(0.0, 0.0, 1.0));
 
 		txreverse 	= txforward.inverse();
 		rtreverse 	= rtforward.inverse();
 
+		//printf("Surface %d %d: %f %f %f\n", h, i, -surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz]);
 
 		for ( int j = 0; j < nray; j++ ) {
 		    Vector3d saveP = ray[j].p;
@@ -75,15 +76,11 @@ extern "C" {
 
 		    if ( ray[j].vignetted ) { continue; }
 
-		    //if ( surf[i].z != 0 ) { prays(&ray[j], 1); }
-
 		    ray[j].p = txforward * ray[j].p;		// Put the ray into the surface cs.
 		    ray[j].k = rtforward * ray[j].k;
 
 			//printf("Conv ");
 			//prays(&ray[j], 1);
-
-		    //if ( surf[i].z != 0 ) { prays(&ray[j], 1); }
 
 		    if ( (long) surf[i].traverse == COORDBK ) { continue; }
 
@@ -123,8 +120,8 @@ extern "C" {
 		}
 
 		if ( !once ) {
-		    n  = surf[i].n > 0.0 ? surf[i].n : n;
-		    z += surf[i].thickness;
+		    n  = surf[i].p[Px_n] > 0.0 ? surf[i].p[Px_n] : n;
+		    z += surf[i].p[Px_thickness];
 		}
 	    }
 			//printf("Done ");
@@ -134,8 +131,8 @@ extern "C" {
 		for ( int j = 0 ; j < nray; j++ ) {		// Rays that have not traversed are vignetted.
 		    ray[j].vignetted = !traversed[j];
 		}
-		n  = surf[0].n > 0.0 ? surf[0].n : n;
-		z += surf[0].thickness;
+		n  = surf[0].p[Px_n] > 0.0 ? surf[0].p[Px_n] : n;
+		z += surf[0].p[Px_thickness];
 	    }
 	}
 	delete [] traversed;

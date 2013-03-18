@@ -11,9 +11,10 @@ package require acorn
 
 ZMX create GMT source zmx-models/GMT-1-AcOWFS-2.ZMX
 
-acorn::mkrays rays nx 5 x0 -12700 x1 12700 ny 5 y0 -12700 y1 12700
+acorn::mkrays rays nx 200 x0 -12700 x1 12700 ny 200 y0 -12700 y1 12700
 
-#GMT print
 GMT trace rays
+GMT print
 
-acorn::prays rays
+#acorn::prays rays
+

@@ -1,0 +1,20 @@
+#!/usr/bin/env tclkit8.6
+#
+lappend auto_path ./lib ../lib
+
+source tcloo.tcl
+source  acorn-model.tcl
+package require acorn
+
+acorn::model Lenslets {
+    surface A	{ R  0 			thickness 3.2 glass BK7 }
+    surface B	{ R -3.128424286155137 	thickness 6.000		}
+    surface C   { thickness 0.0 				}
+}
+
+acorn::mkrays rays nx 11 ny 1 box 1
+
+Lenslets trace rays
+Lenslets print
+
+acorn::prays rays

@@ -1,7 +1,34 @@
 
-    proc mappair { map params } {
+    proc dltpair { l1 l2 } {
 	set reply {}
-	foreach { name value } $params { lappend reply [dict get $map $name] $value }
+	foreach { name def } $l1 {
+	    set val [dict get $l2 $name]
+
+	    if { $def != $val } {
+		lappend reply $name $val
+	    }
+	}
+
+	set reply
+    }
+    proc mappair { map params } {
+	#puts "mappair $map : $params"
+	set reply {}
+	foreach { name value } $params {
+	    try {
+		lappend reply [dict get $map $name] $value
+	    } on error message {
+		puts "$message : $name"
+	    }
+	}
+	set reply
+    }
+    proc revpair { map params } {
+	foreach { name par } $map { lappend rev $par $name }
+	#puts "revpair $rev"
+
+	set reply {}
+	foreach { name value } [join $params] { lappend reply [dict get $rev $name] $value }
 	set reply
     }
     proc maplist { map params } {
@@ -12,30 +39,58 @@
 
 
 oo::class create ::acorn::BaseModel {
-    variable surfaces
+    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs		\
     accessor surfaces
 
+    constructor {} {
+	set grouptype sequential
+	set basedef { name {} type simple comment {} n 1.00 glass {} x 0.0 y 0.0 z 0.0 rx 0.0 ry 0.0 rz 0.0 thickness 0.0 aper_type {} aper_param {} aper_min 0.0 aper_max 0.0 }
+	set default {}
+	set basemap { 	name name type type comment comment glass glass
+	    		aperture aperture aper_type aper_type aper_param aper_param }
+    	set basepar { x y z rx ry rz thickness aper_min aper_max n }
+	foreach par $basepar i [iota 0 [llength $basepar]-1] { lappend basemap $par p$i }
+	set anonsurf 0
+
+	set surfdefs(coordbrk,pdef) {}
+
+	set surftype {}
+	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
+	set surf 0
+    }
     method surfset1 { obj surf parmap cmd args } {
 	switch $cmd {
 	    length  { $obj $surf $cmd }
-	    get     { $obj $surf $cmd {*}[maplist $parmap $args] }
 	    set     { $obj $surf $cmd {*}[mappair $parmap $args] }
-	    getdict { $obj $surf $cmd {*}[maplist $parmap $args] }
 	    setdict { $obj $surf $cmd {*}[mappair $parmap $args] }
-	    getlist { $obj $surf $cmd {*}[maplist $parmap $args] }
 	    setlist { $obj $surf $cmd {*}$args] }
+	    get     { $obj $surf $cmd {*}[maplist $parmap $args] }
+	    getdict { revpair $parmap [$obj $surf $cmd {*}[maplist $parmap $args]] }
+	    getlist { $obj $surf $cmd {*}[maplist $parmap $args] }
 	}
     }
 
-    method trace { rays { wave 5000 } } {
+    method trace { rays { surfs { 0 end } } { wave 5000 } } {		# Assemble the surfaces to be traced.
 	::acorn::SurfaceList create slist 0
+
+	lassign $surfs start end
+	lassign $start s0 s1
+	lassign $end   e0 e1
 
 	set i 0
 	foreach { type surf } $surfaces {
+
+	    if { $s0 > $i } { continue }
+
 	    slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
 
 	    foreach j [iota 0 [$surf length]-1] {
+		#if { $s1 > $i } { continue }
+		set s1 0
+
 		set aper [lindex [lindex [$surf $j get aperture] 0] 0]
+
+		#puts "[$surf $j get name] [lindex [lindex [$surf $j get aperture] 0] 0] [$surf $j get aper_type]"
 
 		if { $aper ne {} } {
 		    $surf $j set aper_data [$aper getptr]
@@ -44,12 +99,15 @@ oo::class create ::acorn::BaseModel {
 
 		if { [$surf $j get glass] ne {{{}}} } {
 		    if { [$surf $j get glass_ptr] == -1 } {
-			$surf $j set n -1
+			my [$surf $j get name] set n -1
 		    } else {
-			$surf $j set n [acorn::glass_indx [$surf $j get glass_ptr] $wave]
+			my [$surf $j get name] set n [acorn::glass_indx [$surf $j get glass_ptr] $wave]
 		    }
 		}
+
+		#if { $i == $e0 && $j == $e1 } { break }
 	    }
+	    #if { $i == $e0 && $j == $e1 } { break }
 	    incr i
 	}
 	acorn::trace_rays 0 1 [slist getptr] [slist length] [$rays getptr] [$rays length]
@@ -80,30 +138,34 @@ oo::class create ::acorn::BaseModel {
     }
 
     method print {} {
+	puts "acorn::model [self] \{"
+
+	set tab "	"
 	foreach { type surf } $surfaces {
-	    puts "$type : $surf :"
-	    puts "	[join [$surf 0 end getdict name type R K n thickness glass x y z rx ry rz aper_type aper_data aperture aper_param aper_min aper_max] "\n	"]"
-	    puts \n
+	    if { $type eq "non-sequential" } { puts "${tab}surface-group-non-sequential X \{" ; set tab "		" }
+	    foreach i [iota 0 [$surf length]-1] {
+		#puts "	[[self] [$surf $i get name] getdict name type] : [[self] [$surf $i get name] get type]"
+		set stype [[self] [$surf $i get name] get type]
+		set values [[self] [$surf $i get name] getdict {*}[map { name value } $surfdefs($stype,pmap) { set name }]]
+		puts "${tab}surface [$surf $i get name] \{ [dict remove [dltpair $surfdefs($stype,pdef) $values] name] \}"
+	    }
+	    set tab "	"
+	    if { $type eq "non-sequential" } { puts "${tab}\}" }
 	}
+	puts "\}"
     }
 }
 
 oo::class create ::acorn::Model {
     superclass ::acorn::BaseModel
 
-    variable grouptype current surfaces default basedef basemap anonsurf
+    variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs
     accessor grouptype current surfaces default
 
     constructor { args } {
-	procs surface coordinate-break surface-group surface-group-non-sequential
+	next 
 
-	set grouptype sequential
-	set basedef { type simple n 1.00 }
-	set default {}
-	set basemap { 	type type R R K K n n thickness thickness glass glass
-	    		aperture aperture aper_type aper_type aper_param aper_param aper_min aper_min aper_max aper_max
-			x x y y z z rx rx ry ry rz rz }
-	set anonsurf 0
+	procs surface coordinate-break surface-group surface-group-non-sequential
 
 
 	set body [lindex $args end]
@@ -125,6 +187,7 @@ oo::class create ::acorn::Model {
     method coordinate-break { name args } { surface name [list {*}[join $args] grouptype coordbk] }
 
     method surface { name args } {
+	#puts $name
 	set i [$current length]
 
 	set params [dict merge $basedef $default [join $args]]
@@ -133,21 +196,29 @@ oo::class create ::acorn::Model {
 	$current $i set traverse $::acorn::SurfaceTypes($type)		; # Get the surface traverse and infos functions
 	$current $i set infos    $::acorn::SurfaceInfos($type)
 
-	lassign [::acorn::infos 1 [$current $i get infos]] params values
+	if { [$current $i get infos] != -1 } {
+	    lassign [::acorn::infos 1 [$current $i get infos]] dparams dvalues
+	    lassign [::acorn::infos 2 [$current $i get infos]] sparams svalues
+	} else {
+	    set dparams {}
+	    set dvalues {}
+	    set sparams {}
+	    set svalues {}
+	}
 
-	set k 0
+	if { ![info exists surfdefs($type,pdef)] } { set surfdefs($type,pdef) [dict merge $basedef [zip $dparams $dvalues] [zip $sparams $svalues]] }
+
+	set k [llength $basepar]
 	set parmap {}
-	foreach param $params { lappend parmap $param p$k; incr k }	; # Query for and map parameters
-
-	lassign [::acorn::infos 2 [$current $i get infos]] params values
-
+	foreach param $dparams { lappend parmap $param p$k; incr k }	; # Query for and map parameters
 	set k 0
-	foreach param $params { lappend parmap $param s$k; incr k }	; # Query for and map strings
+	foreach param $sparams { lappend parmap $param s$k; incr k }	; # Query for and map strings
 
 	set parmap [dict merge $basemap $parmap]
+	if { ![info exists surfdefs($type,pmap)] } { set surfdefs($type,pmap) $parmap }
 
-	$current $i set {*}[dict merge $basedef $default [mappair $parmap [join $args]] [list name $name]]
-	$current $i set aperture [::acorn::Aperture [lindex [$current $i get aper_type] 0] [$current get aper_param]]
+	$current $i set {*}[mappair $parmap [dict merge $surfdefs($type,pdef) $default [join $args] [list name $name]]]
+	$current $i set aperture  [::acorn::Aperture [lindex [$current $i get aper_type] 0] [$current $i get aper_param]]
 
 	$current $i set glass_ptr [glass-lookup [$current $i get glass]]
 

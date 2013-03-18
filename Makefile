@@ -7,8 +7,8 @@ BITS=-m32  -msse3
 arec	= lib/arec/pkgIndex.tcl
 acorn	= lib/acorn/pkgIndex.tcl
 
-OBJ	= acorn.o glass/glass.o glass/acorn-glass.o
-TCL	= acorn.tcl uda.tcl agf.tcl zmx.tcl
+OBJ	= acorn.o aperture.o glass/glass.o glass/acorn-glass.o
+TCL	= acorn.tcl uda.tcl agf.tcl zmx.tcl func.tcl
 
 SURFS	= surfaces/simple.so surfaces/zernike.so surfaces/lens-array.so
 

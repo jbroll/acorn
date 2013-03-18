@@ -61,22 +61,13 @@ namespace eval acorn {
 	}
 
 	arec::typedef ::acorn::Surfs {
-	    double	R;
-	    double	K;
-	    double	n;
-	    double 	thickness;
-
-	    double	x;
-	    double	y;
-	    double	z;
-
-	    double	rx;
-	    double	ry;
-	    double	rz;
+	    string	name
+	    string	type
+	    string	comment
+	    long	traverse
+	    long	infos
 
 	    string	aper_type;
-	    double	aper_min;
-	    double	aper_max;
 	    string	aper_param;
 
 	    string	aperture;
@@ -85,11 +76,6 @@ namespace eval acorn {
 
 	    foreach i [iota 0 255] { double p$i }
 	    foreach i [iota 0  31] { char*  s$i }
-
-	    string	name
-	    string	type
-	    long	traverse
-	    long	infos
 
 	    string	glass
 	    long	glass_ptr

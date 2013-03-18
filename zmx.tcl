@@ -27,7 +27,7 @@ array set ZMXNSODMap {
 
 }
 
-array set ZMXUserSurfMap {
+array set ZMXParmMap {
     lens-array,1	nx
     lens-array,2	ny
     lens-array,3	width
@@ -37,28 +37,18 @@ array set ZMXUserSurfMap {
 oo::class create ZMX {
     superclass ::acorn::BaseModel
 
-    variable grouptype current surf surftype surfaces default basedef basemap anonsurf		\
-	Id Name Notes Temp Pres									\
+    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs		\
+	Id Name Notes Temp Pres											\
 	params comment nonseqid nonseq nsoexit
 
     accessor grouptype current surfaces default
 
     constructor { type args } {
+	next
+
 	procs TRAC BLNK CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD FLAP FLOA FTYP FWGN GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
 	      NSCD NSCS NSOA NSOD NSOH NSOO NSOP NSOQ NSOS NSOU NSOV NSOW PARM PFIL PICB POLS POPS PUSH PWAV PZUP RAIM ROPD SDMA SLAB STOP SURF		\
 	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVM XDAT XFLN YFLN RSCE MOFF
-
-	set grouptype sequential
-	set basedef { type simple n 1.00 }
-	set default {}
-	set basemap { 	type type R R K K n n thickness thickness
-	    		aperture aperture aper_type aper_type aper_param aper_param aper_min aper_min aper_max aper_max
-			x x y y z z rx rx ry ry rz rz }
-	set anonsurf 0
-
-	set surftype {}
-	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
-	set surf 0
 
 	switch $type {
 	    source { eval [string map { $ \\$ ; \\; [ \\[ } [cat [lindex $args 0]]] }
@@ -104,16 +94,17 @@ oo::class create ZMX {
 	}
 
 	set grouptype sequential
-	my Process-Type $type {*}$args
+	my Process-Type $type $comment $args
      }
 
-     method Process-Type { type args } {
+     method Process-Type { type comm args } {
 	if { $type eq "USERSURF" } {
 	    set args [lassign $args type]
 	}
 	set args {}
 
 	set type $::ZMXSurfaceMap([string tolower $type])
+
 	switch $type {
 	    lens-array-rect {
 		set type lens-array
@@ -127,10 +118,7 @@ oo::class create ZMX {
 
 	set surftype $type
 
-
 	set surf [$current length]
-
-	$current $surf set name $Id
 
 	# Get the surface traverse and infos functions
 	#
@@ -147,7 +135,10 @@ oo::class create ZMX {
 	    set svalues {}
 	}
 
-	set k 0
+	set surfdefs($surftype,pdef) [dict merge $basedef [zip $dparams $dvalues]]
+	set surfdefs($surftype,sdef) [dict merge [zip $sparams $svalues]]
+
+	set k [llength $basepar]
 	set parmap {}
 	foreach param $dparams { lappend parmap $param p$k; incr k }	; # Query for and map parameters
 
@@ -157,11 +148,13 @@ oo::class create ZMX {
 
 	set parmap [dict merge $basemap $parmap]
 
-	$current $surf set {*}[dict merge $basedef $default [mappair $parmap [join $args]]]
+	set surfdefs($surftype,pmap) $parmap
+	set surfdefs($surftype,smap) {}
+
+	$current $surf set {*}[mappair $parmap [dict merge $basedef $default [join $args] [list name $Id type $surftype comment $comm]]]
 
 	::oo::objdefine [self] [list forward $Id [self] surfset1 $current $surf $parmap]
 	::oo::objdefine [self] [list export  $Id]
-
 
 	if { $comment ne {} } {
 	    set name [string map { { } {} } [join [map word $comment { string totitle $word }]]]
@@ -169,14 +162,29 @@ oo::class create ZMX {
 	    ::oo::objdefine [self] [list forward $name [self] surfset1 $current $surf $parmap]
 	    ::oo::objdefine [self] [list export  $name]
 	}
-
      }
-     method CURV { curv  args } { if { $curv } { $current $surf set R [expr { 1.0/$curv }] }  	 }
-     method CONI { conic args } { $current $surf set K $conic 	 }
+     method CURV { curv  args } {
+	 if { $grouptype ne "non-sequential" } {
+	     if { $curv } {
+		 my [$current $surf get name] set R [expr { 1.0/$curv }]
+	     } 
+	 }
+     }
+     method CONI { conic args } {                my [$current $surf get name] set K $conic 	 }
      method COMM { args }  { set comment $args }
-     method PARM { n value } { $current $surf set p$n $value }
+     method PARM { n value } {
+	 if { $grouptype ne "non-sequential" } {
+	     try { my [$current $surf get name] set $::ZMXParmMap($surftype,$n) $value
+	     } on error message {
+		 puts stderr "PARM $surftype $n $value : $message"
+		 #$current $surf set p$n $value
+	     }
+	 } else {
+	     $current $surf set p$n $value
+	 }
+     }
      method DISZ { thick } { 
-	 if { $grouptype ne "non-sequential" } { $current $surf set thickness $thick }
+	 if { $grouptype ne "non-sequential" } { $current $surf set {*}[mappair $basemap [list thickness $thick]] }
      }
      method DIAM { diam args } {	# This is Zemax computed semi-diameter, not the aperture size.  }
      method SQOB { args } { # aperture obscuration is true }
@@ -184,8 +192,8 @@ oo::class create ZMX {
      method ELOB { args } { # aperture obscuration is true }
      method SQAP { w h  } { 
      	$current $surf set aper_type rectangular 
-     	$current $surf set aper_max  [expr $w/2.0] 
-     	$current $surf set aper_min  [expr $h/2.0] 
+     	my [$current $surf get name] set aper_max  [expr $w/2.0] 
+     	my [$current $surf get name] set aper_min  [expr $h/2.0] 
      }
      method ELAP { w h  } {
      	$current $surf set aper_type eliptical 
@@ -194,7 +202,7 @@ oo::class create ZMX {
      }
      method CLAP { n rad args  } {
 	    $current $surf set aper_type circular 
-	    $current $surf set aper_max  $rad 
+	    my [$current $surf get name] set aper_max  $rad 
      }
      method FLAP { n rad args  } {}
      method OBDC { x y  } { # aperture decenter }
@@ -216,7 +224,10 @@ oo::class create ZMX {
      method NSOH { type args } {
 	switch $type {
 	 default {
-	    if { $nonseq == 0 } { set nsoexit [$current 0 get p0 p1 p2 p3 p4 p5 p6] }
+	    if { $nonseq == 0 } {
+		set nsoexit [$current 0 get p0 p1 p2 p3 p4 p5 p6]
+		$current 0 set p0 0 p1 0 p2 0 p3 0 p4 0 p5 0 p6 0
+	    }
 
 	    $current length $nonseq
 
@@ -224,9 +235,9 @@ oo::class create ZMX {
 
 	    my SURF $nonseqid-[incr nonseq]
 	    my COMM $comment
-	    my Process-Type $type
+	    my Process-Type $type [lrange $args 2 end]
 
-	    $current $surf set thickness [lindex $nsoexit 0 3]
+	    my [$current $surf get name] set thickness [lindex $nsoexit 0 3]
 	 }
 	}
      }
@@ -240,13 +251,13 @@ oo::class create ZMX {
      }
      method NSCS { args } {}
      method NSOD { n value a b c d e f } {
-	 catch { $current $surf set $::ZMXNSODMap($surftype,$n) $value } reply
+	 catch { my [$current $surf get name] set $::ZMXNSODMap($surftype,$n) $value } reply
      }
      method NSOP { dx dy dz rx ry rz args } {
-	 $current $surf set x $dx y $dy z $dz rx $rx ry $ry rz $rz
+	 my [$current $surf get name] set x $dx y $dy z $dz rx $rx ry $ry rz $rz
 
 	 if { [lindex $args 0] eq "MIRROR" } {
-	     $current $surf set n -1 
+	     my [$current $surf get name] set n -1 
 	 }
      }
      method NSCD { args } {}

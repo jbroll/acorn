@@ -27,23 +27,24 @@
 typedef void (*TraceFunc)(double z, double n, struct _Surface *s, struct _Ray *r);
 typedef int  (*InfosFunc)(int info, char **str, double **val);
 
+enum PX_Param {
+    Px_px, Px_py, Px_pz, Px_rx, Px_ry, Px_rz
+  , Px_thickness
+  , Px_aper_min, Px_aper_max
+  , Px_n
+
+  , Px_NParams
+};
+
+
 typedef struct _Surface {
-    double	R;
-    double	K;
-    double	n;
-    double 	thickness;
-
-    double	x;
-    double	y;
-    double	z;
-
-    double	rx;
-    double	ry;
-    double	rz;
+    char*	name;
+    char*	type;
+    char*	comment;
+    TraceFunc   traverse;
+    InfosFunc   info;
 
     char*	aper_type;
-    double	aper_min;
-    double	aper_max;
     string	aper_param;
 
     char*	aperture;
@@ -52,11 +53,6 @@ typedef struct _Surface {
     
     double	p[256];
     char*	s[32];
-
-    char*	name;
-    char*	type;
-    TraceFunc   traverse;
-    InfosFunc   info;
 
     char*	glass;
     void*	glass_ptr;

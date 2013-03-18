@@ -8,16 +8,6 @@ proc sqr { x   } { expr $x * $x }
 proc max { x y } { expr $x > $y ? $x : $y }
 
 
-proc jot { { nx - } { x0 - } { x1 - } { xi - } } {
-    if { $nx eq "-" } { set nx 10 }
-    if { $x0 eq "-" } { set x0  0 }
-    if { $x1 eq "-" } { set x1 [expr $x0+$nx-1] }
-    if { $xi eq "-" } { set xi [expr { ($x1-$x0)/($nx-1) }] }
-
-    iota $x0 $x1 $xi
-}
-
-
 proc iota { fr { to {} } { in 1 } } {
     if { $to eq {} } {
 	set to $fr
@@ -26,8 +16,21 @@ proc iota { fr { to {} } { in 1 } } {
     set fr [expr $fr]
     set to [expr $to]
 
-    for { set res {} } { $fr <= $to } { set fr [expr $fr+$in] } {lappend res $fr } 
+    for { set res {} } { $fr <= $to+$in*0.5 } { set fr [expr $fr+$in] } {lappend res $fr } 
     set res
+}
+
+proc jot { { nx - } { x0 - } { x1 - } { xi - } } {
+    if { $nx eq "-" } { set nx 10 }
+    if { $x0 eq "-" } { set x0  0 }
+    if { $x1 eq "-" } { set x1 [expr { $x0+$nx-1.0 }] }
+    if { $xi eq "-" } { set xi [expr { ($x1-$x0)/($nx-1.0) }] }
+
+    if { $nx == 1 } {
+	expr { ($x0+$x1)/2.0 }
+    } else {
+	iota $x0 $x1 $xi
+    }
 }
 
 proc zip { args } {

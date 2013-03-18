@@ -16,6 +16,7 @@ Parabolic A set R 0
 
 acorn::mkrays rays nx 3 ny 3 box 25
 
+Parabolic print
 Parabolic trace rays
 
 acorn::prays rays
