@@ -15,7 +15,11 @@ TPoolWork *work(void *data) {
 
 int main() {
 
+    printf("Here\n");
+
     TPool *tp = TPoolInit(5);
+
+    printf("Here\n");
 
     TPoolThreadStart(tp, (TPoolWork) work, (void *) 1);
     TPoolThreadStart(tp, (TPoolWork) work, (void *) 2);

@@ -1,13 +1,13 @@
 
 
 INC= -I/Users/john/include -I/home/john/include
-BITS=-m32  -msse3
+BITS=-m32 -msse3
 #BITS=-m64 -fPIC
 
 arec	= lib/arec/pkgIndex.tcl
 acorn	= lib/acorn/pkgIndex.tcl
 
-OBJ	= acorn.o aperture.o glass/glass.o glass/acorn-glass.o
+OBJ	= acorn.o aperture.o glass/glass.o glass/acorn-glass.o tpool/tpool.o
 TCL	= acorn.tcl uda.tcl agf.tcl zmx.tcl func.tcl
 
 SURFS	= surfaces/simple.so surfaces/zernike.so surfaces/lens-array.so

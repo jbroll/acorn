@@ -32,7 +32,7 @@ extern "C" {
 	}
     }
 
-    void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray)
+    void trace_rays0(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray)
     {
 	int *traversed = new int[nray];
 
@@ -137,7 +137,6 @@ extern "C" {
 	}
 	delete [] traversed;
     }
-
     typedef struct _TraceWork {
 	double		 z;
 	double		 n;
@@ -145,25 +144,47 @@ extern "C" {
 	int		 nsurfs;
 	Ray 		*ray;
 	int		 nray;
+
+	TPoolThread	*t;
     } TraceWork;
 
     void trace_rays_worker(TraceWork *work) {
-	 trace_rays(work->z, work->n, work->surflist, work->nsurfs, work->ray, work->nray);
+	 trace_rays0(work->z, work->n, work->surflist, work->nsurfs, work->ray, work->nray);
     }
     void trace_rays_thread(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, void *tp, int nthread)
     {
-	TraceWork data[32];
+	TraceWork data[64];
 
-	for ( int i = 0; i < nthread; i++ ) {
-	    data[i].z        = z;
-	    data[i].n        = n;
-	    data[i].surflist = surflist;
-	    data[i].nsurfs   = nsurfs;
-	    data[i].ray      = &ray[nray/nthread];
-	    data[i].nray     =      nray%nthread;
 
-	    TPoolThreadStart( (TPool*) tp, (TPoolWork) trace_rays_worker, &data[i]);
+	if ( nthread == 0 ) {
+	    trace_rays0(z, n, surflist, nsurfs, ray, nray);
+	} else {
+	    if ( tp == NULL ) { tp = TPoolInit(64); }
+
+	    for ( int i = 0; i < nthread; i++ ) {
+		data[i].z        = z;
+		data[i].n        = n;
+		data[i].surflist = surflist;
+		data[i].nsurfs   = nsurfs;
+		data[i].ray      = &ray[nray/nthread*i];
+		data[i].nray     =      nray/nthread;
+
+		if ( i == nthread-1 ) { data[i].nray = nray - nray/nthread*i; }
+
+		data[i].t = TPoolThreadStart( (TPool*) tp, (TPoolWork) trace_rays_worker, &data[i]);
+	    }
+	    for ( int i = 0; i < nthread; i++ ) {
+		TPoolThreadWait(data[i].t);
+	    }
 	}
+    }
+
+    TPool *tp = NULL;
+
+    void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int nthread) {
+	 //trace_rays0(z, n, surflist, nsurfs, ray, nray);
+
+    	trace_rays_thread(z, n, surflist, nsurfs, ray, nray, tp, nthread);
     }
 }
 

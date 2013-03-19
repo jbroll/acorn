@@ -110,7 +110,7 @@ oo::class create ::acorn::BaseModel {
 	    #if { $i == $e0 && $j == $e1 } { break }
 	    incr i
 	}
-	acorn::trace_rays 0 1 [slist getptr] [slist length] [$rays getptr] [$rays length]
+	acorn::trace_rays 0 1 [slist getptr] [slist length] [$rays getptr] [$rays length] 8
 
 	rename slist {}
     }

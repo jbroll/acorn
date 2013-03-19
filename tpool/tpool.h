@@ -25,4 +25,4 @@
  
  TPool *TPoolInit(int n);
  TPoolThread *TPoolThreadStart(TPool *tp, TPoolWork func, void *data);
- TPoolThread *TPoolThreadWair (TPoolThread *t);
+ void TPoolThreadWait (TPoolThread *t);

@@ -11,11 +11,25 @@ package require acorn
 
 source test/GMT-1-AcOWFS-2.aco
 
+proc timer { name action } {
+    if { ![info exists ::timer($name,timer)] } { set ::timer($name,timer) 0 }
 
-acorn::mkrays rays nx 100 x0 -12700 x1 12700 ny 100 y0 -12700 y1 12700
-#acorn::mkrays rays nx 10 x0 -12700 x1 12700 ny 1 y0 -12700 y1 12700
+    switch $action {
+	start { set ::timer($name,start) [clock milliseconds] }
+	stop  { set ::timer($name,timer) [expr $::timer($name,timer) + [clock milliseconds] - $::timer($name,start)] }
+    }
 
+    format %f.2 [expr $::timer($name,timer)/1000.0]
+}
+
+
+
+acorn::mkrays rays nx 300 x0 -12700 x1 12700 ny 300 y0 -12700 y1 12700
+
+timer A start
 GMT trace rays
-GMT print
+puts [timer A stop]
+
+#GMT print
 
 acorn::prays rays
