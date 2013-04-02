@@ -3,7 +3,7 @@
 
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
-critcl::tsources func.tcl tcloo.tcl uda.tcl agf.tcl zmx.tcl acorn.tcl
+critcl::tsources func.tcl tcloo.tcl uda.tcl agf.tcl acorn-model.tcl zmx.tcl acorn.tcl
 critcl::csources acorn.cpp aperture.cpp
 
 ::critcl::tcl 8.6

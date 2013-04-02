@@ -9,8 +9,11 @@ lappend auto_path lib
 array set ZMXSurfaceMap {
     standard	 simple
     coordbrk	 coordbrk
+    evenasph     evenasph
+    dgrating	 dgrating
     us_array.dll lens-array-rect
     szernpha	 zernike
+
     nsc_ssur	 simple
     nsc_zsur	 zernike
     nsc_annu	 simple
@@ -32,6 +35,22 @@ array set ZMXParmMap {
     lens-array,2	ny
     lens-array,3	width
     lens-array,4	height
+
+    coordbrk,1		x
+    coordbrk,2		y
+    coordbrk,3		z
+    coordbrk,4		rx
+    coordbrk,5		ry
+    coordbrk,6		rz
+
+    evenasph,1		a1
+    evenasph,2		a2
+    evenasph,3		a3
+    evenasph,4		a4
+    evenasph,5		a5
+    evenasph,6		a6
+    evenasph,7		a7
+    evenasph,8		a8
 }
 
 oo::class create ZMX {
@@ -46,9 +65,9 @@ oo::class create ZMX {
     constructor { type args } {
 	next
 
-	procs TRAC BLNK CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD FLAP FLOA FTYP FWGN GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
-	      NSCD NSCS NSOA NSOD NSOH NSOO NSOP NSOQ NSOS NSOU NSOV NSOW PARM PFIL PICB POLS POPS PUSH PWAV PZUP RAIM ROPD SDMA SLAB STOP SURF		\
-	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVM XDAT XFLN YFLN RSCE MOFF
+	procs TRAC BLNK CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD ENPD FLAP FLOA FTYP FWGN GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
+	      NSCD NSCS NSOA NSOD NSOH NSOO NSOP NSOQ NSOS NSOU NSOV NSOW PARM PPAR PRAM PFIL PICB POLS POPS PUSH PWAV PZUP RAIM ROPD SDMA SLAB STOP SURF		\
+	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVM XDAT XFLN YFLN XFIE RSCE MOFF OBSC SQAP ELOB WAVE THIC
 
 	switch $type {
 	    source { eval [string map { $ \\$ ; \\; [ \\[ } [cat [lindex $args 0]]] }
@@ -62,9 +81,11 @@ oo::class create ZMX {
 	}
     }
 
+    method OBSC { args } {}
     method VERS { args } {}
     method UNIT { lens_unit src_prefix src_unit anal_prefix anal_unit args }	{}
     method ENVD { temp pres args }	{ set Temp $temp; set Pres $pres }
+    method ENPD { args }	{ }
     method GCAT { args }	{}
 
     method NAME { args } { set     Name $args }
@@ -103,7 +124,7 @@ oo::class create ZMX {
 	}
 	set args {}
 
-	set type $::ZMXSurfaceMap([string tolower $type])
+	set type $::ZMXSurfaceMap([string tolower $type])		; # Map Zemaz surface type in to acorn.
 
 	switch $type {
 	    lens-array-rect {
@@ -172,6 +193,11 @@ oo::class create ZMX {
      }
      method CONI { conic args } {                my [$current $surf get name] set K $conic 	 }
      method COMM { args }  { set comment $args }
+     method PPAR { args } { }
+     method THIC { args } { }
+     method WAVE { args } { }
+     method PRAM { args } { }
+     method XFIE { args } { }
      method PARM { n value } {
 	 if { $grouptype ne "non-sequential" } {
 	     try { my [$current $surf get name] set $::ZMXParmMap($surftype,$n) $value
@@ -190,7 +216,7 @@ oo::class create ZMX {
      method SQOB { args } { # aperture obscuration is true }
      method OBSC { args } { # aperture obscuration is true }
      method ELOB { args } { # aperture obscuration is true }
-     method SQAP { w h  } { 
+     method SQAP { w h args  } { 
      	$current $surf set aper_type rectangular 
      	my [$current $surf get name] set aper_max  [expr $w/2.0] 
      	my [$current $surf get name] set aper_min  [expr $h/2.0] 
@@ -209,7 +235,11 @@ oo::class create ZMX {
 
      method GLAS { name args } {
 	 $current $surf set glass $name
-	 $current $surf set glass_ptr [glass-lookup $name]
+	 try {
+	     $current $surf set glass_ptr [glass-lookup $name]
+	 } on error message {
+	     puts "missing glass : $name"
+	 }
      }
 
      method BLNK { args } {}
@@ -242,12 +272,12 @@ oo::class create ZMX {
 	}
      }
      method NSOA { n aperture } {
-	if { $aperture eq {} } { return }
+	if { $aperture eq  {}  } { return }
 	if { $aperture eq {{}} } { return }
 
 	$current $surf set aper_type  UDA
 	$current $surf set aper_param [string map { {"} {} } $aperture]
-	$current $surf set aperture [::acorn::Aperture [$current get aper_type] [$current get aper_param]]
+	$current $surf set aperture [::acorn::Aperture [$current $surf get aper_type] [$current $surf get aper_param]]
      }
      method NSCS { args } {}
      method NSOD { n value a b c d e f } {

@@ -46,7 +46,7 @@ proc surface-polygon { m s { zz 0 } } {
 
     # Transform the aperture to the surface position
     #
-    foreach {*}[lindex [$m $s getdict x y z rx ry rz] 0] { break }
+    foreach {*}[$m $s getdict x y z rx ry rz] { break }
 
      set T [3d::transforms [3d::rotate z [expr -($rz)] deg] [3d::rotate y $ry deg] [3d::rotate x $rx deg] [3d::translate $x $y [expr { $z }]]]
      set P [3d::transform3p $T $P]
@@ -78,30 +78,40 @@ proc display { m } {
     set c 0
 
     foreach { type surf } [$m surfaces] {
-	set color [lindex $colors [expr $c%[llength $colors]]]
-
 	foreach j [iota 0 [$surf length]-1] {
+	    set color [lindex $colors [expr $c%[llength $colors]]]
+
 	    set name [$surf $j get name]
 
 	    switch [$m $name get aper_type] {
 	     UDA -
 	     circular {
-		.win create polygon [surface-polygon $m $name $z] -color $color   -style outline
+		try {
+		    .win create polygon [set x [surface-polygon $m $name $z]] -color $color   -style outline 
+		} on error message {
+		    puts "$m $name : $message"
+		    if { $message eq "floating point value is Not a Number" } { continue }
+
+		    puts $::errorInfo
+		    exit
+		}
+
 	     }
 	    }
 
-	    if { $type eq "sequential" } {
-		set z [expr { $z + [$surf $j get thickness] }]
+	    if { $type eq "sequential" && [$m $name get thickness] ne "Inf" } {
+		set z [expr { $z + [$m $name get thickness] }]
 		incr c
 	    } 
 	}
-	if { $type ne "sequential" } {
-	    set z [expr { $z + [$surf 0 get thickness] }]
+	if { $type ne "sequential" && [$m $name get thickness] ne "Inf" } {
+	    set z [expr { $z + [$m $name get thickness] }]
 	    incr c
 	}
     }
 }
 
+GMT print
 display GMT
 
 .win transform -camera {} "lookat all"

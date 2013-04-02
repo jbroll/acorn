@@ -115,6 +115,8 @@ set K(a)       {T panleft 5.0 }
 
 # Lookat!
 set K(l) lookat
+set K(1)	{T movein 0.8}
+set K(4)	{T movein 1.2}
 
 # Mouse control.
 bind .win <B1-Motion> {
@@ -176,7 +178,9 @@ bind .win <ButtonRelease-2> {
   set y1 [lindex $coords 1]
   set x2 [lindex $coords 4]
   set y2 [lindex $coords 5]
-  puts "Selected: [.win find viewport($x1,$y1,$x2,$y2)]"
+  puts "Selected: [set xxx [.win find viewport($x1,$y1,$x2,$y2)]]"
+
+  T lookat [join $xxx ||]
 }
 bind .win <B2-Motion> {
   set coords [lindex [.win coords BOX] 0]

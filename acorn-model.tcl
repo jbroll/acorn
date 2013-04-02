@@ -12,7 +12,6 @@
 	set reply
     }
     proc mappair { map params } {
-	#puts "mappair $map : $params"
 	set reply {}
 	foreach { name value } $params {
 	    try {
@@ -25,7 +24,6 @@
     }
     proc revpair { map params } {
 	foreach { name par } $map { lappend rev $par $name }
-	#puts "revpair $rev"
 
 	set reply {}
 	foreach { name value } [join $params] { lappend reply [dict get $rev $name] $value }
@@ -40,14 +38,16 @@
 
 oo::class create ::acorn::BaseModel {
     variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs		\
-    accessor surfaces
+    accessor surfaces basepar
 
     constructor {} {
 	set grouptype sequential
 	set basedef { name {} type simple comment {} n 1.00 glass {} x 0.0 y 0.0 z 0.0 rx 0.0 ry 0.0 rz 0.0 thickness 0.0 aper_type {} aper_param {} aper_min 0.0 aper_max 0.0 }
 	set default {}
 	set basemap { 	name name type type comment comment glass glass
-	    		aperture aperture aper_type aper_type aper_param aper_param }
+	    		aperture aperture aper_type aper_type aper_param aper_param aper_data aper_data aper_leng aper_leng 
+			traverse traverse infos infos thickness thickness
+	}
     	set basepar { x y z rx ry rz thickness aper_min aper_max n }
 	foreach par $basepar i [iota 0 [llength $basepar]-1] { lappend basemap $par p$i }
 	set anonsurf 0
@@ -89,8 +89,6 @@ oo::class create ::acorn::BaseModel {
 		set s1 0
 
 		set aper [lindex [lindex [$surf $j get aperture] 0] 0]
-
-		#puts "[$surf $j get name] [lindex [lindex [$surf $j get aperture] 0] 0] [$surf $j get aper_type]"
 
 		if { $aper ne {} } {
 		    $surf $j set aper_data [$aper getptr]
@@ -134,7 +132,7 @@ oo::class create ::acorn::BaseModel {
 	slist 0 set surf [expr { [$surf getptr]+[acorn::Surfs size]*$j }] nsurf 1 type 0
 
 
-	acorn::trace_rays $z 1 [slist getptr] [slist length] [$rays getptr] [$rays length]
+	acorn::trace_rays $z 1 [slist getptr] [slist length] [$rays getptr] [$rays length] 1
     }
 
     method print {} {
@@ -160,7 +158,7 @@ oo::class create ::acorn::Model {
     superclass ::acorn::BaseModel
 
     variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs
-    accessor grouptype current surfaces default
+    accessor grouptype current surfaces default basepar
 
     constructor { args } {
 	next 
@@ -187,7 +185,6 @@ oo::class create ::acorn::Model {
     method coordinate-break { name args } { surface name [list {*}[join $args] grouptype coordbk] }
 
     method surface { name args } {
-	#puts $name
 	set i [$current length]
 
 	set params [dict merge $basedef $default [join $args]]

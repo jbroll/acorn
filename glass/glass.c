@@ -160,7 +160,7 @@ double handbook2(double y, double t, double p, double *c)
 {
 	double n2 = c[0]
 	    + c[1] * pow(y, 2) / (pow(y, 2) - c[2])
-	    - c[3] *  pow(y, 2);
+	    - c[3] * pow(y, 2);
 
 	return sqrt(n2);
 }
@@ -186,6 +186,6 @@ double glass_index(int formula, double wave, double temp, double pres, double *c
 	case SchottE3  :	return schottE3  (wave, temp, pres, c);
     }
 
-	return 0.0;
+    return 0.0;
 }
 

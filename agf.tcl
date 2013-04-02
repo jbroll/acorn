@@ -104,7 +104,7 @@ proc glass-loader { pathlist } {
      foreach cat [GlassCats 0 end get glass] {
          set i -1
          foreach name [[$cat glass] 0 end get name] {
-	     set ::Glass($name) [[$cat glass] [incr i] getptr]
+	     set ::Glass([lindex $name 0]) [[$cat glass] [incr i] getptr]
 	 }
      }
 }
