@@ -267,7 +267,7 @@ oo::class create ZMX {
 	    my COMM $comment
 	    my Process-Type $type [lrange $args 2 end]
 
-	    my [$current $surf get name] set thickness [lindex $nsoexit 0 3]
+	    my [$current $surf get name] set thickness [lindex $nsoexit 3]
 	 }
 	}
      }

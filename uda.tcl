@@ -66,7 +66,7 @@ oo::class create UDA {
 	$polygon [$polygon length] set x $x y $y 
     }
     method BRK {} 				{
-	if { $inpath != -1 } { LIN {*}[lindex [$polygon $inpath get x y] 0] }
+	if { $inpath != -1 } { LIN {*}[$polygon $inpath get x y] }
 
 	if { $break } { $polygon [$polygon length]  set x 0  y 0 }
 	set inpath -1
@@ -82,7 +82,7 @@ oo::class create UDA {
 		set x [lindex $args 0]
 		set y [lindex $args 1]
 
-		if { $inpath != -1 } { lassign [lindex [$polygon $inpath get x y] 0] x0 y0 }
+		if { $inpath != -1 } { lassign [$polygon $inpath get x y] x0 y0 }
 
 		if { ( $x == 0 && $y == 0 ) || ( $inpath >= 0 && $x == $x0 && $y == $y0 ) } {
 		    BRK

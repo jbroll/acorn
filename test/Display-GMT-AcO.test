@@ -5,7 +5,6 @@ lappend auto_path /Users/john/lib ./lib ../lib tripack/lib
 
 source tcloo.tcl
 source ngon.tcl
-source acorn-model.tcl
 source display-common.tcl
 source 3d.tcl
 

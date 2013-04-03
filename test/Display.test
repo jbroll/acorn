@@ -4,7 +4,6 @@ lappend auto_path /Users/john/lib ./lib ../lib tripack/lib
 
 source tcloo.tcl
 source ngon.tcl
-source acorn-model.tcl
 package require acorn
 package require tripack
 
