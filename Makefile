@@ -8,7 +8,7 @@ arec	= lib/arec/pkgIndex.tcl
 acorn	= lib/acorn/pkgIndex.tcl
 
 OBJ	= acorn.o aperture.o glass/glass.o glass/acorn-glass.o tpool/tpool.o
-TCL	= acorn.tcl uda.tcl agf.tcl zmx.tcl func.tcl
+TCL	= acorn.tcl acorn-model.tcl uda.tcl agf.tcl zmx.tcl func.tcl
 
 SURFS	= surfaces/simple.so surfaces/zernike.so surfaces/lens-array.so surfaces/evenasph.so surfaces/dgrating.so
 

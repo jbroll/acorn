@@ -79,23 +79,24 @@ oo::class create ::acorn::BaseModel {
 
 	set i 0
 	foreach { type surf } $surfaces {
-
 	    if { $s0 > $i } { continue }
 
 	    slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
 
 	    foreach j [iota 0 [$surf length]-1] {
 		#if { $s1 > $i } { continue }
+
 		set s1 0
 
 		set aper [lindex [lindex [$surf $j get aperture] 0] 0]
 
 		if { $aper ne {} } {
+		    puts "Aper? $aper"
 		    $surf $j set aper_data [$aper getptr]
 		    $surf $j set aper_leng [$aper length]
 		}
 
-		if { [$surf $j get glass] ne {{{}}} } {
+		if { [$surf $j get glass] ne {} } {
 		    if { [$surf $j get glass_ptr] == -1 } {
 			my [$surf $j get name] set n -1
 		    } else {

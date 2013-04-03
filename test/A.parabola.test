@@ -11,6 +11,7 @@ acorn::model Parabolic {
     surface C	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
+
 Parabolic A set R 0
 
 acorn::mkrays rays nx 3 ny 3 box 25
