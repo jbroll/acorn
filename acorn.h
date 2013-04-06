@@ -24,8 +24,8 @@
 #define ACORN_PARAMETERS	1
 #define ACORN_STRINGS		2
 
-typedef void (*TraceFunc)(double z, double n, struct _Surface *s, struct _Ray *r);
-typedef int  (*InfosFunc)(int info, char **str, double **val);
+typedef int (*TraceFunc)(double z, double n, struct _Surface *s, struct _Ray *r);
+typedef int (*InfosFunc)(int info, char **str, double **val);
 
 enum PX_Param {
     Px_px, Px_py, Px_pz, Px_rx, Px_ry, Px_rz
@@ -74,8 +74,8 @@ extern "C" {
     int  SurfSize(void);
     int  RaysSize(void);
 
-    void xrays(Ray *r, int n);
-    void prays(Ray *r, int n);
+    //void xrays(Ray *r, int n);
+    //void prays(Ray *r, int n);
 
     void aper_init(Surface *s, Affine3d transform);
     int  aper_clip(Surface *s, Ray *r);

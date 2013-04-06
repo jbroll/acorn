@@ -1,0 +1,21 @@
+#!/usr/bin/env tclkit8.6
+#
+lappend auto_path ./lib ../lib
+
+source tcloo.tcl
+source unix.tcl
+
+package require acorn
+
+source test/GMT-1-AcOWFS-3.aco
+
+acorn::mkrays rays nx 300 x0 -12700 x1 12700 ny 300 y0 -12700 y1 12700
+#acorn::mkrays rays nx 3 x0 -12700 x1 12700 ny 3 y0 -12700 y1 12700
+
+timer A start
+GMT trace rays
+puts stderr [timer A stop]
+
+GMT print
+
+acorn::prays rays

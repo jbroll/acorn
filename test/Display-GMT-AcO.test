@@ -86,7 +86,9 @@ proc display { m } {
 	     UDA -
 	     circular {
 		try {
-		    .win create polygon [set x [surface-polygon $m $name $z]] -color $color   -style outline 
+		    if { [$m $name get aper_max] != 0 } {
+			.win create polygon [set x [surface-polygon $m $name $z]] -color $color   -style outline 
+		    }
 		} on error message {
 		    puts "$m $name : $message"
 		    if { $message eq "floating point value is Not a Number" } { continue }

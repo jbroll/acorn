@@ -4,7 +4,6 @@ lappend auto_path ./lib ../lib
 
 source tcloo.tcl
 
-source acorn-model.tcl
 package require acorn
 
 

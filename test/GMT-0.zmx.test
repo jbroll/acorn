@@ -5,8 +5,6 @@ lappend auto_path ./lib ../lib
 source tcloo.tcl
 source unix.tcl
 
-source acorn-model.tcl
-
 package require acorn
 
 ZMX create GMT source zmx-models/GMT-0.zmx

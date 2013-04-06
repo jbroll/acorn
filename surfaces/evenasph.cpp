@@ -20,8 +20,8 @@ extern "C" {
 
     enum Px_Local { Pm_R = Px_NParams, Pm_K };
 
-  static const char  *MyParamNames[] = { "R", "K" };
-  static const double MyParamValue[] = { 0.0, 0.0 };
+  static const char  *MyParamNames[] = { "R", "K", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8" };
+  static const double MyParamValue[] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
 
   int info(int command, char **strings, double **values) 
@@ -64,9 +64,33 @@ extern "C" {
 
     if ( aper_clip(&s, &r) ) { return 1; }
 
-    nhat = AcornSimpleSurfaceNormal(r, R, K);
 
-    AcornRefract(r, nhat, n0, n);		// Reflect or Refract
+
+    // Normal
+    //
+    if ( R == 0.0 || abs(R) > 1.0e10 ) {		// Planar
+	nhat = Vector3d(0.0, 0.0, -Dsign*1.0);
+    } else {
+	nhat = Vector3d(Rsign*Dsign*r.p(X), Rsign*Dsign*r.p(Y), -Dsign * sqrt(R * R - (K+1)*(r.p(X) * r.p(X) + r.p(Y) * r.p(Y))));
+	nhat /= nhat.norm();
+    }
+
+    //prays(&r, 1);
+
+    if      ( n == -1 ) {			// Reflect
+					    	// http://http.developer.nvidia.com/Cg/reflect.html
+	    r.k = r.k - 2 * nhat * nhat.dot(r.k);
+    } else if ( n0 != n ) {			 // Refract
+						// http://http.developer.nvidia.com/Cg/refract.html
+	//printf("Index %f %f\n", n0, n);
+
+	double eta = n0/n;
+	double cosi = (-r.k).dot(nhat);
+	double cost = 1.0 - eta*eta * ( 1.0 - cosi*cosi);
+
+	r.k = (eta*r.k + (eta*cosi - sqrt(abs(cost))) * nhat) * (cost > 0);
+    }
+    //prays(&r, 1);
 
     return 0;
   }

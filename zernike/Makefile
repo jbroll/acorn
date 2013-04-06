@@ -12,7 +12,4 @@ zernike.tab : zerniketable nollorder.sh Makefile
 zernike.c : zernike.tab mkzernike
 	./mkzernike > zernike.c 
 
-zernike.o : zernike.c
-	cc -c $(BITS) zernike.c -o zernike.o
-
 

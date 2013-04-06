@@ -7,16 +7,18 @@ source unix.tcl
 lappend auto_path lib
 
 array set ZMXSurfaceMap {
-    standard	 simple
-    coordbrk	 coordbrk
-    evenasph     evenasph
-    dgrating	 dgrating
-    us_array.dll lens-array-rect
-    szernpha	 zernike
+    standard	 	simple
+    coordbrk	 	coordbrk
+    evenasph     	evenasph
+    dgrating	 	dgrating
+    szernpha	 	zernike
 
-    nsc_ssur	 simple
-    nsc_zsur	 zernike
-    nsc_annu	 simple
+    nsc_ssur	 	simple
+    nsc_zsur	 	zernike
+    nsc_annu	 	simple
+
+    us_array.dll 	lens-array-rect
+    us_hexarray.dll	lens-array-hex
 }
 
 array set ZMXNSODMap {
@@ -26,15 +28,17 @@ array set ZMXNSODMap {
 
     zernike,1	R
     zernike,2	K
-    zernike,3	aper_max
+    zernike,15	nzterms
+    zernike,5	xdecenter
+    zernike,6	ydecenter
 
 }
 
 array set ZMXParmMap {
-    lens-array,1	nx
-    lens-array,2	ny
-    lens-array,3	width
-    lens-array,4	height
+    lens-array-rect,1	nx
+    lens-array-rect,2	ny
+    lens-array-rect,3	width
+    lens-array-rect,4	height
 
     coordbrk,1		x
     coordbrk,2		y
@@ -67,7 +71,7 @@ oo::class create ZMX {
 
 	procs TRAC BLNK CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD ENPD FLAP FLOA FTYP FWGN GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
 	      NSCD NSCS NSOA NSOD NSOH NSOO NSOP NSOQ NSOS NSOU NSOV NSOW PARM PPAR PRAM PFIL PICB POLS POPS PUSH PWAV PZUP RAIM ROPD SDMA SLAB STOP SURF		\
-	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVM XDAT XFLN YFLN XFIE RSCE MOFF OBSC SQAP ELOB WAVE THIC
+	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVM XDAT XFLN YFLN XFIE RSCE RWRE MOFF OBSC SQAP ELOB WAVE THIC
 
 	switch $type {
 	    source { eval [string map { $ \\$ ; \\; [ \\[ } [cat [lindex $args 0]]] }
@@ -78,6 +82,17 @@ oo::class create ZMX {
 	    lappend surfaces $grouptype $current
 	} else {
 	    rename $current {}
+	}
+    }
+
+    method simple { args } {}
+    method zernike { n value a b c d e f } {
+	if { $n == 3 } {
+	    my [$current $surf get name] set aper_max $value
+	    my [$current $surf get name] set nradius  $value
+	}
+	if { $n > 15 } {
+	    my [$current $surf get name] set z[expr $n-15] $value
 	}
     }
 
@@ -125,17 +140,6 @@ oo::class create ZMX {
 	set args {}
 
 	set type $::ZMXSurfaceMap([string tolower $type])		; # Map Zemaz surface type in to acorn.
-
-	switch $type {
-	    lens-array-rect {
-		set type lens-array
-		set args { symetry rect }
-	    }
-	    lens-array-hex {
-		set type lens-array
-		set args { symetry hex }
-	    }
-	}
 
 	set surftype $type
 
@@ -247,6 +251,7 @@ oo::class create ZMX {
      method MOFF { args } {}
      method GLCZ { args } {}
      method RSCE { args } {}
+     method RWRE { args } {}
 
 
      # NonSequential surface commands
@@ -272,8 +277,11 @@ oo::class create ZMX {
 	}
      }
      method NSOA { n aperture } {
-	if { $aperture eq  {}  } { return }
-	if { $aperture eq {{}} } { return }
+
+	if { $aperture eq  {}  } {
+	    $current $surf set aper_type  circular
+	    return
+	}
 
 	$current $surf set aper_type  UDA
 	$current $surf set aper_param [string map { {"} {} } $aperture]
@@ -281,7 +289,10 @@ oo::class create ZMX {
      }
      method NSCS { args } {}
      method NSOD { n value a b c d e f } {
-	 catch { my [$current $surf get name] set $::ZMXNSODMap($surftype,$n) $value } reply
+	 try { my [$current $surf get name] set $::ZMXNSODMap($surftype,$n) $value 
+	 } on error message {
+	     my [$current $surf get type] $n $value $a $b $c $d $e $f
+	 }
      }
      method NSOP { dx dy dz rx ry rz args } {
 	 my [$current $surf get name] set x $dx y $dy z $dz rx $rx ry $ry rz $rz

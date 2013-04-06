@@ -30,6 +30,8 @@
 	set reply
     }
     proc maplist { map params } {
+	if { [llength $params] == 0 } { return [dict values $map] }
+
 	set reply {}
 	foreach name $params { lappend reply [dict get $map $name] }
 	set reply
@@ -67,6 +69,9 @@ oo::class create ::acorn::BaseModel {
 	    get     { $obj $surf $cmd {*}[maplist $parmap $args] }
 	    getdict { revpair $parmap [$obj $surf $cmd {*}[maplist $parmap $args]] }
 	    getlist { $obj $surf $cmd {*}[maplist $parmap $args] }
+
+	    params { lmap { name par } $parmap { set name } }
+	    map    { return $parmap }
 	}
     }
 
@@ -91,7 +96,6 @@ oo::class create ::acorn::BaseModel {
 		set aper [lindex [lindex [$surf $j get aperture] 0] 0]
 
 		if { $aper ne {} } {
-		    puts "Aper? $aper"
 		    $surf $j set aper_data [$aper getptr]
 		    $surf $j set aper_leng [$aper length]
 		}
@@ -139,7 +143,7 @@ oo::class create ::acorn::BaseModel {
     method print {} {
 	puts "acorn::model [self] \{"
 
-	set tab "	"
+	set tab "    "
 	foreach { type surf } $surfaces {
 	    if { $type eq "non-sequential" } { puts "${tab}surface-group-non-sequential X \{" ; set tab "		" }
 	    foreach i [iota 0 [$surf length]-1] {
@@ -148,7 +152,7 @@ oo::class create ::acorn::BaseModel {
 		set values [[self] [$surf $i get name] getdict {*}[map { name value } $surfdefs($stype,pmap) { set name }]]
 		puts "${tab}surface [$surf $i get name] \{ [dict remove [dltpair $surfdefs($stype,pdef) $values] name] \}"
 	    }
-	    set tab "	"
+	    set tab "        "
 	    if { $type eq "non-sequential" } { puts "${tab}\}" }
 	}
 	puts "\}"

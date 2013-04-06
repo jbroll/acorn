@@ -1,4 +1,3 @@
-#include <iostream>
 #include <Eigen/Dense>
 
 using namespace std;
@@ -21,7 +20,7 @@ extern "C" {
 	for ( int i = 0; i < n; i++ ) {
 	    printf("%5d\t%10.6f\t%10.6f\t%10.6f\t", i, ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
 	    printf("%10.6f\t%10.6f\t%10.6f\t%d\n",     ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
-}
+	}
     }
     void xrays(Ray *ray, int n)
     {
@@ -85,9 +84,7 @@ extern "C" {
 		    if ( (long) surf[i].traverse == COORDBK ) { continue; }
 
 
-		    surf[i].traverse(n, z, &surf[i], &ray[j]);
-
-		    ray[j].vignetted = aper_clip(&surf[i], &ray[j]);
+		    ray[j].vignetted = surf[i].traverse(n, z, &surf[i], &ray[j]);
 
 
 		    if ( once ) {
@@ -134,6 +131,8 @@ extern "C" {
 		n  = surf[0].p[Px_n] > 0.0 ? surf[0].p[Px_n] : n;
 		z += surf[0].p[Px_thickness];
 	    }
+	    //printf("%f %f\n", n, z);
+	    fflush(stdout);
 	}
 	delete [] traversed;
     }
@@ -154,7 +153,6 @@ extern "C" {
     void trace_rays_thread(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, void *tp, int nthread)
     {
 	TraceWork data[64];
-
 
 	if ( nthread == 0 ) {
 	    trace_rays0(z, n, surflist, nsurfs, ray, nray);
