@@ -113,7 +113,7 @@ oo::class create ::acorn::BaseModel {
 	    #if { $i == $e0 && $j == $e1 } { break }
 	    incr i
 	}
-	acorn::trace_rays 0 1 [slist getptr] [slist length] [$rays getptr] [$rays length] 8
+	acorn::trace_rays 0 1 [slist getptr] [slist length] [$rays getptr] [$rays length] 0
 
 	rename slist {}
     }
@@ -279,7 +279,7 @@ proc acorn::mkrays { name args } {
 
     if { [info commands $name] eq {} } { acorn::Rays create $name 0 }
 
-    set args [dict merge { nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - } $args]
+    set args [dict merge { circle 0 nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - } $args]
     dict with args {
 	if { [info exists box] } {
 	    set x0 [expr -$box]
@@ -291,6 +291,8 @@ proc acorn::mkrays { name args } {
 	set i 0
 	foreach x [jot $nx $x0 $x1 $xi] {
 	    foreach y [jot $ny $y0 $y1 $yi] {
+		if { $circle && $x*$x+$y*$y > $x0*$x0+$y0+$y0 } { continue }
+
 		$name [$name length] set px $x py $y pz $pz kx 0.0 ky 0.0 kz 1.0 vignetted 0
 		incr i
 	    }

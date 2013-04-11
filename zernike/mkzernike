@@ -5,43 +5,23 @@ cat <<- EOF
 
 	// zernike.c
 	//
-	double zernike_std_value(double x, double y, int n, double *c)
+	void zernike_std(double x, double y, int n, double *c, double *z, double *dx, double *dy)
 	{
-
-	    double z = 0;
-
-EOF
-
-    < zernike.tab		\
-    table -h '{
-		N = sprintf("%3d", NR-1)
-
-	    printf "    if ( n <= "N" ) return z;	"
-	    print  "    z += c["N"] * " z ";"
-    }'
-
-echo
-echo 	"	return z;"
-echo	"}"
-
-
-cat <<- EOF
-
-	void zernike_std_slope(double x, double y, int n, double *c, double *dx, double *dy)
-	{
-
+	    *z  = 0.0;
 	    *dx = 0.0;
 	    *dy = 0.0;
+
 EOF
 
     < zernike.tab		\
     table -h '{
 		N = sprintf("%3d", NR-1)
 
-	    print "    if ( n <= "N" ) return;   *dx += c["N"] * " dx ";"
-	    print "                              *dy += c["N"] * " dy ";"
+	    print "    if ( n <= "N" ) return; *z  += c["N"] * " z ";"
+	    print "                            *dx += c["N"] * " dx ";"
+	    print "                            *dy += c["N"] * " dy ";"
     }'
 
-echo
 echo	"}"
+
 

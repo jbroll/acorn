@@ -17,7 +17,7 @@ SURFS	= surfaces/simple.so		\
 	  surfaces/evenasph.so		\
 	  surfaces/dgrating.so
 
-ACORN_UTIL 	= surfaces/acorn-utils.h
+ACORN_UTIL 	= surfaces/acorn-utils.h surfaces/aperture.o
 
 all : $(acorn) $(SURFS)
 

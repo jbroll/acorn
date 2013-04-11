@@ -44,6 +44,7 @@ extern "C" {
 	    if ( once ) { for ( int j = 0; j < nray; j++ ) { traversed[j] = 0; } }
 
 	    for ( int i = 0; i < nsurf; i++ ) {
+
 		if ( isinf(surf[i].p[Px_thickness]) ) { continue; }
 
 		Affine3d txforward;
@@ -84,6 +85,7 @@ extern "C" {
 		    if ( (long) surf[i].traverse == COORDBK ) { continue; }
 
 
+		    //printf("traverse %f %f\n", n, z);
 		    ray[j].vignetted = surf[i].traverse(n, z, &surf[i], &ray[j]);
 
 
@@ -131,11 +133,10 @@ extern "C" {
 		n  = surf[0].p[Px_n] > 0.0 ? surf[0].p[Px_n] : n;
 		z += surf[0].p[Px_thickness];
 	    }
-	    //printf("%f %f\n", n, z);
-	    fflush(stdout);
 	}
 	delete [] traversed;
     }
+
     typedef struct _TraceWork {
 	double		 z;
 	double		 n;

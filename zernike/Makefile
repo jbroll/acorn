@@ -1,7 +1,10 @@
 
+FC=gfortran-mp-4.7 -m32 -g -O3
+CFLAGS= -m32 -O3
+
 BITS=-m32 
 
-all : zernike.o
+all : ztest zernike.o
 
 zerniketable : zerniketable.c
 	cc zerniketable.c -o zerniketable
@@ -11,5 +14,4 @@ zernike.tab : zerniketable nollorder.sh Makefile
 
 zernike.c : zernike.tab mkzernike
 	./mkzernike > zernike.c 
-
 

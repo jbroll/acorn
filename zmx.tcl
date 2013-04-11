@@ -266,11 +266,11 @@ oo::class create ZMX {
 
 	    $current length $nonseq
 
+	    my SURF $nonseqid-[incr nonseq]
+
 	    lassign $args a b comment
 
-	    my SURF $nonseqid-[incr nonseq]
-	    my COMM $comment
-	    my Process-Type $type [lrange $args 2 end]
+	    my Process-Type $type $comment
 
 	    my [$current $surf get name] set thickness [lindex $nsoexit 3]
 	 }

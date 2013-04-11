@@ -16,6 +16,7 @@ extern "C" {
 	    fprintf(stderr, "%s %5d\t%10.6f\t%10.6f\t%10.6f\t%10.6f\t%10.6f\t%10.6f\t%d\n"
 		    , msg, i, ray[i].p(X), ray[i].p(Y), ray[i].p(Z)
 		       , ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
+	    fflush(stderr);
 	}
     }
 
@@ -83,56 +84,69 @@ extern "C" {
 
     Vector3d nhat;
 
+    double xdecenter = s.p[Pm_xdecenter];
+    double ydecenter = s.p[Pm_ydecenter];
+    double   nradius = s.p[Pm_nradius];
+    int      nzterms = s.p[Pm_nzterms];
+
+    double tol	     = 0.0000000000001;
+
     d = AcornSimpleSurfaceDistance(r, z, R, K);
 
     // Ray/Surface intersection position
     //
     r.p += d * r.k;
 
+
+    if ( nzterms ) {
+	    double zstart = r.p(Z), zz, dx, dy, dz;
+
+	for ( int iter = 0; iter < 5; iter++ ) {
+	    zernike_std((r.p(X) + xdecenter)/nradius, (r.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zz, &dx, &dy);
+
+	    Vector3d P = Vector3d(r.p(X), r.p(Y), zstart+zz);		// Estimate point on the surface.
+
+	    								// Compute the normal to the conic + zernike
+	    if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
+		nhat = Vector3d(Rsign*Dsign*dx, Rsign*Dsign*dy, -Dsign*1.0);
+	    } else {
+		double dz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
+
+		//nhat = Vector3d(Rsign*Dsign*P(X) + dx*zz, Rsign*Dsign*P(Y) + dy*zz, -Dsign * dz);
+		nhat = Vector3d(Rsign*Dsign*P(X), Rsign*Dsign*P(Y), -Dsign * dz);
+	    }
+	    nhat /= nhat.norm();
+
+
+	    double Num = (P-r.p).dot(nhat);
+	    double Den =     r.k.dot(nhat);
+
+	    if ( Den != 0.0f ) {
+		r.p += Num/Den * r.k;					// Move along the ray the distance to the normal surface.
+
+		//printf("%d zz %.10f d %.10f	", iter, zz, Num/Den);
+		//printf("%f %f %f\n", r.p(X), r.p(Y), r.p(Z));
+
+		if ( abs(Num/Den) < tol ) {
+		    //printf("Break %f %f\n", Num/Den , tol);
+
+		    break;
+		}				// If the ray failes to advance, then Done.
+	    } else {
+		return 1;						// BANG!
+	    }
+	}
+    } else {
+	nhat = AcornSimpleSurfaceNormal(r, R, K);
+    }
+
     if ( aper_clip(&s, &r) ) { return 1; }
 
-    double dx, dy, dz;
-
-    if ( (int) s.p[Pm_nzterms] ) {
-	double xdecenter = s.p[Pm_xdecenter];
-	double ydecenter = s.p[Pm_ydecenter];
-	double   nradius = s.p[Pm_nradius];
-	int      nzterms = s.p[Pm_nzterms];
-
-	double tol = 0.0000000000001;
-
-	Ray	Rn = r;
-
-    //drays("This", &Rn, 1);
-	for ( double iter = 0; iter < 5; iter++ ) {
-	    double dz = zernike_std_value((Rn.p(X) + xdecenter)/nradius, (Rn.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1]);
-			zernike_std_slope((Rn.p(X) + xdecenter)/nradius, (Rn.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &dx, &dy);
-
-	    //fprintf(stderr, "X %f xde %f nrad %f\n", Rn.p(X), xdecenter, nradius);
-
-	    //fprintf(stderr, "Here %f %f, %d %f\n", (Rn.p(X) + xdecenter)/nradius, (Rn.p(Y) + ydecenter)/nradius, nzterms, dz);
-	    Rn.p += dz * Rn.k;					// move the ray to the estimate of the deformation surface.
-
-	    if ( abs(dz) < tol ) { break; }
-	}
-    //drays("That", &Rn, 1);
-
-	r = Rn;
-    }
-
-    // Normal
-    //
-    if ( R == 0.0 || abs(R) > 1.0e10 ) {	// Planar
-	nhat = Vector3d(0.0, 0.0, -Dsign*1.0);
-    } else {
-	nhat = Vector3d(Rsign*Dsign*r.p(X), Rsign*Dsign*r.p(Y), -Dsign * sqrt(R * R - (K+1)*(r.p(X) * r.p(X) + r.p(Y) * r.p(Y))));
-	nhat /= nhat.norm();
-    }
-
+    //printf("%f %f %f\n", nhat(X), nhat(Y), nhat(Z));
+    //drays("1", &r, 1);
 
     AcornRefract(r, nhat, n0, n);		// Reflect or Refract
-
-    //drays(&r, 1);
+    //drays("2", &r, 1);
 
     return 0;
   }
