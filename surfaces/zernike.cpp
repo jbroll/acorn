@@ -89,22 +89,26 @@ extern "C" {
     double   nradius = s.p[Pm_nradius];
     int      nzterms = s.p[Pm_nzterms];
 
-    double tol	     = 0.0000000000001;
+    double tol	     = 0.0000000001;
 
-    d = AcornSimpleSurfaceDistance(r, z, R, K);
-
-    // Ray/Surface intersection position
-    //
-    r.p += d * r.k;
 
 
     if ( nzterms ) {
-	    double zstart = r.p(Z), zz, dx, dy, dz;
+	double zz, dx, dy, dz;
+
 
 	for ( int iter = 0; iter < 5; iter++ ) {
+	    Vector3d A = r.p;
+
+	    d = AcornSimpleSurfaceDistance(r, z, R, K);
+
+	    // Ray/Surface intersection position
+	    //
+	    r.p += d * r.k;
+
 	    zernike_std((r.p(X) + xdecenter)/nradius, (r.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zz, &dx, &dy);
 
-	    Vector3d P = Vector3d(r.p(X), r.p(Y), zstart+zz);		// Estimate point on the surface.
+	    Vector3d P = Vector3d(r.p(X), r.p(Y), r.p(Z)+zz);		// Estimate point on the surface.
 
 	    								// Compute the normal to the conic + zernike
 	    if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
@@ -112,31 +116,40 @@ extern "C" {
 	    } else {
 		double dz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
 
-		//nhat = Vector3d(Rsign*Dsign*P(X) + dx*zz, Rsign*Dsign*P(Y) + dy*zz, -Dsign * dz);
-		nhat = Vector3d(Rsign*Dsign*P(X), Rsign*Dsign*P(Y), -Dsign * dz);
+		nhat = Vector3d(Rsign*Dsign*(P(X) + dx*zz), Rsign*Dsign* (P(Y) + dy*zz), -Dsign * dz);
+		//nhat = Vector3d(Rsign*Dsign*P(X), Rsign*Dsign*P(Y), -Dsign * dz);
 	    }
 	    nhat /= nhat.norm();
 
 
-	    double Num = (P-r.p).dot(nhat);
+	    double Num = (P-r.p).dot(nhat);				// Compute the distance to the surface normal to nhat.
 	    double Den =     r.k.dot(nhat);
 
 	    if ( Den != 0.0f ) {
 		r.p += Num/Den * r.k;					// Move along the ray the distance to the normal surface.
 
-		//printf("%d zz %.10f d %.10f	", iter, zz, Num/Den);
-		//printf("%f %f %f\n", r.p(X), r.p(Y), r.p(Z));
 
-		if ( abs(Num/Den) < tol ) {
+
+		if ( (A-r.p).squaredNorm() < tol ) {
+		//if ( abs(zz - Num/Den) < tol ) {
 		    //printf("Break %f %f\n", Num/Den , tol);
 
 		    break;
 		}				// If the ray failes to advance, then Done.
+
+		//printf("%d norm %.10f 	", iter, (A-r.p).norm());
+		//printf("%f %f %f\n", r.p(X), r.p(Y), r.p(Z));
 	    } else {
 		return 1;						// BANG!
 	    }
 	}
     } else {
+	d = AcornSimpleSurfaceDistance(r, z, R, K);
+
+	// Ray/Surface intersection position
+	//
+	r.p += d * r.k;
+
 	nhat = AcornSimpleSurfaceNormal(r, R, K);
     }
 
