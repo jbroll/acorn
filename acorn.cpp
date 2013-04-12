@@ -31,15 +31,17 @@ extern "C" {
 	}
     }
 
-    void trace_rays0(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray)
+    void trace_rays0(double z, double n, SurfaceList *surflist, int nsurfs, Ray *R, int nray, int rsize)
     {
 	int *traversed = new int[nray];
+	Ray *ray;
 
 	for ( int h = 0; h < nsurfs; h++ ) {
 
 	    Surface *surf = surflist[h].surf;
 	    int     nsurf = surflist[h].nsurf;
 	    int      once = surflist[h].type;
+	    int		j;
 
 	    if ( once ) { for ( int j = 0; j < nray; j++ ) { traversed[j] = 0; } }
 
@@ -67,55 +69,55 @@ extern "C" {
 
 		//printf("Surface %d %d: %f %f %f\n", h, i, -surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz]);
 
-		for ( int j = 0; j < nray; j++ ) {
-		    Vector3d saveP = ray[j].p;
-		    Vector3d saveK = ray[j].k;
+		for ( j = 0, ray = R; j < nray; j++, ray = (Ray *) (((char *) ray) + rsize) ) {
+		    Vector3d saveP = ray->p;
+		    Vector3d saveK = ray->k;
 
 			//printf("Ray  ");
-			//prays(&ray[j], 1);
+			//prays(ray, 1);
 
-		    if ( ray[j].vignetted ) { continue; }
+		    if ( ray->vignetted ) { continue; }
 
-		    ray[j].p = txforward * ray[j].p;		// Put the ray into the surface cs.
-		    ray[j].k = rtforward * ray[j].k;
+		    ray->p = txforward * ray->p;		// Put the ray into the surface cs.
+		    ray->k = rtforward * ray->k;
 
 			//printf("Conv ");
-			//prays(&ray[j], 1);
+			//prays(ray, 1);
 
 		    if ( (long) surf[i].traverse == COORDBK ) { continue; }
 
 
 		    //printf("traverse %f %f\n", n, z);
-		    ray[j].vignetted = surf[i].traverse(n, z, &surf[i], &ray[j]);
+		    ray->vignetted = surf[i].traverse(n, z, &surf[i], ray);
 
 
 		    if ( once ) {
 			//printf("Here ");
-			//prays(&ray[j], 1);
+			//prays(ray, 1);
 
-			  if ( !ray[j].vignetted ) {		// If the ray was not vignetted it has traversed this surface.
+			  if ( !ray->vignetted ) {		// If the ray was not vignetted it has traversed this surface.
 			//printf("Trav ");
-			//prays(&ray[j], 1);
+			//prays(ray, 1);
 			      traversed[j] = 1;			// Don't try this ray again
-			      ray[j].vignetted = 1;
+			      ray->vignetted = 1;
 			  } else {
 			//printf("Ving ");
 			//prays(&ray[j], 1);
-			      ray[j].p = saveP;			// Reset
-			      ray[j].k = saveK;
+			      ray->p = saveP;			// Reset
+			      ray->k = saveK;
 
-			      ray[j].vignetted = 0;		// Try again on next surface
+			      ray->vignetted = 0;		// Try again on next surface
 
 			      continue;
 			  }
 		    }
 
-		    ray[j].p = txreverse * ray[j].p;		// Put the ray back into global cs..
-		    ray[j].k = rtreverse * ray[j].k;
+		    ray->p = txreverse * ray->p;		// Put the ray back into global cs..
+		    ray->k = rtreverse * ray->k;
 
 			//printf("Next ");
-			//prays(&ray[j], 1);
-		//if ( surf[i].z != 0 ) { prays(&ray[j], 1); }
+			//prays(ray, 1);
+		//if ( surf[i].z != 0 ) { prays(ray, 1); }
 		}
 
 		if ( !once ) {
@@ -124,11 +126,11 @@ extern "C" {
 		}
 	    }
 			//printf("Done ");
-			//prays(&ray[0], 1);
+			//prays(ray, 1);
 
 	    if ( once ) {
 		for ( int j = 0 ; j < nray; j++ ) {		// Rays that have not traversed are vignetted.
-		    ray[j].vignetted = !traversed[j];
+		    ray->vignetted = !traversed[j];
 		}
 		n  = surf[0].p[Px_n] > 0.0 ? surf[0].p[Px_n] : n;
 		z += surf[0].p[Px_thickness];
@@ -144,19 +146,20 @@ extern "C" {
 	int		 nsurfs;
 	Ray 		*ray;
 	int		 nray;
+	int		rsize;
 
 	TPoolThread	*t;
     } TraceWork;
 
     void trace_rays_worker(TraceWork *work) {
-	 trace_rays0(work->z, work->n, work->surflist, work->nsurfs, work->ray, work->nray);
+	 trace_rays0(work->z, work->n, work->surflist, work->nsurfs, work->ray, work->nray, work->rsize);
     }
-    void trace_rays_thread(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, void *tp, int nthread)
+    void trace_rays_thread(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, void *tp, int nthread)
     {
 	TraceWork data[64];
 
 	if ( nthread == 0 ) {
-	    trace_rays0(z, n, surflist, nsurfs, ray, nray);
+	    trace_rays0(z, n, surflist, nsurfs, ray, nray, rsize);
 	} else {
 	    if ( tp == NULL ) { tp = TPoolInit(64); }
 
@@ -180,10 +183,10 @@ extern "C" {
 
     TPool *tp = NULL;
 
-    void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int nthread) {
+    void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, int nthread) {
 	 //trace_rays0(z, n, surflist, nsurfs, ray, nray);
 
-    	trace_rays_thread(z, n, surflist, nsurfs, ray, nray, tp, nthread);
+    	trace_rays_thread(z, n, surflist, nsurfs, ray, nray, rsize, tp, nthread);
     }
 }
 

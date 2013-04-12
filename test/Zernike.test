@@ -11,8 +11,8 @@ acorn::model Zern {
 }
 
 
-acorn::mkrays rays nx 25 ny 25 box 25 circle 1
-#acorn::mkrays rays nx 3 ny 3 box 25
+#acorn::mkrays rays nx 25 ny 25 box 25 circle 1
+acorn::mkrays rays nx 3 ny 3 box 25
 
 puts [Zern B get z1]
 
