@@ -1,3 +1,22 @@
+/*     SUBROUTINE ICZERN (R2, K, P, TEL, KODE)
+C
+C   /****************************************
+C    *
+C    *    PERKIN-ELMER CORPORATE COMPUTING
+C    *      SOFTWARE ENGINEERING SECTION
+C    *
+C    *    ICZERN FORTRAN
+C    *    WRITTEN BY H. JACKSON  M/S 180  X (203) 762-4395
+C    *            ON 07/01/80
+C    *
+C    *    UPDATE:   10/22/80
+C    *    TIME:     09:01:06
+C    *
+C   ITERATIVELY CORRECT FOR THE ZERNIKE DEFORMATIONS
+C   OF AN OPTICAL SURFACE
+C 
+C    ******************************************/
+
 #include <iostream>
 #include <Eigen/Dense>
 
@@ -9,16 +28,6 @@ using namespace Eigen;
 
 extern "C" {
 #include "../zernike/zernike.h"
-
-    void drays(const char *msg, Ray *ray, int n)
-    {
-	for ( int i = 0; i < n; i++ ) {
-	    fprintf(stderr, "%s %5d\t%10.6f\t%10.6f\t%10.6f\t%10.6f\t%10.6f\t%10.6f\t%d\n"
-		    , msg, i, ray[i].p(X), ray[i].p(Y), ray[i].p(Z)
-		       , ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
-	    fflush(stderr);
-	}
-    }
 
     enum Px_Local { Pm_R = Px_NParams, Pm_K, Pm_xdecenter, Pm_ydecenter, Pm_nradius, Pm_nzterms, Pm_z1 };
 
@@ -66,101 +75,79 @@ extern "C" {
     return 0;
   }
 
-  int traverse(double n0, double z, Surface &s, Ray &r)
-  {
-    double d;
 
-    double R = s.p[Pm_R];
-    double K = s.p[Pm_K];
-    double n = s.p[Px_n];
+int traverse(double n0, double z, Surface &s, Ray &r)
+{
+	double n = s.p[Px_n];
 
-    // Intersect
-    //
-    // establish sign flippy dealies
-    //
-    double Ksign = 1.0;
-    double Dsign = r.k(Z)/fabs(r.k(Z));
-    double Rsign = R/fabs(R);
+        double R2= s.p[Pm_R];	//    R2   : R*8 - CONSTANT TERM OF SURFACE EQUATION
+	double K = 0.0;		//    K    : R*8 - 1 / 2 LINEAR TERM IN SURFACE EQUATION
+	double P = s.p[Pm_K];	//    P    : R*8 - CONIC CONSTANT = 1 - ECCENTRICITY ** 2
 
-    Vector3d nhat;
+	double    XD = r.p(X);	//   : R*8 - X COORD. OF RAY INTERSECTION WITH UNDEFORMED SURFACE
+	double    YD = r.p(Y);	//   : R*8 - Y COORD. OF RAY INTERSECTION WITH UNDEFORMED SURFACE
+	double    ZD = r.p(Z);	//   : R*8 - Z COORD. OF RAY INTERSECTION WITH UNDEFORMED SURFACE
+	double    XL = r.k(X);	//   : R*8 - X COMPONENT OF INPUT DIRECTION
+	double    YL = r.k(Y);	//   : R*8 - Y COMPONENT OF INPUT DIRECTION
+	double    ZL = r.k(Z);	//   : R*8 - Z COMPONENT OF INPUT DIRECTION
 
-    double xdecenter = s.p[Pm_xdecenter];
-    double ydecenter = s.p[Pm_ydecenter];
-    double   nradius = s.p[Pm_nradius];
-    int      nzterms = s.p[Pm_nzterms];
+	double    XG = 0;	//   : R*8 - X COMPONENT OF GRADIENT OF SURFACE AT INTERSECTION
+	double    YG = 0;	//   : R*8 - Y COMPONENT OF GRADIENT OF SURFACE AT INTERSECTION
+	double    ZG = 0;	//   : R*8 - Z COMPONENT OF GRADIENT OF SURFACE AT INTERSECTION
 
-    double tol	     = 0.0000000001;
+	double	  TEL;		//   : R*8 - TOTAL DISTANCE CORRECTION
+	double	  DEF2 = 0; 	//   : R*8 - SUM OF THE SQUARES OF THE DEFORMATION COEFFICIENTS
 
 
+	double F, FDOT, RCS, ZF;
+	double XAP, YAP, ZAP;
 
-    if ( nzterms ) {
-	double zz, dx, dy, dz;
+	double RHOS = XD*XD + YD*YD;
+	double PZK = P * ZD - K;
+	double DEL = RHOS + PZK*PZK + ZD*ZD + 1.0;
+	double TS = DEL * 1.0E-14 + DEF2 * 1.0E-05;
 
+	double xdecenter = s.p[Pm_xdecenter];
+	double ydecenter = s.p[Pm_ydecenter];
+	double   nradius = s.p[Pm_nradius];
+	int      nzterms = s.p[Pm_nzterms];
 
-	for ( int iter = 0; iter < 5; iter++ ) {
-	    Vector3d A = r.p;
+	int IT = 0;
 
-	    d = AcornSimpleSurfaceDistance(r, z, R, K);
+	for ( int i = 0; i < nzterms; i++ ) { DEF2 += s.p[Pm_z1+i]*s.p[Pm_z1+i]; }
 
-	    // Ray/Surface intersection position
+	while ( 1 ) {
+
+	    zernike_std((XD + xdecenter)/nradius, (YD + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &ZAP, &XAP, &YAP);
+
+	    ZF = ZD - ZAP;
+	    PZK = P*ZF - K;
+	    XG = XD - XAP * PZK / nradius;
+	    YG = YD - YAP * PZK / nradius;
+	    ZG = PZK;
+	    RCS = R2 + ZF * (K - PZK);
+	    F = RHOS - RCS;
+
+	    if ( fabs(F) < TS ) { 		    break;	}	// DONE
+
+	    if ( ++IT    > 5  ) {		    return 9;	}	// KODE = 9 : TOO MANY ITERATIONS
+
+	    FDOT = XG * XL + YG * YL + ZG * ZL;
+
+	    printf("%f %f\n", FDOT*DEL, F+F);
+
+	    if ( fabs(FDOT * DEL) < fabs(F + F) ) { return 8;	} 	// KODE = 8 : EXCESSIVE DEFORMATION OR ZERO DIVIDE
+
+	    //  EVALUATE AND USE DEL
 	    //
-	    r.p += d * r.k;
-
-	    zernike_std((r.p(X) + xdecenter)/nradius, (r.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zz, &dx, &dy);
-
-	    Vector3d P = Vector3d(r.p(X), r.p(Y), r.p(Z)+zz);		// Estimate point on the surface.
-
-	    								// Compute the normal to the conic + zernike
-	    if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
-		nhat = Vector3d(Rsign*Dsign*dx, Rsign*Dsign*dy, -Dsign*1.0);
-	    } else {
-		double dz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
-
-		nhat = Vector3d(Rsign*Dsign*(P(X) + dx*zz), Rsign*Dsign* (P(Y) + dy*zz), -Dsign * dz);
-		//nhat = Vector3d(Rsign*Dsign*P(X), Rsign*Dsign*P(Y), -Dsign * dz);
-	    }
-	    nhat /= nhat.norm();
-
-
-	    double Num = (P-r.p).dot(nhat);				// Compute the distance to the surface normal to nhat.
-	    double Den =     r.k.dot(nhat);
-
-	    if ( Den != 0.0f ) {
-		r.p += Num/Den * r.k;					// Move along the ray the distance to the normal surface.
-
-
-
-		if ( (A-r.p).squaredNorm() < tol ) {
-		//if ( abs(zz - Num/Den) < tol ) {
-		    //printf("Break %f %f\n", Num/Den , tol);
-
-		    break;
-		}				// If the ray failes to advance, then Done.
-
-		//printf("%d norm %.10f 	", iter, (A-r.p).norm());
-		//printf("%f %f %f\n", r.p(X), r.p(Y), r.p(Z));
-	    } else {
-		return 1;						// BANG!
-	    }
+	    DEL = - F / (FDOT + FDOT);
+	    TEL = TEL + DEL;
+	    XD = XD + DEL * XL;
+	    YD = YD + DEL * YL;
+	    ZD = ZD + DEL * ZL;
+	    RHOS = XD*XD + YD*YD;
 	}
-    } else {
-	d = AcornSimpleSurfaceDistance(r, z, R, K);
 
-	// Ray/Surface intersection position
-	//
-	r.p += d * r.k;
-
-	nhat = AcornSimpleSurfaceNormal(r, R, K);
-    }
-
-    if ( aper_clip(&s, &r) ) { return 1; }
-
-    //printf("%f %f %f\n", nhat(X), nhat(Y), nhat(Z));
-    //drays("1", &r, 1);
-
-    AcornRefract(r, nhat, n0, n);		// Reflect or Refract
-    //drays("2", &r, 1);
-
-    return 0;
-  }
+	return 0;
+}
 }
