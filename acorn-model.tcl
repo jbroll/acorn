@@ -138,7 +138,7 @@ oo::class create ::acorn::BaseModel {
 	slist 0 set surf [expr { [$surf getptr]+[acorn::Surfs size]*$j }] nsurf 1 type 0
 
 
-	acorn::trace_rays $z 1 [slist getptr] [slist length] [$rays getptr] [$rays length] 1
+	acorn::trace_rays $z 1 [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] 0
     }
 
     method print {} {
