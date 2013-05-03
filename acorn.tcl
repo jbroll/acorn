@@ -4,12 +4,12 @@
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
 critcl::tsources func.tcl tcloo.tcl uda.tcl agf.tcl acorn-model.tcl zmx.tcl acorn.tcl
-critcl::csources acorn.cpp
+critcl::csources acorn.cpp 
 
 ::critcl::tcl 8.6
 ::critcl::config language c++ 
 
-critcl::clibraries glass/acorn-glass.o glass/glass.o tpool/tpool.o -lstdc++
+critcl::clibraries tpool/tpool.o glass/acorn-glass.o glass/glass.o -lstdc++
 
 
 source tcloo.tcl

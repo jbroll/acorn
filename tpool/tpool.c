@@ -45,8 +45,8 @@
 
  TPool *TPoolInit(int n) {
     int    i;
-    TPool *tp  = calloc(sizeof(TPool), 1);
-    tp->thread = calloc(sizeof(TPoolThread), n);
+    TPool *tp  = (TPool *)      calloc(sizeof(TPool), 1);
+    tp->thread = (TPoolThread*) calloc(sizeof(TPoolThread), n);
     tp->nthread = n;
 
     for ( i = 0; i < n; i++ ) {

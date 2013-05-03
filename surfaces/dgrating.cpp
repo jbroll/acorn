@@ -4,6 +4,8 @@
 using namespace std;
 using namespace Eigen;
 
+#include <stdio.h>
+
 #include "../acorn.h"
 
 

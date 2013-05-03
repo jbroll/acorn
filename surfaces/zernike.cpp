@@ -23,6 +23,8 @@ C    ******************************************/
 using namespace std;
 using namespace Eigen;
 
+#include <stdio.h>
+
 #include "../acorn.h"
 #include "acorn-utils.h" 
 

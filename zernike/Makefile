@@ -4,7 +4,7 @@ CFLAGS= -m32 -O3
 
 BITS=-m32 
 
-all : ztest zernike.o
+all : zernike.c
 
 zerniketable : zerniketable.c
 	cc zerniketable.c -o zerniketable
