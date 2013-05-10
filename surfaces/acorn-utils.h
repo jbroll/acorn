@@ -1,14 +1,15 @@
 
+
 inline double AcornSimpleSurfaceDistance(Ray &r, double z, double R, double K)
 {
-    double Ksign = 1.0;
-    double Dsign = r.k(Z)/fabs(r.k(Z));
-    double Rsign = R/fabs(R);
     double d;
 
-    if ( R == 0.0 )  {			// Planar
+    if ( R == 0.0 )  {				// Planar
 	d = (z - r.p(Z))/r.k(Z);
     } else {					// http://www-physics.ucsd.edu/~tmurphy/astr597/exercises/raytrace-3d.pdf
+	double Ksign = 1.0;
+	double Dsign = r.k(Z)/fabs(r.k(Z));
+	double Rsign = R/fabs(R);
 
 	if ( K < -1.0 ) { Ksign = -1.0; }
 
@@ -32,11 +33,10 @@ inline double AcornSimpleSurfaceDistance(Ray &r, double z, double R, double K)
     return d;
 }
 
+
 inline Vector3d AcornSimpleSurfaceNormal(Ray &r, double R, double K)
 {
-    double Ksign = 1.0;
     double Dsign = r.k(Z)/fabs(r.k(Z));
-    double Rsign = R/fabs(R);
     Vector3d nhat;
 
     // Normal
@@ -44,6 +44,9 @@ inline Vector3d AcornSimpleSurfaceNormal(Ray &r, double R, double K)
     if ( R == 0.0 || abs(R) > 1.0e10 ) {	// Planar
 	nhat = Vector3d(0.0, 0.0, -Dsign*1.0);
     } else {
+	double Ksign = 1.0;
+	double Rsign = R/fabs(R);
+
 	nhat = Vector3d(Rsign*Dsign*r.p(X), Rsign*Dsign*r.p(Y), -Dsign * sqrt(R * R - (K+1)*(r.p(X) * r.p(X) + r.p(Y) * r.p(Y))));
 	nhat /= nhat.norm();
     }
@@ -71,3 +74,5 @@ void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
 	r.k = (eta*r.k + (eta*cosi - sqrt(abs(cost))) * nhat) * (cost > 0);
     }
 }
+
+

@@ -1,0 +1,12 @@
+
+*.o
+*.so
+
+zernike/zernike.c
+zernike/zernike.tab
+zernike/zerniketable
+
+lib
+tripack/lib
+
+

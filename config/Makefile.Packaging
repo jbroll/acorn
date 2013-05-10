@@ -1,0 +1,39 @@
+# Packaging Targets
+#
+Version = $(Package)`awk '{ print \$$2; exit }' Version`
+
+source  :
+	$(MAKE) tar source=1 version=$(Version)
+
+tar 	:
+	find . -follow -name '.#*'   -print | xargs rm -f
+	find . -follow -name '*.swp' -print | xargs rm -f
+	if [ "$(source)" = 1 ] ; then						\
+	    $(MAKE) distclean;							\
+	    cd ..;								\
+	    rm -rf $(version);							\
+	    ln -s $(Package) $(version);					\
+	fi
+	cd ..;									\
+	 sed < $(version)/$(Package).ex -e s/$(Package)/$(version)/ > exclude;	\
+	 tar cvfXh - exclude $(version) | gzip > $(version).tar.gz;		\
+	 rm -rf exclude;							\
+	 echo; ls -l $(version).tar.gz; echo
+
+unpack  :
+	cd ..;							\
+	rm -rf $(version);					\
+	rm -rf $(version).$(Arch);				\
+	gzip -d < $(version).tar.gz | tar xf -
+	
+binary 	:
+	$(MAKE) unpack version=$(Version)
+	mv ../$(Version) ../$(Version).$(Arch)
+	cd ../$(Version).$(Arch);				\
+	CC=cc ./configure --prefix=`pwd` $(CONFIGARGS);		\
+	$(MAKE) ;						\
+	$(MAKE) install;					\
+	$(MAKE) clean;						\
+	current=`pwd`; $(MAKE) tar version=`basename $$current`;\
+	cd ..; rm -rf `basename $$current`
+

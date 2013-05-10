@@ -1,0 +1,21 @@
+# These are the default definitions for all starbase makefiles
+#
+
+srcdir	= .
+ 
+AR 	= ar
+CC 	= cc
+INC     = $(WD)/tablesrc/xinc
+LEX     = flex
+LN_S    = ln -s
+SED     = sed
+RANLIB 	= ranlib
+RM      = rm -f
+YACC 	= bison -y
+
+exeext	= ""
+
+MAKEDEFS = bindir=$(bindir) libdir=$(libdir) incdir=$(incdir)
+
+Arch	  = `uname`-`uname -i`
+

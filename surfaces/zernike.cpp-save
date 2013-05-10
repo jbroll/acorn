@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdio.h>
 #include <Eigen/Dense>
 
 using namespace std;
@@ -9,16 +10,6 @@ using namespace Eigen;
 
 extern "C" {
 #include "../zernike/zernike.h"
-
-    void drays(const char *msg, Ray *ray, int n)
-    {
-	for ( int i = 0; i < n; i++ ) {
-	    fprintf(stderr, "%s %5d\t%10.6f\t%10.6f\t%10.6f\t%10.6f\t%10.6f\t%10.6f\t%d\n"
-		    , msg, i, ray[i].p(X), ray[i].p(Y), ray[i].p(Z)
-		       , ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
-	    fflush(stderr);
-	}
-    }
 
     enum Px_Local { Pm_R = Px_NParams, Pm_K, Pm_xdecenter, Pm_ydecenter, Pm_nradius, Pm_nzterms, Pm_z1 };
 
@@ -95,23 +86,25 @@ extern "C" {
 
     if ( nzterms ) {
 	for ( int iter = 0; iter < 5; iter++ ) {
-	    double zz, dx, dy, dz;
+	    double zdx, zdy, zdz;
 	    Vector3d A = r.p;
 
 	    d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
 	    r.p += d * r.k;
 
-	    zernike_std((r.p(X) + xdecenter)/nradius, (r.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zz, &dx, &dy);
+	    zernike_std((r.p(X) + xdecenter)/nradius, (r.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zdz, &zdx, &zdy);
 
-	    Vector3d P = Vector3d(r.p(X), r.p(Y), r.p(Z)+zz);		// Estimate point on the surface.
+	    Vector3d P = Vector3d(r.p(X), r.p(Y), r.p(Z)+zdz);		// Estimate point on the surface.
 
 	    								// Compute the normal to the conic + zernike
 	    if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
-		nhat = Vector3d(Rsign*Dsign*dx, Rsign*Dsign*dy, -Dsign*1.0);
+		nhat = Vector3d(Rsign*Dsign*zdx, Rsign*Dsign*zdy, -Dsign*1.0);
 	    } else {
-		double dz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
+		double cdz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
+		double cdx = P(X)/cdz;
+		double cdy = P(Y)/cdz;
 
-		nhat = Vector3d(Rsign*Dsign*(P(X) + dx*zz), Rsign*Dsign* (P(Y) + dy*zz), -Dsign * dz);
+		nhat = Vector3d(Rsign*Dsign*(cdx + zdx), Rsign*Dsign* (P(Y) + dy*zz), -Dsign*1);
 		//nhat = Vector3d(Rsign*Dsign*P(X), Rsign*Dsign*P(Y), -Dsign * dz);
 	    }
 	    nhat /= nhat.norm();
