@@ -1,29 +1,9 @@
-/*     SUBROUTINE ICZERN (R2, K, P, TEL, KODE)
-C
-C   /****************************************
-C    *
-C    *    PERKIN-ELMER CORPORATE COMPUTING
-C    *      SOFTWARE ENGINEERING SECTION
-C    *
-C    *    ICZERN FORTRAN
-C    *    WRITTEN BY H. JACKSON  M/S 180  X (203) 762-4395
-C    *            ON 07/01/80
-C    *
-C    *    UPDATE:   10/22/80
-C    *    TIME:     09:01:06
-C    *
-C   ITERATIVELY CORRECT FOR THE ZERNIKE DEFORMATIONS
-C   OF AN OPTICAL SURFACE
-C 
-C    ******************************************/
-
 #include <iostream>
+#include <stdio.h>
 #include <Eigen/Dense>
 
 using namespace std;
 using namespace Eigen;
-
-#include <stdio.h>
 
 #include "../acorn.h"
 #include "acorn-utils.h" 
@@ -77,79 +57,95 @@ extern "C" {
     return 0;
   }
 
+  int traverse(double n0, double z, Surface &s, Ray &r)
+  {
+    double d;
 
-int traverse(double n0, double z, Surface &s, Ray &r)
-{
-	double n = s.p[Px_n];
+    double R = s.p[Pm_R];
+    double K = s.p[Pm_K];
+    double n = s.p[Px_n];
 
-        double R2= s.p[Pm_R];	//    R2   : R*8 - CONSTANT TERM OF SURFACE EQUATION
-	double K = 0.0;		//    K    : R*8 - 1 / 2 LINEAR TERM IN SURFACE EQUATION
-	double P = s.p[Pm_K];	//    P    : R*8 - CONIC CONSTANT = 1 - ECCENTRICITY ** 2
+    // Intersect
+    //
+    // establish sign flippy dealies
+    //
+    double Ksign = 1.0;
+    double Dsign = r.k(Z)/fabs(r.k(Z));
+    double Rsign = R/fabs(R);
 
-	double    XD = r.p(X);	//   : R*8 - X COORD. OF RAY INTERSECTION WITH UNDEFORMED SURFACE
-	double    YD = r.p(Y);	//   : R*8 - Y COORD. OF RAY INTERSECTION WITH UNDEFORMED SURFACE
-	double    ZD = r.p(Z);	//   : R*8 - Z COORD. OF RAY INTERSECTION WITH UNDEFORMED SURFACE
-	double    XL = r.k(X);	//   : R*8 - X COMPONENT OF INPUT DIRECTION
-	double    YL = r.k(Y);	//   : R*8 - Y COMPONENT OF INPUT DIRECTION
-	double    ZL = r.k(Z);	//   : R*8 - Z COMPONENT OF INPUT DIRECTION
+    Vector3d nhat;
 
-	double    XG = 0;	//   : R*8 - X COMPONENT OF GRADIENT OF SURFACE AT INTERSECTION
-	double    YG = 0;	//   : R*8 - Y COMPONENT OF GRADIENT OF SURFACE AT INTERSECTION
-	double    ZG = 0;	//   : R*8 - Z COMPONENT OF GRADIENT OF SURFACE AT INTERSECTION
+    double xdecenter = s.p[Pm_xdecenter];
+    double ydecenter = s.p[Pm_ydecenter];
+    double   nradius = s.p[Pm_nradius];
+    int      nzterms = s.p[Pm_nzterms];
 
-	double	  TEL;		//   : R*8 - TOTAL DISTANCE CORRECTION
-	double	  DEF2 = 0; 	//   : R*8 - SUM OF THE SQUARES OF THE DEFORMATION COEFFICIENTS
+    double tol	     = 0.0000000001;
 
 
-	double F, FDOT, RCS, ZF;
-	double XAP, YAP, ZAP;
 
-	double RHOS = XD*XD + YD*YD;
-	double PZK = P * ZD - K;
-	double DEL = RHOS + PZK*PZK + ZD*ZD + 1.0;
-	double TS = DEL * 1.0E-14 + DEF2 * 1.0E-05;
+    if ( nzterms ) {
+	for ( int iter = 0; iter < 5; iter++ ) {
+	    double zdx, zdy, zdz;
+	    Vector3d A = r.p;
 
-	double xdecenter = s.p[Pm_xdecenter];
-	double ydecenter = s.p[Pm_ydecenter];
-	double   nradius = s.p[Pm_nradius];
-	int      nzterms = s.p[Pm_nzterms];
+	    d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
+	    r.p += d * r.k;
 
-	int IT = 0;
+	    zernike_std((r.p(X) + xdecenter)/nradius, (r.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zdz, &zdx, &zdy);
 
-	for ( int i = 0; i < nzterms; i++ ) { DEF2 += s.p[Pm_z1+i]*s.p[Pm_z1+i]; }
+	    Vector3d P = Vector3d(r.p(X), r.p(Y), r.p(Z)+zdz);		// Estimate point on the surface.
 
-	while ( 1 ) {
+	    								// Compute the normal to the conic + zernike
+	    if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
+		nhat = Vector3d(Rsign*Dsign*zdx, Rsign*Dsign*zdy, -Dsign*1.0);
+	    } else {
+		double cdz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
+		double cdx = P(X)/cdz;
+		double cdy = P(Y)/cdz;
 
-	    zernike_std((XD + xdecenter)/nradius, (YD + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &ZAP, &XAP, &YAP);
+		nhat = Vector3d(Rsign*Dsign*(cdx + zdx), Rsign*Dsign*(cdy + zdy), -Dsign*1);
+		//nhat = Vector3d(Rsign*Dsign*P(X), Rsign*Dsign*P(Y), -Dsign * dz);
+	    }
+	    nhat /= nhat.norm();
 
-	    ZF = ZD - ZAP;
-	    PZK = P*ZF - K;
-	    XG = XD - XAP * PZK / nradius;
-	    YG = YD - YAP * PZK / nradius;
-	    ZG = PZK;
-	    RCS = R2 + ZF * (K - PZK);
-	    F = RHOS - RCS;
+	    double Num = (P-r.p).dot(nhat);				// Compute the distance to the surface normal to nhat.
+	    double Den =     r.k.dot(nhat);
 
-	    if ( fabs(F) < TS ) { 		    break;	}	// DONE
+	    if ( Den != 0.0f ) {
+		r.p += Num/Den * r.k;					// Move along the ray the distance to the normal surface.
 
-	    if ( ++IT    > 5  ) {		    return 9;	}	// KODE = 9 : TOO MANY ITERATIONS
+		if ( (A-r.p).squaredNorm() < tol ) {
+		//if ( abs(zz - Num/Den) < tol ) {
+		    //printf("Break %f %f\n", Num/Den , tol);
 
-	    FDOT = XG * XL + YG * YL + ZG * ZL;
+		    break;
+		}				// If the ray failes to advance, then Done.
 
-	    printf("%f %f\n", FDOT*DEL, F+F);
-
-	    if ( fabs(FDOT * DEL) < fabs(F + F) ) { return 8;	} 	// KODE = 8 : EXCESSIVE DEFORMATION OR ZERO DIVIDE
-
-	    //  EVALUATE AND USE DEL
-	    //
-	    DEL = - F / (FDOT + FDOT);
-	    TEL = TEL + DEL;
-	    XD = XD + DEL * XL;
-	    YD = YD + DEL * YL;
-	    ZD = ZD + DEL * ZL;
-	    RHOS = XD*XD + YD*YD;
+		//printf("%d norm %.10f 	", iter, (A-r.p).norm());
+		//printf("%f %f %f\n", r.p(X), r.p(Y), r.p(Z));
+	    } else {
+		return 1;						// BANG!
+	    }
 	}
+    } else {
+	d = AcornSimpleSurfaceDistance(r, z, R, K);
 
-	return 0;
-}
+	// Ray/Surface intersection position
+	//
+	r.p += d * r.k;
+
+	nhat = AcornSimpleSurfaceNormal(r, R, K);
+    }
+
+    if ( aper_clip(&s, &r) ) { return 1; }
+
+    //printf("%f %f %f\n", nhat(X), nhat(Y), nhat(Z));
+    //drays("1", &r, 1);
+
+    AcornRefract(r, nhat, n0, n);		// Reflect or Refract
+    //drays("2", &r, 1);
+
+    return 0;
+  }
 }
