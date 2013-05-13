@@ -139,7 +139,6 @@ extern "C" {
     }
 
     AcornRefract(r, nhat, n0, n);		// Reflect or Refract
-    //drays("2", &r, 1);
 
     return 0;
   }

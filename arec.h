@@ -4,6 +4,9 @@
 #define	AREC_ISLIST	1
 #define AREC_ASDICT	2
 
+#define AREC_STRUCT	0
+#define AREC_UNION	1
+
 #define ARecPadd(offset, align) ((offset + align - 1) & ~(align - 1))
 
 #define ARecCmd(interp, inst, name, args, expr, objc, objv, code)	\
@@ -52,11 +55,12 @@ typedef Tcl_Obj*  (*ARecGetFunc)(Tcl_Interp *ip, ARecTypePtr type,            vo
 
 typedef struct _ARecType {
     Tcl_Obj		*nameobj;
-    int		  	 size;
-    int		 	 align;
+    long	  	 size;
+    long	 	 align;
+    long	 	 stype;
 
-    int		 	nfield;
-    int		 	afield;
+    long	 	nfield;
+    long	 	afield;
     struct _ARecField   *field;
 
     ARecSetFunc	set;
@@ -88,7 +92,7 @@ int ARecSetFromArgs(Tcl_Interp *interp, ARecType *type, char *recs, int m, int o
 int ARecSetFromList(Tcl_Interp *interp, ARecType *type, char *recs, int m, int objc, Tcl_Obj **objv, int flags);
 int ARecSetFromDict(Tcl_Interp *interp, ARecType *type, char *recs, int m, int objc, Tcl_Obj **objv, int flags);
 
-ARecType *ARecTypeAddType(ARecField *types, Tcl_Obj *nameobj, int size, int align, ARecSetFunc set, ARecGetFunc get);
+ARecType *ARecTypeAddType(ARecField *types, Tcl_Obj *nameobj, int size, int align, int stype, ARecSetFunc set, ARecGetFunc get);
 
 Tcl_Obj *ARecGetStruct(Tcl_Interp *ip, ARecType *type, void *recs, int m, int objc, Tcl_Obj **objv, int flags);
 
@@ -97,4 +101,9 @@ ARecType *ARecLookupType(Tcl_Obj *nameobj);
 typedef char *string;
 
 ARecField *ARecCreateType(Tcl_Obj *name);
+
+typedef struct arec_LngAlign { long   x; char y; } ARecLngAlign;
+typedef struct arec_PtrAlign { void  *x; char y; } ARecPtrAlign;
+typedef struct arec_DblAlign { double x; char y; } ARecDblAlign;
+
 

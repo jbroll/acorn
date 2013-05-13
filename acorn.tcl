@@ -1,5 +1,10 @@
 #!/Users/john/bin/tclkit8.6
 #
+if { 1 && ![critcl::compiled] } {		# Force md5 to be FAST.  Don't use object cache.
+    proc md5 { x } {
+	    return [expr rand()]
+    }
+}
 
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
@@ -51,8 +56,12 @@ namespace eval acorn {
 	set ::acorn::SurfaceInfos(coordbrk)	-1
 
 	foreach type [glob ./surfaces/*.so] {
-	    set ::acorn::SurfaceTypes([file rootname [file tail $type]]) [acorn::getsymbol $type traverse]
-	    set ::acorn::SurfaceInfos([file rootname [file tail $type]]) [acorn::getsymbol $type info]
+	    if { ![set ::acorn::SurfaceTypes([file rootname [file tail $type]]) [acorn::getsymbol $type traverse]] } {
+		error "Cannot load traverse from $type"
+	    }
+	    if { ![set ::acorn::SurfaceInfos([file rootname [file tail $type]]) [acorn::getsymbol $type info]] } {
+		error "Cannot load traverse from $type"
+	    }
 	}
 
 	arec::typedef ::acorn::Rays {

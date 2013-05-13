@@ -5,16 +5,12 @@ lappend auto_path ./lib ../lib
 source tcloo.tcl
 package require acorn
 
-puts HERE1
 
 acorn::model Parabolic {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
     surface B	{ R -400.0	K -1.0	n -1.00	thickness	-200 }
     surface C	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
-
-puts HERE2
-
 
 Parabolic A set R 0
 
