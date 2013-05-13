@@ -36,6 +36,9 @@ extern "C" {
 	int *traversed = new int[nray];
 	Ray *ray;
 
+	//printf("Ray0 %p %d %d\n", R, nray, rsize);
+	//return;
+
 	for ( int h = 0; h < nsurfs; h++ ) {
 
 	    Surface *surf = surflist[h].surf;
@@ -67,7 +70,7 @@ extern "C" {
 		txreverse 	= txforward.inverse();
 		rtreverse 	= rtforward.inverse();
 
-		//printf("Surface %d %d: %f %f %f\n", h, i, -surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz]);
+		//printf("Surface %d %d: %f %f %f	%d\n", h, i, -surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz], once);
 
 		for ( j = 0, ray = R; j < nray; j++, ray = (Ray *) (((char *) ray) + rsize) ) {
 		    Vector3d saveP = ray->p;
@@ -89,6 +92,11 @@ extern "C" {
 
 		    //printf("traverse %f %f\n", n, z);
 		    ray->vignetted = surf[i].traverse(n, z, &surf[i], ray);
+
+		    if ( !ray->vignetted ) {
+		        ray->vignetted = aper_clip(&surf[i], ray);
+		    }
+
 
 
 		    if ( once ) {
@@ -129,7 +137,7 @@ extern "C" {
 			//prays(ray, 1);
 
 	    if ( once ) {
-		for ( int j = 0 ; j < nray; j++ ) {		// Rays that have not traversed are vignetted.
+		for ( j = 0, ray = R; j < nray; j++, ray = (Ray *) (((char *) ray) + rsize) ) { 	// Rays that have not traversed are vignetted.
 		    ray->vignetted = !traversed[j];
 		}
 		n  = surf[0].p[Px_n] > 0.0 ? surf[0].p[Px_n] : n;
@@ -168,8 +176,9 @@ extern "C" {
 		data[i].n        = n;
 		data[i].surflist = surflist;
 		data[i].nsurfs   = nsurfs;
-		data[i].ray      = &ray[nray/nthread*i];
+		data[i].ray      = (Ray *)((char *) ray + (nray/nthread)*i*rsize);
 		data[i].nray     =      nray/nthread;
+		data[i].rsize    = rsize;
 
 		if ( i == nthread-1 ) { data[i].nray = nray - nray/nthread*i; }
 

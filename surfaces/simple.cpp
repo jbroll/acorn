@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include <iostream>
 #include <Eigen/Dense>
 
@@ -63,8 +61,6 @@ extern "C" {
     // Ray/Surface Intersection position
     //
     r.p += d * r.k;
-
-    if ( aper_clip(&s, &r) ) { return 1; }
 
     nhat = AcornSimpleSurfaceNormal(r, R, K);
 

@@ -9,7 +9,7 @@ critcl::csources acorn.cpp
 ::critcl::tcl 8.6
 ::critcl::config language c++ 
 
-critcl::clibraries tpool/tpool.o glass/acorn-glass.o glass/glass.o -lstdc++
+critcl::clibraries tpool/lib/$env(ARCH)/tpool.o glass/lib/$env(ARCH)/acorn-glass.o glass/lib/$env(ARCH)/glass.o -lstdc++
 
 
 source tcloo.tcl

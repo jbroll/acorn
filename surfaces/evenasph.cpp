@@ -64,9 +64,6 @@ extern "C" {
     //
     r.p += d * r.k;
 
-    if ( aper_clip(&s, &r) ) { return 1; }
-
-
 
     // Normal
     //
