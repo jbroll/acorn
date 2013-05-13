@@ -191,6 +191,7 @@ oo::class create ::acorn::Model {
     method coordinate-break { name args } { surface name [list {*}[join $args] grouptype coordbk] }
 
     method surface { name args } {
+
 	set i [$current length]
 
 	set params [dict merge $basedef $default [join $args]]

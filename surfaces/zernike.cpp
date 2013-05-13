@@ -138,8 +138,6 @@ extern "C" {
 	nhat = AcornSimpleSurfaceNormal(r, R, K);
     }
 
-    if ( aper_clip(&s, &r) ) { return 1; }
-
     //printf("%f %f %f\n", nhat(X), nhat(Y), nhat(Z));
     //drays("1", &r, 1);
 
