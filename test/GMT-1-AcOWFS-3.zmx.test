@@ -12,12 +12,12 @@ ZMX create GMT source zmx-models/GMT-1-AcOWFS-3.ZMX
 
 acorn::mkrays rays nx 100 x0 -12700 x1 12700 ny 100 y0 -12700 y1 12700
 
-GMT S7 set z4 .05
+#GMT S7 set z4 .05
 
-GMT S1 set z4 .01
+#GMT S1 set z4 .001
 #GMT S2 set z4 .003
 #GMT S3 set z4 .003
-GMT S4 set z4 -.01
+#GMT S4 set z4 -.01
 #GMT S5 set z4 .003
 #GMT S6 set z4 -.1
 
