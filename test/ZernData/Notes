@@ -1,0 +1,54 @@
+
+for z in 2 3 4 5 6 7 8 9 10 ; do
+    aco set B z$z 0
+done
+
+case $1 in 
+ mkrays)
+    echo rays nx 10 ny 10 start 1 end 1 | aco file
+    aco set B thick -190 
+    aco push
+
+    echo raytable | aco file > start.rays
+
+
+    echo rays nx 10 ny 10 start 1 end -1 | aco file
+
+    echo raytable | aco file > none.rays
+
+    for z in 2 3 4 5 6 7 8 9 10 ; do
+	aco set B z$z .05
+	aco push
+	sleep 2
+	echo raytable | aco file > z`printf %02d $z`.rays
+	aco set B z$z 0
+    done
+    ;;
+ plot)
+	pastetable none.rays z*.rays > pasted.rays
+
+	plottable toptitle "Zemax Z2 - Z10"						\
+		      nobox title  Z8 size 3 3 file pasted.rays x_1,y_1 vector x_8,y_8	\
+		graph nobox title  Z9 size 3 3 file pasted.rays x_1,y_1 vector x_9,y_9	\
+		graph nobox title Z10 size 3 3 file pasted.rays x_1,y_1 vector x_10,y_10\
+		at 5 0									\
+		graph nobox title  Z5 size 3 3 file pasted.rays x_1,y_1 vector x_5,y_5 	\
+		graph nobox title  Z6 size 3 3 file pasted.rays x_1,y_1 vector x_6,y_6	\
+		graph nobox title  Z7 size 3 3 file pasted.rays x_1,y_1 vector x_7,y_7 	\
+		at 2.5 0								\
+		graph nobox title  Z2 size 3 3 file pasted.rays x_1,y_1 vector x_2,y_2	\
+		graph nobox title  Z3 size 3 3 file pasted.rays x_1,y_1 vector x_3,y_3	\
+		graph nobox title  Z4 size 3 3 file pasted.rays x_1,y_1 vector x_4,y_4 	\
+	
+esac
+
+exit
+echo raytable | aco file | plottable size 8 8 x,y marker circle
+
+exit
+
+echo rays nx 10 ny 10 start 1 end -1 | aco file
+
+aco set B z4 
+
+

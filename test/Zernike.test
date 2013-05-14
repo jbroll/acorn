@@ -4,6 +4,25 @@ lappend auto_path ./lib ../lib arec/lib
 
 package require acorn
 
+source starbase.tcl
+
+proc starbase2ray { table { rays {} } } {
+    upvar $table T
+
+    if { $rays eq "" } {
+	set rays [::acorn::Rays create rays[incr ::acorn::RAYS] 0]
+    }
+
+    starbase_foreachrow T -colvars row {
+	puts "$x $y"
+	$rays [$rays length] set px $x py $y pz $z kx $l ky $m kz $n
+    }
+
+    set rays
+}
+
+set rays [starbase2ray [starbase_read R test/ZernData/start.rays]]
+
 acorn::model Zern {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
     surface B	{ R -400.0	K -1.0	n -1.00	thickness	-190 type zernike nradius 25 nzterms 11  }
@@ -11,13 +30,13 @@ acorn::model Zern {
 }
 
 
-acorn::mkrays rays nx 10 ny 10 box 25 circle 0
+#acorn::mkrays rays nx 10 ny 10 box 25 circle 0
 #acorn::mkrays rays nx 3 ny 3 box 25
 
-Zern B set z9 -.0015
+Zern B set z9 -.0007
 
 puts [Zern B get z1]
 
-Zern trace rays
+Zern trace $rays
 
-acorn::prays rays
+acorn::prays $rays
