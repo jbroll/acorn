@@ -70,6 +70,9 @@ typedef struct _Ray {
     int		vignetted;
 } Ray;
 
+void aper_init(Surface *s, Affine3d transform);
+int  aper_clip(Surface *s, Ray *r);
+
 extern "C" {
     int  SurfSize(void);
     int  RaysSize(void);
@@ -77,6 +80,4 @@ extern "C" {
     //void xrays(Ray *r, int n);
     //void prays(Ray *r, int n);
 
-    void aper_init(Surface *s, Affine3d transform);
-    int  aper_clip(Surface *s, Ray *r);
 }

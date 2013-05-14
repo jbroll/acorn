@@ -1,6 +1,6 @@
 #!/usr/bin/env tclkit8.6
 #
-lappend auto_path /home/john/lib /Users/john/lib ./lib ../lib tripack/lib
+lappend auto_path /home/john/lib /Users/john/lib ./lib ../lib arec/lib tripack/lib
 
 source tcloo.tcl
 source ngon.tcl
@@ -167,6 +167,5 @@ GMT print
 display GMT
 acorn-tree GMT
 
-puts HERE
 .win transform -camera {} "lookat all"
 

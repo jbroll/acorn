@@ -3,9 +3,8 @@
 using namespace std;
 using namespace Eigen;
 
-#include "../acorn.h"
+#include "acorn.h"
 
-extern "C" {
 #include <stdio.h>
 #include <string.h>
 
@@ -42,4 +41,3 @@ extern "C" {
 
 	return 0;
     }
-}

@@ -18,4 +18,10 @@ typedef struct _GlassEntry {
     double	ymin, ymax;
 } GlassEntry;
 
-double glass_index(int formula, double wave, double temp, double pres, double *c);
+
+extern "C" {
+    double glass_indx(GlassEntry *glass, double wave);
+    int  GlasSize(void);
+
+    double glass_index(int formula, double wave, double temp, double pres, double *c);
+}

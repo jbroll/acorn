@@ -3,6 +3,10 @@
    John Roll 2012
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
  #include <stdlib.h>
 
  #define TCL_THREADS 1
@@ -110,3 +114,8 @@ void TPoolThreadWait(TPoolThread *t) {
 
     Tcl_MutexUnlock(&t->lock);
  }
+
+
+#ifdef __cplusplus
+}
+#endif

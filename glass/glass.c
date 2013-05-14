@@ -1,4 +1,5 @@
 
+extern "C" {
 #include <stdio.h>
 #include <math.h>
 
@@ -17,9 +18,6 @@
 #define Sellmeier5    11
 #define SchottE2      12
 #define SchottE3      13
-
-
-
 
 double schott(double y, double t, double p, double *c)
 {
@@ -189,3 +187,4 @@ double glass_index(int formula, double wave, double temp, double pres, double *c
     return 0.0;
 }
 
+}

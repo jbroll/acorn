@@ -1,43 +1,45 @@
 #!/Users/john/bin/tclkit8.6
 #
-if { 1 && ![critcl::compiled] } {		# Force md5 to be FAST.  Don't use object cache.
+if { 0 && ![critcl::compiled] } {		# Force md5 to be FAST.  Don't use object cache.
     proc md5 { x } {
 	    return [expr rand()]
     }
 }
 
-critcl::cheaders -I/Users/john/include -I/home/john/include
-
-critcl::tsources func.tcl tcloo.tcl uda.tcl agf.tcl acorn-model.tcl zmx.tcl acorn.tcl
-critcl::csources acorn.cpp 
-
 ::critcl::tcl 8.6
 ::critcl::config language c++ 
 
-critcl::clibraries tpool/lib/$env(ARCH)/tpool.o glass/lib/$env(ARCH)/acorn-glass.o glass/lib/$env(ARCH)/glass.o -lstdc++
+critcl::cheaders -I/Users/john/include -I/home/john/include
+
+critcl::tsources func.tcl tcloo.tcl uda.tcl agf.tcl acorn-model.tcl zmx.tcl acorn.tcl
+critcl::csources acorn.cpp aperture.cpp glass/acorn-glass.cpp glass/glass.c tpool/tpool.c
+
+critcl::clibraries -lstdc++
 
 
 source tcloo.tcl
-#source uda.tcl
 
 namespace eval acorn {
     variable SurfaceTypes
     variable SurfaceInfos
 
+
     critcl::ccode {
 	#include <dlfcn.h>
+
 
 	extern "C" {
 	    int  SurfSize(void);
 	    int  RaysSize(void);
-	    int  GlasSize(void);
 
 	    void xrays(void *r, int n);
 	    void prays(void *r, int n);
-	    void trace_rays(double z, double n, void *surflist, int nsurfs, void *ray, int nray, int rsize, int nthread);
-	    typedef int  (*InfosFunc)(int info, char ***str, double **val);
 
+	    void trace_rays(double z, double n, void *surflist, int nsurfs, void *ray, int nray, int rsize, int nthread);
+
+	    typedef int  (*InfosFunc)(int info, char ***str, double **val);
 	    double glass_indx(void *glass, double wave);
+	    int  GlasSize(void);
 	}
     }
 
@@ -55,7 +57,7 @@ namespace eval acorn {
 	set ::acorn::SurfaceTypes(coordbrk)	-1
 	set ::acorn::SurfaceInfos(coordbrk)	-1
 
-	foreach type [glob ./surfaces/*.so] {
+	foreach type [glob ./surfaces/lib/[arch]/*.so] {
 	    if { ![set ::acorn::SurfaceTypes([file rootname [file tail $type]]) [acorn::getsymbol $type traverse]] } {
 		error "Cannot load traverse from $type"
 	    }
@@ -143,6 +145,10 @@ namespace eval acorn {
 
     critcl::cproc _prays { long r int nray } void { prays((void *) r, nray); }
     critcl::cproc _xrays { long r int nray } void { xrays((void *) r, nray); }
+
+    if { ![::critcl::compiled] } {
+	critcl::cproc arch   {} char* [subst { return "$env(ARCH)"; }]
+    }
 }
 
 
