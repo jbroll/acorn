@@ -101,7 +101,8 @@ extern "C" {
 
 	    								// Compute the normal to the conic + zernike
 	    if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
-		nhat = Vector3d(Rsign*Dsign*-zdx, Rsign*Dsign*-zdy, -Dsign*1.0);
+		nhat = Vector3d(Dsign*-zdx, Dsign*-zdy, -Dsign*1.0);
+//printf("Planar Hat %f %f %f\n", nhat(X), nhat(Y), nhat(Z));
 	    } else {
 		double cdz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
 		double cdx = P(X)/cdz;					// These must be slopes to add with zernike slopes.
@@ -117,6 +118,7 @@ extern "C" {
 	    if ( Den != 0.0f ) {
 		r.p += Num/Den * r.k;					// Move along the ray the distance to the normal surface.
 
+printf("Tol %f\n", (A-r.p).norm());
 		if ( (A-r.p).squaredNorm() < tol ) { break; } 		// If the ray failes to advance, then Done.
 	    } else {
 		return 1;						// BANG!
