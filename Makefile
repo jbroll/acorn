@@ -4,16 +4,17 @@ OS  =$(shell uname)
 ARCH=$(OS).$(shell uname -m)
 
 acorn.Linux.x86_64  : BITS = -m64
+acorn.Linux.i386    : BITS = -m32
 acorn.Darwin.x86_64 : BITS = -m64
 acorn.Darwin.i386   : BITS = -m32
-
-#include $(CONFIG)
 
 INC= -I/Users/john/include -I/home/john/include
 
 CFLAGS=$(INC) -msse -fPIC
 
+SRC	= acorn.cpp aperture.cpp glass/glass.c glass/acorn-glass.cpp tpool/tpool.c
 TCL	= acorn.tcl acorn-model.tcl uda.tcl agf.tcl zmx.tcl func.tcl
+
 
 SURFS	= surfaces/lib/$(ARCH)/simple.so		\
 	  surfaces/lib/$(ARCH)/zernike.so		\
@@ -22,9 +23,9 @@ SURFS	= surfaces/lib/$(ARCH)/simple.so		\
 	  surfaces/lib/$(ARCH)/evenasph.so		\
 	  surfaces/lib/$(ARCH)/dgrating.so
 
+ACORN_SRCS = $(SRC) $(TCL) $(SURFS)
 ACORN_OBJS = $(SURFS) 
-
-ACORN_UTIL 	= surfaces/acorn-utils.h
+ACORN_UTIL = surfaces/acorn-utils.h
 
 all: zernike acorn.$(OS) arec.$(OS) $(SURFS)
 
@@ -39,18 +40,20 @@ acorn.Darwin : acorn.Darwin.i386 acorn.Darwin.x86_64
 
 acorn.Darwin.i386   : lib/acorn/macosx-ix86/acorn.dylib		arec.Darwin.i386
 acorn.Darwin.x86_64 : lib/acorn/macosx-x86_64/acorn.dylib	arec.Darwin.x86_64
+acorn.Linux.x86_64  : lib/acorn/linux-x86_64/acorn.so	arec.Linux.x86_64
 
-lib/acorn/macosx-ix86/acorn.dylib   : $(TCL) $(ACORN_OBJS)
+lib/acorn/macosx-ix86/acorn.dylib   :	$(ACORN_SRCS)
 	ARCH=$(ARCH) critcl -target macosx-x86_32 -pkg acorn 
 	rm -rf lib/acorn/macosx-ix86
 	mv lib/acorn/macosx-x86_32 lib/acorn/macosx-ix86
 
-lib/acorn/macosx-x86_64/acorn.dylib : $(TCL) $(ACORN_OBJS)
+lib/acorn/macosx-x86_64/acorn.dylib :	$(ACORN_SRCS)
 	ARCH=$(ARCH) critcl -target macosx-x86_64 -pkg acorn 
 
+lib/acorn/linux-x86_64/acorn.so :	$(ACORN_SRCS)
+	ARCH=$(ARCH) critcl -pkg acorn 
 
-#acorn.o : acorn.cpp acorn.h
-#	g++ $(BITS) -O2 -c $(INC) acorn.cpp -o acorn.o
+
 
 surfaces/lib/$(ARCH)/simple.so : surfaces/simple.cpp acorn.h $(ACORN_UTIL)
 	mkdir -p surfaces/lib/$(ARCH)

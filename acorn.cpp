@@ -22,14 +22,6 @@ extern "C" {
 	    printf("%10.6f\t%10.6f\t%10.6f\t%d\n",     ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
 	}
     }
-    void xrays(Ray *ray, int n)
-    {
-	for ( int i = 0; i < n; i++ ) {
-	    printf("%p	%016llx %016llx %016llx\t", &ray[i]
-		    					, ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
-	    printf("%016llx %016llx %016llx\n" , ray[i].k(X), ray[i].k(Y), ray[i].k(Z));
-	}
-    }
 
     void trace_rays0(double z, double n, SurfaceList *surflist, int nsurfs, Ray *R, int nray, int rsize)
     {

@@ -32,7 +32,6 @@ namespace eval acorn {
 	    int  SurfSize(void);
 	    int  RaysSize(void);
 
-	    void xrays(void *r, int n);
 	    void prays(void *r, int n);
 
 	    void trace_rays(double z, double n, void *surflist, int nsurfs, void *ray, int nray, int rsize, int nthread);
@@ -144,10 +143,9 @@ namespace eval acorn {
     }
 
     critcl::cproc _prays { long r int nray } void { prays((void *) r, nray); }
-    critcl::cproc _xrays { long r int nray } void { xrays((void *) r, nray); }
 
     if { ![::critcl::compiled] } {
-	critcl::cproc arch   {} char* [subst { return "$env(ARCH)"; }]
+	critcl::cproc arch   {} {const char*} [subst { return "$env(ARCH)"; }]
     }
 }
 
