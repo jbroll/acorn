@@ -11,7 +11,7 @@ if { 0 && ![critcl::compiled] } {		# Force md5 to be FAST.  Don't use object cac
 
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
-critcl::tsources func.tcl tcloo.tcl uda.tcl agf.tcl acorn-model.tcl zmx.tcl acorn.tcl
+critcl::tsources func.tcl tcloo.tcl unix.tcl uda.tcl acorn-model.tcl agf.tcl zmx.tcl acorn.tcl
 critcl::csources acorn.cpp aperture.cpp glass/acorn-glass.cpp glass/glass.c tpool/tpool.c
 
 critcl::clibraries -lstdc++

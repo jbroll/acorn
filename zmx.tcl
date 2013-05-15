@@ -1,10 +1,8 @@
 # Zemax ZMX file.
 #
 # 
-source tcloo.tcl
-source unix.tcl
 
-lappend auto_path lib
+namespace eval acorn {
 
 array set ZMXSurfaceMap {
     standard	 	simple
@@ -12,6 +10,7 @@ array set ZMXSurfaceMap {
     evenasph     	evenasph
     dgrating	 	dgrating
     szernpha	 	zernike
+    szernsag	 	zernike
 
     nsc_ssur	 	simple
     nsc_zsur	 	zernike
@@ -56,8 +55,9 @@ array set ZMXParmMap {
     evenasph,7		a7
     evenasph,8		a8
 }
+}
 
-oo::class create ZMX {
+oo::class create ::acorn::ZMX {
     superclass ::acorn::BaseModel
 
     variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs		\
@@ -139,7 +139,7 @@ oo::class create ZMX {
 	}
 	set args {}
 
-	set type $::ZMXSurfaceMap([string tolower $type])		; # Map Zemaz surface type in to acorn.
+	set type $::acorn::ZMXSurfaceMap([string tolower $type])		; # Map Zemaz surface type in to acorn.
 
 	set surftype $type
 
@@ -289,7 +289,7 @@ oo::class create ZMX {
      }
      method NSCS { args } {}
      method NSOD { n value a b c d e f } {
-	 try { my [$current $surf get name] set $::ZMXNSODMap($surftype,$n) $value 
+	 try { my [$current $surf get name] set $::acorn::ZMXNSODMap($surftype,$n) $value 
 	 } on error message {
 	     my [$current $surf get type] $n $value $a $b $c $d $e $f
 	 }
@@ -353,5 +353,4 @@ oo::class create ZMX {
     method XFLN { args } {}
     method YFLN { args } {}
 }
-
 
