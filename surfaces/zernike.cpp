@@ -94,6 +94,10 @@ extern "C" {
 
 	    zernike_std((r.p(X) + xdecenter)/nradius, (r.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zdz, &zdx, &zdy);
 
+	    zdz /= nradius;
+	    zdy /= nradius;
+	    zdx /= nradius;
+
 	    Vector3d P = Vector3d(r.p(X), r.p(Y), r.p(Z)+zdz);		// Estimate point on the surface.
 
 	    								// Compute the normal to the conic + zernike

@@ -76,8 +76,4 @@ int  aper_clip(Surface *s, Ray *r);
 extern "C" {
     int  SurfSize(void);
     int  RaysSize(void);
-
-    //void xrays(Ray *r, int n);
-    //void prays(Ray *r, int n);
-
 }

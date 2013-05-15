@@ -14,7 +14,6 @@ proc starbase2ray { table { rays {} } } {
     }
 
     starbase_foreachrow T -colvars row {
-	puts "$x $y"
 	$rays [$rays length] set px $x py $y pz $z kx $l ky $m kz $n
     }
 
@@ -33,9 +32,7 @@ acorn::model Zern {
 #acorn::mkrays rays nx 10 ny 10 box 25 circle 0
 #acorn::mkrays rays nx 3 ny 3 box 25
 
-Zern B set z9 -.0007
-
-puts [Zern B get z1]
+Zern B set z9 -.00075
 
 Zern trace $rays
 
