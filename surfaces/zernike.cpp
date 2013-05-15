@@ -105,11 +105,10 @@ extern "C" {
 		nhat = Vector3d(Rsign*Dsign*zdx, Rsign*Dsign*zdy, -Dsign*1.0);
 	    } else {
 		double cdz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
-		double cdx = P(X)/cdz;
+		double cdx = P(X)/cdz;					// These must be slopes to add with zernike slopes.
 		double cdy = P(Y)/cdz;
 
 		nhat = Vector3d(Rsign*Dsign*(cdx + zdx), Rsign*Dsign*(cdy + zdy), -Dsign*1);
-		//nhat = Vector3d(Rsign*Dsign*P(X), Rsign*Dsign*P(Y), -Dsign * dz);
 	    }
 	    nhat /= nhat.norm();
 

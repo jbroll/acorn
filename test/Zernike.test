@@ -24,7 +24,7 @@ set rays [starbase2ray [starbase_read R test/ZernData/start.rays]]
 
 acorn::model Zern {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	-190 type zernike nradius 25 nzterms 11  }
+    surface B	{ R -400.0	K -1.0	n -1.00	thickness	-190 type zernike nradius 36 nzterms 11  }
     surface C	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
@@ -32,7 +32,7 @@ acorn::model Zern {
 #acorn::mkrays rays nx 10 ny 10 box 25 circle 0
 #acorn::mkrays rays nx 3 ny 3 box 25
 
-Zern B set z9 -.00075
+Zern B set z9 -.05
 
 Zern trace $rays
 

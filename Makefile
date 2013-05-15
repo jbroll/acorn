@@ -23,7 +23,7 @@ SURFS	= surfaces/lib/$(ARCH)/simple.so		\
 	  surfaces/lib/$(ARCH)/evenasph.so		\
 	  surfaces/lib/$(ARCH)/dgrating.so
 
-ACORN_SRCS = $(SRC) $(TCL)
+ACORN_SRCS = $(SRC) $(TCL) $(SURFS)
 ACORN_OBJS = $(SURFS) 
 ACORN_UTIL = surfaces/acorn-utils.h
 
