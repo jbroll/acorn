@@ -23,79 +23,45 @@ proc starbase2ray { table { rays {} } } {
 starbase_read Start test/ZernData/start.rays
 set rays {}
 
-acorn::model Zern0 {
+acorn::model Model {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	-190 type zernike nradius 36 nzterms 11  }
+    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernike nradius 36 nzterms 11 }
+    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernike nradius 36 nzterms 0 }
+    surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
 set Zamount 0.05
 
-foreach zz { 1 2 3 4 5 6 7 8 9 10 } {
-    set rays [starbase2ray Start $rays]
+foreach surf { B C } {
+    foreach zz { 1 2 3 4 5 6 7 8 9 10 } {
+	set rays [starbase2ray Start $rays]
 
-    Zern0 B set z$zz $Zamount
-    Zern0 trace $rays
+	Model $surf set z$zz $Zamount
+	Model trace $rays
 
-    starbase_read ZRay test/ZernData/z[format %02d $zz]-p.rays
+	starbase_read ZRay test/ZernData/z[format %02d $zz]-$surf.rays
 
-    set zoff	200
+	set zoff	370
 
-    set sumx 0
-    set sumy 0
-    set sumz 0
-    starbase_foreachrow ZRay -colvars row {
-	lassign [$rays [expr $row-1] get px py pz] px py pz
+	set sumx 0
+	set sumy 0
+	set sumz 0
+	starbase_foreachrow ZRay -colvars row {
+	    lassign [$rays [expr $row-1] get px py pz] px py pz
 
-	set pz [expr $pz-$zoff]
+	    set pz [expr $pz-$zoff]
 
-	#puts "$px $py $pz		$x $y $z"
+	    #puts "$px $py $pz		$x $y $z"
 
-	set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
-	set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
-	set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
+	    set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
+	    set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
+	    set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
+	}
+
+	puts "$zz	[expr sqrt($sumx)]	[expr sqrt($sumy)]	[expr sqrt($sumz)]"
+
+	unset ZRay
+	Model $surf set z$zz 0.0
     }
-
-    puts "$zz	[expr sqrt($sumx)]	[expr sqrt($sumy)]	[expr sqrt($sumz)]"
-
-    unset ZRay
-    Zern0 B set z$zz 0.0
 }
-
-acorn::model Zern1 {
-    surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	-190 type zernike nradius 36 nzterms 11  }
-    surface C	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
-}
-
-foreach zz { 1 2 3 4 5 6 7 8 9 10 } {
-    set rays [starbase2ray Start $rays]
-
-    Zern1 B set z$zz $Zamount
-    Zern1 trace $rays
-
-    starbase_read ZRay test/ZernData/z[format %02d $zz].rays
-
-    set zoff	10
-
-    set sumx 0
-    set sumy 0
-    set sumz 0
-    starbase_foreachrow ZRay -colvars row {
-	lassign [$rays [expr $row-1] get px py pz] px py pz
-
-	set pz [expr $pz-$zoff]
-
-	#puts "$px $py $pz		$x $y $z"
-
-	set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
-	set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
-	set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
-    }
-
-    puts "$zz	[expr sqrt($sumx)]	[expr sqrt($sumy)]	[expr sqrt($sumz)]"
-
-    unset ZRay
-    Zern1 B set z$zz 0.0
-}
-
 

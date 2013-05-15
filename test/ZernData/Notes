@@ -1,36 +1,28 @@
 
-for z in 1 2 3 4 5 6 7 8 9 10 ; do
-    aco set B z$z 0
-done
-
 case $1 in 
  data)
-    aco  rays nx 11 ny 11 start 1
-    aco set B thick -190 
+    for z in 1 2 3 4 5 6 7 8 9 10 ; do
+	aco set B z$z 0
+	aco set C z$z 0
+    done
+
+    aco  rays nx 11 ny 11 start 1 end -1
     aco push
 
     aco rays end  1						# Trace rays to surface 1 (planar).
     aco raytable > start.rays	
 
     aco rays end -1	 					# Trace rays to image plane.
-    aco raytable > none.rays
+    aco raytable > image.rays
 
-    for z in 1 2 3 4 5 6 7 8 9 10 ; do
-	aco set B z$z .05
-	aco push
-	sleep 2
-	echo raytable | aco file > z`printf %02d $z`.rays
-	aco set B z$z 0
-    done
-
-    aco rays end  2						# Trace rays to the mirror (parabola).
-
-    for z in 1 2 3 4 5 6 7 8 9 10 ; do
-	aco set B z$z .05
-	aco push
-	sleep 2
-	aco raytable > z`printf %02d $z`-p.rays
-	aco set B z$z 0
+    for surf in B C ; do
+	for z in 1 2 3 4 5 6 7 8 9 10 ; do
+	    aco set $surf z$z .05
+	    aco push
+	    sleep 2
+	    aco raytable > z`printf %02d $z`-$surf.rays
+	    aco set $surf z$z 0
+	done
     done
     ;;
  plot)
