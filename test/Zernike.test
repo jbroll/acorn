@@ -38,18 +38,12 @@ foreach surf { B C } {
     foreach zz { 1 2 3 4 5 6 7 8 9 10 } {
 	set rays [starbase2ray Start $rays]
 
-<<<<<<< HEAD
-if { $argv ne {} } {
-    Zern B set {*}$argv
-}
-=======
-set surf C
-set zz   2
+#set surf C
+#set zz   2
 
 	Model $surf set z$zz $Zamount
 	Model trace $rays
-exit
->>>>>>> d6f7991af5a05327776261801da4e25061efac59
+#exit
 
 	starbase_read ZRay test/ZernData/z[format %02d $zz]-$surf.rays
 
