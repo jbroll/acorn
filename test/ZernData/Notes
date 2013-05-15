@@ -1,26 +1,35 @@
 
-for z in 2 3 4 5 6 7 8 9 10 ; do
+for z in 1 2 3 4 5 6 7 8 9 10 ; do
     aco set B z$z 0
 done
 
 case $1 in 
- mkrays)
-    echo rays nx 10 ny 10 start 1 end 1 | aco file
+ data)
+    aco  rays nx 11 ny 11 start 1
     aco set B thick -190 
     aco push
 
-    echo raytable | aco file > start.rays
+    aco rays end  1						# Trace rays to surface 1 (planar).
+    aco raytable > start.rays	
 
+    aco rays end -1	 					# Trace rays to image plane.
+    aco raytable > none.rays
 
-    echo rays nx 10 ny 10 start 1 end -1 | aco file
-
-    echo raytable | aco file > none.rays
-
-    for z in 2 3 4 5 6 7 8 9 10 ; do
+    for z in 1 2 3 4 5 6 7 8 9 10 ; do
 	aco set B z$z .05
 	aco push
 	sleep 2
 	echo raytable | aco file > z`printf %02d $z`.rays
+	aco set B z$z 0
+    done
+
+    aco rays end  2						# Trace rays to the mirror (parabola).
+
+    for z in 1 2 3 4 5 6 7 8 9 10 ; do
+	aco set B z$z .05
+	aco push
+	sleep 2
+	aco raytable > z`printf %02d $z`-p.rays
 	aco set B z$z 0
     done
     ;;

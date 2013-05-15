@@ -14,26 +14,88 @@ proc starbase2ray { table { rays {} } } {
     }
 
     starbase_foreachrow T -colvars row {
-	$rays [$rays length] set px $x py $y pz $z kx $l ky $m kz $n
+	$rays [expr $row-1] set px $x py $y pz $z kx $l ky $m kz $n
     }
 
     set rays
 }
 
-set rays [starbase2ray [starbase_read R test/ZernData/start.rays]]
+starbase_read Start test/ZernData/start.rays
+set rays {}
 
-acorn::model Zern {
+acorn::model Zern0 {
+    surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
+    surface B	{ R -400.0	K -1.0	n -1.00	thickness	-190 type zernike nradius 36 nzterms 11  }
+}
+
+set Zamount 0.05
+
+foreach zz { 1 2 3 4 5 6 7 8 9 10 } {
+    set rays [starbase2ray Start $rays]
+
+    Zern0 B set z$zz $Zamount
+    Zern0 trace $rays
+
+    starbase_read ZRay test/ZernData/z[format %02d $zz]-p.rays
+
+    set zoff	200
+
+    set sumx 0
+    set sumy 0
+    set sumz 0
+    starbase_foreachrow ZRay -colvars row {
+	lassign [$rays [expr $row-1] get px py pz] px py pz
+
+	set pz [expr $pz-$zoff]
+
+	#puts "$px $py $pz		$x $y $z"
+
+	set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
+	set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
+	set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
+    }
+
+    puts "$zz	[expr sqrt($sumx)]	[expr sqrt($sumy)]	[expr sqrt($sumz)]"
+
+    unset ZRay
+    Zern0 B set z$zz 0.0
+}
+
+acorn::model Zern1 {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
     surface B	{ R -400.0	K -1.0	n -1.00	thickness	-190 type zernike nradius 36 nzterms 11  }
     surface C	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
+foreach zz { 1 2 3 4 5 6 7 8 9 10 } {
+    set rays [starbase2ray Start $rays]
 
-#acorn::mkrays rays nx 10 ny 10 box 25 circle 0
-#acorn::mkrays rays nx 3 ny 3 box 25
+    Zern1 B set z$zz $Zamount
+    Zern1 trace $rays
 
-Zern B set z9 -.05
+    starbase_read ZRay test/ZernData/z[format %02d $zz].rays
 
-Zern trace $rays
+    set zoff	10
 
-acorn::prays $rays
+    set sumx 0
+    set sumy 0
+    set sumz 0
+    starbase_foreachrow ZRay -colvars row {
+	lassign [$rays [expr $row-1] get px py pz] px py pz
+
+	set pz [expr $pz-$zoff]
+
+	#puts "$px $py $pz		$x $y $z"
+
+	set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
+	set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
+	set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
+    }
+
+    puts "$zz	[expr sqrt($sumx)]	[expr sqrt($sumy)]	[expr sqrt($sumz)]"
+
+    unset ZRay
+    Zern1 B set z$zz 0.0
+}
+
+
