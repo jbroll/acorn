@@ -75,26 +75,26 @@ inline void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
     }
 }
 
-inline int AcornIterativeIntersect(Ray &r, Surface &surf, SagittaFunc sagitta, double R, double K) 
+inline int AcornIterativeIntersect(Surface &surf, Ray &r, SagittaFunc sagitta, double R, double K, Vector3d &nhat) 
 {
-    Vector3d nhat;
-
     double Az = r.p(Z);
     double sag = 0.0;
 
-    double tol = 1e10-8;
+    double tol = 1e-8;
 
-	double Dsign = r.k(Z)/fabs(r.k(Z));
-	double Rsign = R/fabs(R);
+    double Dsign = r.k(Z)/fabs(r.k(Z));
+    double Rsign = R/fabs(R);
 
-    for ( int iter = 0; iter < 5; iter++ ) {
+    int i;
+
+    for ( i = 0; i < ACORN_ITER; i++ ) {
 	double zdx, zdy, zdz;
 
 	sagitta(surf, r.p(X), r.p(Y), &zdz, &zdx, &zdy);
 
 	Vector3d P = Vector3d(r.p(X), r.p(Y), Az-zdz);		// Estimate point on the surface.
 
-								// Compute the normal to the conic + zernike
+								// Compute the normal to the conic + deformation
 	if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
 	    nhat = Vector3d(zdx, zdy, -Dsign*1.0);
 	} else {
@@ -121,4 +121,8 @@ inline int AcornIterativeIntersect(Ray &r, Surface &surf, SagittaFunc sagitta, d
 	    return 1;						// BANG!
 	}
     }
+    if ( i >= ACORN_ITER ) { return 1; }
+
+    return 0;
 }
+

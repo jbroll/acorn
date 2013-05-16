@@ -16,6 +16,8 @@
 #define h2d(r)	( (r) * X_H2D )
 #define d2h(d)	( (d) / X_H2D )
 
+#define ACORN_ITER	5
+
 // Special surface types
 //
 #define COORDBK	-1

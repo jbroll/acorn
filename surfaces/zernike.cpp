@@ -7,6 +7,7 @@ using namespace Eigen;
 
 #include "../acorn.h"
 #include "acorn-utils.h" 
+#include <math.h>
 
 extern "C" {
 #include "../zernike/zernike.h"
@@ -71,7 +72,7 @@ extern "C" {
 	zdx /= nradius;
 	zdy /= nradius;
 
-	*dz = -zdz;
+	*dz = -zdz;				// This makes the Zernike signs match Zemax.
 	*dx = -zdx;
 	*dy = -zdy;
     }
@@ -84,71 +85,16 @@ extern "C" {
     double K = s.p[Pm_K];
     double n = s.p[Px_n];
 
-    // Intersect
-    //
-    // establish sign flippy dealies
-    //
-    double Ksign = 1.0;
-    double Dsign = r.k(Z)/fabs(r.k(Z));
-    double Rsign = R/fabs(R);
-
     Vector3d nhat;
 
-    double xdecenter = s.p[Pm_xdecenter];
-    double ydecenter = s.p[Pm_ydecenter];
-    double   nradius = s.p[Pm_nradius];
     int      nzterms = s.p[Pm_nzterms];
-
-    double tol	     = 1.0e-10;
-
-
 
     if ( nzterms ) {
 	d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
 	r.p += d * r.k;
 
-	double Az = r.p(Z);
-	double sag = 0.0;
+	if ( AcornIterativeIntersect(s, r, ZernikeSag, R, K, nhat) ) { return 1; }
 
-	for ( int iter = 0; iter < 5; iter++ ) {
-	    double zdx, zdy, zdz;
-
-	    zernike_std((r.p(X) + xdecenter)/nradius, (r.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zdz, &zdx, &zdy);
-
-	    zdx /= nradius;
-	    zdy /= nradius;
-
-
-	    Vector3d P = Vector3d(r.p(X), r.p(Y), Az+zdz);		// Estimate point on the surface.
-
-	    								// Compute the normal to the conic + zernike
-	    if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
-		nhat = Vector3d(-zdx, -zdy, -Dsign*1.0);
-	    } else {
-		double cdz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
-		double cdx = P(X)/cdz;					// These must be slopes to add with zernike slopes.
-		double cdy = P(Y)/cdz;
-
-		nhat = Vector3d(Rsign*Dsign*(cdx + -zdx), Rsign*Dsign*(cdy + -zdy), -Dsign*1);
-	    }
-	    nhat /= nhat.norm();
-
-	    if ( fabs(sag - zdz) < tol ) { break; }
-	    sag = zdz;
-
-
-	    double Num = (P-r.p).dot(nhat);				// Compute the distance to the surface normal to nhat.
-	    double Den =     r.k.dot(nhat);
-
-
-	    if ( Den != 0.0f ) {
-		double dist = Num/Den;
-
-		r.p += dist * r.k;					// Move along the ray the distance to the normal surface.
-	    } else {
-		return 1;						// BANG!
-	    }
-	}
     } else {
 	d = AcornSimpleSurfaceDistance(r, z, R, K);
 

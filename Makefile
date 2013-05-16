@@ -61,23 +61,23 @@ surfaces/lib/$(ARCH)/simple.so : surfaces/simple.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
 	g++ $(BITS) -fPIC -O2 -shared $(INC) surfaces/simple.cpp -o surfaces/lib/$(ARCH)/simple.so
 
-surfaces/lib/$(ARCH)/evenasph.so : surfaces/evenasph.cpp acorn.h
+surfaces/lib/$(ARCH)/evenasph.so : surfaces/evenasph.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
 	g++ $(BITS) -fPIC -O2 -shared $(INC) surfaces/evenasph.cpp -o surfaces/lib/$(ARCH)/evenasph.so
 
-surfaces/lib/$(ARCH)/dgrating.so : surfaces/dgrating.cpp acorn.h
+surfaces/lib/$(ARCH)/dgrating.so : surfaces/dgrating.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
 	g++ $(BITS) -fPIC -O2 -shared $(INC) surfaces/dgrating.cpp -o surfaces/lib/$(ARCH)/dgrating.so
 
-surfaces/lib/$(ARCH)/zernike.so : surfaces/zernike.cpp acorn.h zernike/lib/$(ARCH)/zernike.o
+surfaces/lib/$(ARCH)/zernike.so : surfaces/zernike.cpp acorn.h zernike/lib/$(ARCH)/zernike.o $(ACORN_UTIL)
 	@mkdir -p zernike/lib/$(ARCH)
 	g++ $(BITS) -fPIC -O2 -shared $(INC) surfaces/zernike.cpp zernike/lib/$(ARCH)/zernike.o -o surfaces/lib/$(ARCH)/zernike.so
 	
-surfaces/lib/$(ARCH)/lens-array-rect.so : surfaces/lens-array-rect.cpp acorn.h
+surfaces/lib/$(ARCH)/lens-array-rect.so : surfaces/lens-array-rect.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
 	g++ $(BITS) -fPIC -O2 -shared $(INC) surfaces/lens-array-rect.cpp -o surfaces/lib/$(ARCH)/lens-array-rect.so
 	
-surfaces/lib/$(ARCH)/lens-array-hex.so : surfaces/lens-array-hex.cpp acorn.h
+surfaces/lib/$(ARCH)/lens-array-hex.so : surfaces/lens-array-hex.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
 	g++ $(BITS) -fPIC -O2 -shared $(INC) surfaces/lens-array-hex.cpp -o surfaces/lib/$(ARCH)/lens-array-hex.so
 
