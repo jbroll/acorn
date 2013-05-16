@@ -36,15 +36,15 @@ extern "C" {
     void EvenASpSag(Surface &s, double x, double y, double *dz, double *dx, double *dy)
     {
 	int    i;
-	int    naterms = s.p[Pm_nterms];
+	int    nterms = s.p[Pm_nterms];
 
 	double adz = 0.0;
 	double adx = 0.0;
 
-	double r = sqrt(x*x+y*y);
+	double  r = sqrt(x*x+y*y);
 	double rr = 1;
 
-	for ( i = 0; i < naterms; i++ ) {
+	for ( i = 0; i < nterms; i++ ) {
 	    rr = rr*r;						// rr is an odd.
 	    adx = adx + rr * s.p[Pm_a2+i] * (i+1*2);		// Make us a derrivitive.
 

@@ -11,13 +11,17 @@ if { 0 && ![critcl::compiled] } {		# Force md5 to be FAST.  Don't use object cac
 
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
-critcl::tsources func.tcl tcloo.tcl unix.tcl uda.tcl acorn-model.tcl agf.tcl zmx.tcl acorn.tcl
+critcl::tsources util/func.tcl util/tcloo.tcl util/unix.tcl 		\
+		 zmx-io/uda.tcl zmx-io/agf.tcl				\
+		 acorn-model.tcl acorn.tcl				\
+		 zmx-io/zmx.tcl
+
 critcl::csources acorn.cpp aperture.cpp glass/acorn-glass.cpp glass/glass.c tpool/tpool.c
 
 critcl::clibraries -lstdc++
 
 
-source tcloo.tcl
+source util/tcloo.tcl
 
 namespace eval acorn {
     variable SurfaceTypes

@@ -9,7 +9,9 @@ INC= -I/Users/john/include -I/home/john/include
 CFLAGS=$(INC) -msse -fPIC
 
 SRC	= acorn.cpp aperture.cpp glass/glass.c glass/acorn-glass.cpp tpool/tpool.c
-TCL	= acorn.tcl acorn-model.tcl uda.tcl agf.tcl zmx.tcl func.tcl
+TCL	= acorn.tcl acorn-model.tcl			\
+	  zmx-io/uda.tcl zmx-io/agf.tcl zmx-io/zmx.tcl	\
+	  util/unix.tcl  util/func.tcl  util/tcloo.tcl
 
 
 SURFS	= surfaces/lib/$(ARCH)/simple.so		\

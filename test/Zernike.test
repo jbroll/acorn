@@ -1,12 +1,12 @@
 #!/usr/bin/env tclkit8.6
 #
-lappend auto_path ./lib ../lib arec/lib
+lappend auto_path ./lib arec/lib
 
 package require acorn
 package require tcltest
 
-source starbase.tcl
-source acorn-starbase.tcl
+source util/starbase.tcl
+source util/starbase-acorn.tcl
 
 proc starbase2ray { table { rays {} } } {
     upvar $table T

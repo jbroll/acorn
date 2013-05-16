@@ -13,9 +13,6 @@
 
 lappend auto_path lib
 
-source tcloo.tcl
-source unix.tcl
-
 package require arec
 
 arec::typedef ::acorn::Glass {

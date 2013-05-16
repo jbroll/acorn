@@ -5,8 +5,8 @@ lappend auto_path ./lib ../lib arec/lib
 package require acorn
 package require tcltest
 
-source starbase.tcl
-source acorn-starbase.tcl
+source util/starbase.tcl
+source util/starbase-acorn.tcl
 
 starbase_read Start test/EvenData/start.rays
 set rays {}

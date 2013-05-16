@@ -13,8 +13,6 @@
 
 lappend auto_path lib
 
-source tcloo.tcl
-
 package require arec
 
 arec::typedef ::acorn::Polygon {

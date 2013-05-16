@@ -1,13 +1,13 @@
 #!/usr/bin/env tclkit8.6
 #
-lappend auto_path ./lib ../lib
+lappend auto_path ./lib arec/lib
 
-source tcloo.tcl
-source unix.tcl
+#source tcloo.tcl
+#source unix.tcl
 
 package require acorn
 
-ZMX create GMT source zmx-models/GMT-0.zmx
+acorn::ZMX create GMT source zmx-models/GMT-0.zmx
 
 #acorn::mkrays rays nx 3 ny 3 box 12700
 acorn::mkrays rays nx 200 x0 -12700 x1 12700 ny 200 y0 -12700 y1 12700
