@@ -5,12 +5,13 @@ using namespace std;
 using namespace Eigen;
 
 #include "../acorn.h"
+
+  enum Px_Local { Pm_R = Px_NParams, Pm_K, Pm_nx, Pm_ny, Pm_width };
+
 #include "acorn-utils.h"
 
 
 extern "C" {
-
-  enum Px_Local { Pm_R = Px_NParams, Pm_K, Pm_nx, Pm_ny, Pm_width };
 
   static const char  *MyParamsNames[] = { "R", "K", "nx", "ny", "width", "height" };
   static const double MyParamsValue[] = { 0.0, 0.0, 10, 10, 1.0, 1.0 };

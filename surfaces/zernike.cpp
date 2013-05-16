@@ -1,18 +1,20 @@
 #include <iostream>
 #include <stdio.h>
+#include <math.h>
 #include <Eigen/Dense>
 
 using namespace std;
 using namespace Eigen;
 
 #include "../acorn.h"
+
+enum Px_Local { Pm_R = Px_NParams, Pm_K, Pm_xdecenter, Pm_ydecenter, Pm_nradius, Pm_nterms, Pm_z1 };
+
 #include "acorn-utils.h" 
-#include <math.h>
 
 extern "C" {
 #include "../zernike/zernike.h"
 
-    enum Px_Local { Pm_R = Px_NParams, Pm_K, Pm_xdecenter, Pm_ydecenter, Pm_nradius, Pm_nzterms, Pm_z1 };
 
   static const char *MyParamNames[]   = { "R", "K"
       , "xdecenter" , "ydecenter"	, "nradius" , "nzterms"
@@ -63,7 +65,7 @@ extern "C" {
 	double xdecenter = s.p[Pm_xdecenter];
 	double ydecenter = s.p[Pm_ydecenter];
 	double   nradius = s.p[Pm_nradius];
-	int      nzterms = s.p[Pm_nzterms];
+	int      nzterms = s.p[Pm_nterms];
 
 	double zdz, zdx, zdy;
 
@@ -72,7 +74,7 @@ extern "C" {
 	zdx /= nradius;
 	zdy /= nradius;
 
-	*dz = -zdz;				// This makes the Zernike signs match Zemax.
+	*dz = -zdz;						// This makes the Zernike signs match Zemax.
 	*dx = -zdx;
 	*dy = -zdy;
     }
@@ -87,25 +89,18 @@ extern "C" {
 
     Vector3d nhat;
 
-    int      nzterms = s.p[Pm_nzterms];
+    int      nterms = s.p[Pm_nterms];
 
-    if ( nzterms ) {
-	d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
-	r.p += d * r.k;
-
-	if ( AcornIterativeIntersect(s, r, ZernikeSag, R, K, nhat) ) { return 1; }
-
+    if ( nterms ) {
+	if ( AcornSimpleIterativeIntersect(s, r, z, nhat, ZernikeSag) ) { return 1; }
     } else {
-	d = AcornSimpleSurfaceDistance(r, z, R, K);
-
-	// Ray/Surface intersection position
-	//
+	d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
 	r.p += d * r.k;
 
 	nhat = AcornSimpleSurfaceNormal(r, R, K);
     }
 
-    AcornRefract(r, nhat, n0, n);		// Reflect or Refract
+    AcornRefract(r, nhat, n0, n);				// Reflect or Refract
 
     return 0;
   }

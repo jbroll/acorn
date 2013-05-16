@@ -75,22 +75,30 @@ inline void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
     }
 }
 
-inline int AcornIterativeIntersect(Surface &surf, Ray &r, SagittaFunc sagitta, double R, double K, Vector3d &nhat) 
+inline int AcornSimpleIterativeIntersect(Surface &s, Ray &r, double z, Vector3d &nhat, SagittaFunc sagitta) 
 {
-    double Az = r.p(Z);
-    double sag = 0.0;
 
-    double tol = 1e-8;
+    double R = s.p[Pm_R];
+    double K = s.p[Pm_K];
+    double n = s.p[Px_n];
 
     double Dsign = r.k(Z)/fabs(r.k(Z));
     double Rsign = R/fabs(R);
 
     int i;
 
+    double d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
+    r.p += d * r.k;
+
+    double Az = r.p(Z);
+    double sag = 0.0;
+
+    double tol = 1e-8;
+
     for ( i = 0; i < ACORN_ITER; i++ ) {
 	double zdx, zdy, zdz;
 
-	sagitta(surf, r.p(X), r.p(Y), &zdz, &zdx, &zdy);
+	sagitta(s, r.p(X), r.p(Y), &zdz, &zdx, &zdy);
 
 	Vector3d P = Vector3d(r.p(X), r.p(Y), Az-zdz);		// Estimate point on the surface.
 
@@ -111,7 +119,6 @@ inline int AcornIterativeIntersect(Surface &surf, Ray &r, SagittaFunc sagitta, d
 
 	double Num = (P-r.p).dot(nhat);				// Compute the distance to the surface normal to nhat.
 	double Den =     r.k.dot(nhat);
-
 
 	if ( Den != 0.0f ) {
 	    double dist = Num/Den;

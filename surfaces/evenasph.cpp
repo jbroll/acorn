@@ -7,6 +7,9 @@ using namespace Eigen;
 #include <stdio.h>
 
 #include "../acorn.h"
+
+    enum Px_Local { Pm_R = Px_NParams, Pm_K, Pm_nterms, Pm_a2 };
+
 #include "acorn-utils.h"
 
 
@@ -19,11 +22,8 @@ extern "C" {
 	    printf("%10.6f\t%10.6f\t%10.6f\t%d\n",     ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
 	}
     }
-
-    enum Px_Local { Pm_R = Px_NParams, Pm_K };
-
-  static const char  *MyParamNames[] = { "R", "K", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8" };
-  static const double MyParamValue[] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  static const char  *MyParamNames[] = { "R", "K", "a2", "a4", "a6", "a8", "a10", "a12", "a14", "a16" };
+  static const double MyParamValue[] = { 0.0, 0.0,  0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0 };
 
 
   int info(int command, char **strings, double **values) 
@@ -40,6 +40,30 @@ extern "C" {
     return 0;
   }
 
+    void EvenASpSag(Surface &s, double x, double y, double *dz, double *dx, double *dy)
+    {
+	int    i;
+	int    naterms = s.p[Pm_nterms];
+
+	double adz = 0.0;
+	double adx = 0.0;
+
+	double r = sqrt(x*x+y*y);
+	double rr = 1;
+
+	for ( i = 0; i < naterms; i++ ) {
+	    rr = rr*r;						// rr is an odd.
+	    adx = adx + rr * s.p[Pm_a2+i] * (i+1);		// Make us a derrivitive.
+
+	    rr = rr*r;						// rr is an even.
+	    adz = adz + rr * s.p[Pm_a2+i];			// Make us the function.
+	}
+
+	*dz =  adz;
+	*dx = (adx / r) * x;					// Split slope on x,y.
+	*dy = (adx / r) * y;
+    }
+
   int traverse(double n0, double z, Surface &s, Ray &r)
   {
     double d;
@@ -48,48 +72,20 @@ extern "C" {
     double K = s.p[Pm_K];
     double n = s.p[Px_n];
 
-    // Intersect
-    //
-    // establish sign flippy dealies
-    //
-    double Ksign = 1.0;
-    double Dsign = r.k(Z)/fabs(r.k(Z));
-    double Rsign = R/fabs(R);
-
     Vector3d nhat;
 
-    d = AcornSimpleSurfaceDistance(r, z, R, K);
+    int      nterms = s.p[Pm_nterms];
 
-    // Ray/Surface Intersection position
-    //
-    r.p += d * r.k;
-
-
-    // Normal
-    //
-    if ( R == 0.0 || abs(R) > 1.0e10 ) {		// Planar
-	nhat = Vector3d(0.0, 0.0, -Dsign*1.0);
+    if ( nterms ) {
+	if ( AcornSimpleIterativeIntersect(s, r, z, nhat, EvenASpSag) ) { return 1; }
     } else {
-	nhat = Vector3d(Rsign*Dsign*r.p(X), Rsign*Dsign*r.p(Y), -Dsign * sqrt(R * R - (K+1)*(r.p(X) * r.p(X) + r.p(Y) * r.p(Y))));
-	nhat /= nhat.norm();
+	d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
+	r.p += d * r.k;
+
+	nhat = AcornSimpleSurfaceNormal(r, R, K);
     }
 
-    //prays(&r, 1);
-
-    if      ( n == -1 ) {			// Reflect
-					    	// http://http.developer.nvidia.com/Cg/reflect.html
-	    r.k = r.k - 2 * nhat * nhat.dot(r.k);
-    } else if ( n0 != n ) {			 // Refract
-						// http://http.developer.nvidia.com/Cg/refract.html
-	//printf("Index %f %f\n", n0, n);
-
-	double eta = n0/n;
-	double cosi = (-r.k).dot(nhat);
-	double cost = 1.0 - eta*eta * ( 1.0 - cosi*cosi);
-
-	r.k = (eta*r.k + (eta*cosi - sqrt(abs(cost))) * nhat) * (cost > 0);
-    }
-    //prays(&r, 1);
+    AcornRefract(r, nhat, n0, n);				// Reflect or Refract
 
     return 0;
   }
