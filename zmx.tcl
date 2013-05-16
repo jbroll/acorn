@@ -27,7 +27,7 @@ array set ZMXNSODMap {
 
     zernike,1	R
     zernike,2	K
-    zernike,15	nzterms
+    zernike,15	nterms
     zernike,5	xdecenter
     zernike,6	ydecenter
 

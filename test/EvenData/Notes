@@ -1,0 +1,65 @@
+
+case $1 in 
+ clear)
+    for a in 2 4 6 8 10 12 14 16; do
+	aco set B a$a 0
+	aco set C a$a 0
+    done
+    ;;
+
+ data)
+    for a in 2 4 6 8 10 12 14 16; do
+	aco set B a$a 0
+	aco set C a$a 0
+    done
+
+    aco  rays nx 11 ny 11 start 1 end -1
+    aco push
+
+    aco rays end  1						# Trace rays to surface 1 (planar).
+    aco raytable > start.rays	
+
+    aco rays end -1	 					# Trace rays to image plane.
+    aco raytable > image.rays
+
+    for surf in B C ; do
+	def=.00000005
+	for a in 2 4 6 8 10 12 14 16; do
+	    aco set $surf a$a $def
+	    aco push
+	    sleep 2
+	    aco raytable > a`printf %02d $a`-$surf.rays
+	    aco set $surf a$a 0
+
+	    def=`calc "$def/400"`
+	done
+    done
+    ;;
+ plot)
+	pastetable none.rays z*.rays > pasted.rays
+
+	plottable toptitle "Zemax Z2 - Z10"						\
+		      nobox title  Z8 size 3 3 file pasted.rays x_1,y_1 vector x_8,y_8	\
+		graph nobox title  Z9 size 3 3 file pasted.rays x_1,y_1 vector x_9,y_9	\
+		graph nobox title Z10 size 3 3 file pasted.rays x_1,y_1 vector x_10,y_10\
+		at 5 0									\
+		graph nobox title  Z5 size 3 3 file pasted.rays x_1,y_1 vector x_5,y_5 	\
+		graph nobox title  Z6 size 3 3 file pasted.rays x_1,y_1 vector x_6,y_6	\
+		graph nobox title  Z7 size 3 3 file pasted.rays x_1,y_1 vector x_7,y_7 	\
+		at 2.5 0								\
+		graph nobox title  Z2 size 3 3 file pasted.rays x_1,y_1 vector x_2,y_2	\
+		graph nobox title  Z3 size 3 3 file pasted.rays x_1,y_1 vector x_3,y_3	\
+		graph nobox title  Z4 size 3 3 file pasted.rays x_1,y_1 vector x_4,y_4 	\
+	
+esac
+
+exit
+echo raytable | aco file | plottable size 8 8 x,y marker circle
+
+exit
+
+echo rays nx 10 ny 10 start 1 end -1 | aco file
+
+aco set B z4 
+
+

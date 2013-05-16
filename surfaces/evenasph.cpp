@@ -15,15 +15,8 @@ using namespace Eigen;
 
 extern "C" {
 
-    void prays(Ray *ray, int n)
-    {
-	for ( int i = 0; i < n; i++ ) {
-	    printf("%5d\t%10.6f\t%10.6f\t%10.6f\t", i, ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
-	    printf("%10.6f\t%10.6f\t%10.6f\t%d\n",     ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
-	}
-    }
-  static const char  *MyParamNames[] = { "R", "K", "a2", "a4", "a6", "a8", "a10", "a12", "a14", "a16" };
-  static const double MyParamValue[] = { 0.0, 0.0,  0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0 };
+  static const char  *MyParamNames[] = { "R", "K", "nterms", "a2", "a4", "a6", "a8", "a10", "a12", "a14", "a16" };
+  static const double MyParamValue[] = { 0.0, 0.0,      7.0,  0.0,  0.0,  0.0,  0.0,   0.0,   0.0,   0.0,   0.0 };
 
 
   int info(int command, char **strings, double **values) 
@@ -53,7 +46,7 @@ extern "C" {
 
 	for ( i = 0; i < naterms; i++ ) {
 	    rr = rr*r;						// rr is an odd.
-	    adx = adx + rr * s.p[Pm_a2+i] * (i+1);		// Make us a derrivitive.
+	    adx = adx + rr * s.p[Pm_a2+i] * (i+1*2);		// Make us a derrivitive.
 
 	    rr = rr*r;						// rr is an even.
 	    adz = adz + rr * s.p[Pm_a2+i];			// Make us the function.

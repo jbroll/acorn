@@ -6,49 +6,38 @@ package require acorn
 package require tcltest
 
 source starbase.tcl
+source acorn-starbase.tcl
 
-proc starbase2ray { table { rays {} } } {
-    upvar $table T
-
-    if { $rays eq "" } {
-	set rays [::acorn::Rays create rays[incr ::acorn::RAYS] 0]
-    }
-
-    starbase_foreachrow T -colvars row {
-	$rays [expr $row-1] set px $x py $y pz $z kx $l ky $m kz $n
-    }
-
-    set rays
-}
-
-starbase_read Start test/ZernData/start.rays
+starbase_read Start test/EvenData/start.rays
 set rays {}
 
 acorn::model Model {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernike nradius 36 nzterms 10 }
-    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernike nradius 36 nzterms 10 }
+    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type evenasph nterms 8 }
+    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type evenasph nterms 8 }
     surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
 set Zamount 0.05
 
 foreach surf { B C } {
-    foreach zz { 1 2 3 4 5 6 7 8 9 10 } {
- 	::tcltest::test zernike-rays-$surf-$zz { Zernike raytrace } -body {
+    set def .00000005
+
+    foreach aa { 0 2 4 6 8 10 12 14 16 } {
+ 	::tcltest::test evenasph-rays-$surf-$aa { EvenASphere raytrace } -body {
 	    set rays [starbase2ray Start $rays]
 
-	    Model $surf set z$zz $Zamount
+	    Model $surf set a$aa $def
 	    Model trace $rays
 
-	    starbase_read ZRay test/ZernData/z[format %02d $zz]-$surf.rays
+	    starbase_read ARay test/EvenData/a[format %02d $aa]-$surf.rays
 
 	    set zoff	370
 
 	    set sumx 0
 	    set sumy 0
 	    set sumz 0
-	    starbase_foreachrow ZRay -colvars row {
+	    starbase_foreachrow ARay -colvars row {
 		lassign [$rays [expr $row-1] get px py pz] px py pz
 
 		set pz [expr $pz-$zoff]
@@ -61,10 +50,16 @@ foreach surf { B C } {
 	    }
 
 
-	    unset ZRay
-	    Model $surf set z$zz 0.0
+	    unset ARay
+	    Model $surf set a$aa 0.0
+
+	    set def [expr $def/400.0]
+
+	    puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
 
 	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+
+	    list 1 1 1
 	} -result {1 1 1}
     }
 }
