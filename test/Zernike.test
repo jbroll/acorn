@@ -4,7 +4,7 @@ lappend auto_path ./lib ../lib arec/lib
 
 package require acorn
 
-acorn::ZMX create ParZMX source zmx-models/Parabola.zmx
+#acorn::ZMX create ParZMX source zmx-models/Parabola.zmx
 
 source starbase.tcl
 

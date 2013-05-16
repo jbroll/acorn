@@ -55,7 +55,7 @@ inline Vector3d AcornSimpleSurfaceNormal(Ray &r, double R, double K)
 }
 
 
-void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
+inline void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
 {
     if      ( n == -1 ) {			// Reflect
 					    	// http://http.developer.nvidia.com/Cg/reflect.html
@@ -75,4 +75,50 @@ void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
     }
 }
 
+inline int AcornIterativeIntersect(Ray &r, Surface &surf, SagittaFunc sagitta, double R, double K) 
+{
+    Vector3d nhat;
 
+    double Az = r.p(Z);
+    double sag = 0.0;
+
+    double tol = 1e10-8;
+
+	double Dsign = r.k(Z)/fabs(r.k(Z));
+	double Rsign = R/fabs(R);
+
+    for ( int iter = 0; iter < 5; iter++ ) {
+	double zdx, zdy, zdz;
+
+	sagitta(surf, r.p(X), r.p(Y), &zdz, &zdx, &zdy);
+
+	Vector3d P = Vector3d(r.p(X), r.p(Y), Az-zdz);		// Estimate point on the surface.
+
+								// Compute the normal to the conic + zernike
+	if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
+	    nhat = Vector3d(zdx, zdy, -Dsign*1.0);
+	} else {
+	    double cdz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
+	    double cdx = P(X)/cdz;				// These must be slopes to add with zernike slopes.
+	    double cdy = P(Y)/cdz;
+
+	    nhat = Vector3d(Rsign*Dsign*(cdx + zdx), Rsign*Dsign*(cdy + zdy), -Dsign*1);
+	}
+	nhat /= nhat.norm();
+
+	if ( fabs(sag - zdz) < tol ) { break; }
+	sag = zdz;
+
+	double Num = (P-r.p).dot(nhat);				// Compute the distance to the surface normal to nhat.
+	double Den =     r.k.dot(nhat);
+
+
+	if ( Den != 0.0f ) {
+	    double dist = Num/Den;
+
+	    r.p += dist * r.k;					// Move along the ray the distance to the normal surface.
+	} else {
+	    return 1;						// BANG!
+	}
+    }
+}

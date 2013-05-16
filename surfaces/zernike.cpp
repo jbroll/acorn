@@ -57,6 +57,25 @@ extern "C" {
     return 0;
   }
 
+    void ZernikeSag(Surface &s, double x, double y, double *dz, double *dx, double *dy)
+    {
+	double xdecenter = s.p[Pm_xdecenter];
+	double ydecenter = s.p[Pm_ydecenter];
+	double   nradius = s.p[Pm_nradius];
+	int      nzterms = s.p[Pm_nzterms];
+
+	double zdz, zdx, zdy;
+
+	zernike_std((x + xdecenter)/nradius, (y + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zdz, &zdx, &zdy);
+
+	zdx /= nradius;
+	zdy /= nradius;
+
+	*dz = -zdz;
+	*dx = -zdx;
+	*dy = -zdy;
+    }
+
   int traverse(double n0, double z, Surface &s, Ray &r)
   {
     double d;
@@ -80,7 +99,7 @@ extern "C" {
     double   nradius = s.p[Pm_nradius];
     int      nzterms = s.p[Pm_nzterms];
 
-    double tol	     = 0.0000000001;
+    double tol	     = 1.0e-10;
 
 
 
@@ -89,6 +108,7 @@ extern "C" {
 	r.p += d * r.k;
 
 	double Az = r.p(Z);
+	double sag = 0.0;
 
 	for ( int iter = 0; iter < 5; iter++ ) {
 	    double zdx, zdy, zdz;
@@ -98,11 +118,12 @@ extern "C" {
 	    zdx /= nradius;
 	    zdy /= nradius;
 
+
 	    Vector3d P = Vector3d(r.p(X), r.p(Y), Az+zdz);		// Estimate point on the surface.
 
 	    								// Compute the normal to the conic + zernike
 	    if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
-		nhat = Vector3d(Dsign*zdx, Dsign*zdy, -Dsign*1.0);
+		nhat = Vector3d(-zdx, -zdy, -Dsign*1.0);
 	    } else {
 		double cdz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
 		double cdx = P(X)/cdz;					// These must be slopes to add with zernike slopes.
@@ -112,6 +133,10 @@ extern "C" {
 	    }
 	    nhat /= nhat.norm();
 
+	    if ( fabs(sag - zdz) < tol ) { break; }
+	    sag = zdz;
+
+
 	    double Num = (P-r.p).dot(nhat);				// Compute the distance to the surface normal to nhat.
 	    double Den =     r.k.dot(nhat);
 
@@ -120,9 +145,6 @@ extern "C" {
 		double dist = Num/Den;
 
 		r.p += dist * r.k;					// Move along the ray the distance to the normal surface.
-
-//printf("Tol %d %.9f %.9f\n", iter, dist, tol);
-		if ( dist < tol ) { break; } 		// If the ray failes to advance, then Done.
 	    } else {
 		return 1;						// BANG!
 	    }

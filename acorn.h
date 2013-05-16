@@ -73,7 +73,11 @@ typedef struct _Ray {
 void aper_init(Surface *s, Affine3d transform);
 int  aper_clip(Surface *s, Ray *r);
 
+typedef void (*SagittaFunc)(Surface &s, double x, double y, double *dz, double *dx, double *dy);
+
 extern "C" {
     int  SurfSize(void);
     int  RaysSize(void);
 }
+
+
