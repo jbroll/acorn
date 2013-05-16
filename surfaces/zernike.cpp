@@ -85,24 +85,24 @@ extern "C" {
 
 
     if ( nzterms ) {
+	d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
+	r.p += d * r.k;
+
+	double Az = r.p(Z);
+
 	for ( int iter = 0; iter < 5; iter++ ) {
 	    double zdx, zdy, zdz;
-	    Vector3d A = r.p;
-
-	    d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
-	    r.p += d * r.k;
 
 	    zernike_std((r.p(X) + xdecenter)/nradius, (r.p(Y) + ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zdz, &zdx, &zdy);
 
 	    zdx /= nradius;
 	    zdy /= nradius;
 
-	    Vector3d P = Vector3d(r.p(X), r.p(Y), r.p(Z)+zdz);		// Estimate point on the surface.
+	    Vector3d P = Vector3d(r.p(X), r.p(Y), Az+zdz);		// Estimate point on the surface.
 
 	    								// Compute the normal to the conic + zernike
 	    if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
-		nhat = Vector3d(Dsign*-zdx, Dsign*-zdy, -Dsign*1.0);
-//printf("Planar Hat %f %f %f\n", nhat(X), nhat(Y), nhat(Z));
+		nhat = Vector3d(Dsign*zdx, Dsign*zdy, -Dsign*1.0);
 	    } else {
 		double cdz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
 		double cdx = P(X)/cdz;					// These must be slopes to add with zernike slopes.
@@ -115,11 +115,14 @@ extern "C" {
 	    double Num = (P-r.p).dot(nhat);				// Compute the distance to the surface normal to nhat.
 	    double Den =     r.k.dot(nhat);
 
-	    if ( Den != 0.0f ) {
-		r.p += Num/Den * r.k;					// Move along the ray the distance to the normal surface.
 
-printf("Tol %f\n", (A-r.p).norm());
-		if ( (A-r.p).squaredNorm() < tol ) { break; } 		// If the ray failes to advance, then Done.
+	    if ( Den != 0.0f ) {
+		double dist = Num/Den;
+
+		r.p += dist * r.k;					// Move along the ray the distance to the normal surface.
+
+//printf("Tol %d %.9f %.9f\n", iter, dist, tol);
+		if ( dist < tol ) { break; } 		// If the ray failes to advance, then Done.
 	    } else {
 		return 1;						// BANG!
 	    }
