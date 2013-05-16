@@ -18,47 +18,38 @@ acorn::model Model {
     surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
-set Zamount 0.05
+::tcltest::test evenasph-rays-image { EvenASphere raytrace } -body {
+    set rays [starbase2ray Start $rays]
+    Model trace $rays
+
+    lassign [starbase_raycompare $rays test/EvenData/image.rays 370] sumx sumy sumz
+
+    puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+
+    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+} -result {1 1 1}
+
 
 foreach surf { B C } {
     set def .00000005
 
-    foreach aa { 0 2 4 6 8 10 12 14 16 } {
+    foreach aa { 2 4 6 8 10 12 14 16 } {
  	::tcltest::test evenasph-rays-$surf-$aa { EvenASphere raytrace } -body {
+
 	    set rays [starbase2ray Start $rays]
 
 	    Model $surf set a$aa $def
 	    Model trace $rays
 
-	    starbase_read ARay test/EvenData/a[format %02d $aa]-$surf.rays
+	    lassign [starbase_raycompare $rays test/EvenData/a[format %02d $aa]-$surf.rays 370] sumx sumy sumz
 
-	    set zoff	370
-
-	    set sumx 0
-	    set sumy 0
-	    set sumz 0
-	    starbase_foreachrow ARay -colvars row {
-		lassign [$rays [expr $row-1] get px py pz] px py pz
-
-		set pz [expr $pz-$zoff]
-
-		#puts "$px $py $pz		$x $y $z"
-
-		set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
-		set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
-		set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
-	    }
-
-
-	    unset ARay
 	    Model $surf set a$aa 0.0
 
 	    set def [expr $def/400.0]
 
-	    puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
-
 	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
 
+	    puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
 	    list 1 1 1
 	} -result {1 1 1}
     }

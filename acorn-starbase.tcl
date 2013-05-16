@@ -13,3 +13,26 @@ proc starbase2ray { table { rays {} } } {
     set rays
 }
 
+proc starbase_raycompare { rays file zoff } {
+    starbase_read ARay $file
+
+    set sumx 0
+    set sumy 0
+    set sumz 0
+    starbase_foreachrow ARay -colvars row {
+	lassign [$rays [expr $row-1] get px py pz] px py pz
+
+	set pz [expr $pz-$zoff]
+
+	#puts "$px $py $pz		$x $y $z"
+
+	set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
+	set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
+	set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
+    }
+
+    unset ARay
+
+    list $sumx $sumy $sumz
+}
+

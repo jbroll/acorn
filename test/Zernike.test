@@ -6,6 +6,7 @@ package require acorn
 package require tcltest
 
 source starbase.tcl
+source acorn-starbase.tcl
 
 proc starbase2ray { table { rays {} } } {
     upvar $table T
@@ -26,10 +27,24 @@ set rays {}
 
 acorn::model Model {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernike nradius 36 nzterms 10 }
-    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernike nradius 36 nzterms 10 }
+    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernike nradius 36 nterms 10 }
+    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernike nradius 36 nterms 10 }
     surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
+
+::tcltest::test evenasph-rays-image { EvenASphere raytrace } -body {
+    set rays [starbase2ray Start $rays]
+    Model trace $rays
+
+    lassign [starbase_raycompare $rays test/ZernData/image.rays 370] sumx sumy sumz
+
+
+    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+
+    #puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+    #list 1 1 1
+} -result {1 1 1}
+
 
 set Zamount 0.05
 
@@ -41,30 +56,14 @@ foreach surf { B C } {
 	    Model $surf set z$zz $Zamount
 	    Model trace $rays
 
-	    starbase_read ZRay test/ZernData/z[format %02d $zz]-$surf.rays
+	    lassign [starbase_raycompare $rays test/ZernData/z[format %02d $zz]-$surf.rays 370] sumx sumy sumz
 
-	    set zoff	370
-
-	    set sumx 0
-	    set sumy 0
-	    set sumz 0
-	    starbase_foreachrow ZRay -colvars row {
-		lassign [$rays [expr $row-1] get px py pz] px py pz
-
-		set pz [expr $pz-$zoff]
-
-		#puts "$px $py $pz		$x $y $z"
-
-		set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
-		set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
-		set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
-	    }
-
-
-	    unset ZRay
 	    Model $surf set z$zz 0.0
 
 	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+
+	    #puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+	    #list 1 1 1
 	} -result {1 1 1}
     }
 }
