@@ -37,7 +37,7 @@ case $1 in
 		aco set $m$s z$z $err
 		aco push
 		sleep 2
-		aco raytable all > $mS$s-z$z.rays
+		aco raytable all > $m$s-z$z.rays
 		aco set $m$s z$z 0
 	    done
 	done
