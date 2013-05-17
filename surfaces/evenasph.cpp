@@ -55,9 +55,9 @@ extern "C" {
 	    //printf("%.21f %.21f\n", adz, adx);
 	    //fflush(stdout);
 
-	*dz =  adz;
-	*dx = -(adx / r) * x;					// Split slope on x,y.
-	*dy = -(adx / r) * y;
+	*dz = adz;
+	*dx = adx/ r * x;					// Split slope on x,y.
+	*dy = adx/ r * y;
     }
 
   int traverse(double n0, double z, Surface &s, Ray &r)

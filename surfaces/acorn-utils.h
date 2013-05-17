@@ -77,6 +77,7 @@ inline void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
 
 inline int AcornSimpleIterativeIntersect(Surface &s, Ray &r, double z, Vector3d &nhat, SagittaFunc sagitta) 
 {
+    int i;
 
     double R = s.p[Pm_R];
     double K = s.p[Pm_K];
@@ -85,12 +86,10 @@ inline int AcornSimpleIterativeIntersect(Surface &s, Ray &r, double z, Vector3d 
     double Dsign = r.k(Z)/fabs(r.k(Z));
     double Rsign = R/fabs(R);
 
-    int i;
-
     double d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
     r.p += d * r.k;
 
-    double Az = r.p(Z);
+    double Az  = r.p(Z);
     double sag = 0.0;
 
     double tol = 1e-8;
@@ -113,6 +112,9 @@ inline int AcornSimpleIterativeIntersect(Surface &s, Ray &r, double z, Vector3d 
 	    nhat = Vector3d(Rsign*Dsign*(cdx + zdx), Rsign*Dsign*(cdy + zdy), -Dsign*1);
 	}
 	nhat /= nhat.norm();
+
+	//printf("%d %.20f %.20f\n", i, sag, zdz);
+	//fflush(stdout);
 
 	if ( fabs(sag - zdz) < tol ) { break; }
 	sag = zdz;
