@@ -1,18 +1,22 @@
 
 case $1 in 
  clear)
-    for s in 1 2 3 4 5 6 7 ; do
-	for z in 2 3 4 5 6 7 8 9 10; do
-	    aco set S$s z$z 0
+    for m in S P ; do
+	for s in 1 2 3 4 5 6 7 ; do
+	    for z in 2 3 4 5 6 7 8 9 10; do
+		aco set $m$s z$z 0
+	    done
 	done
     done
 
     aco push
     ;;
  data)
-    for s in 1 2 3 4 5 6 7 ; do
-	for z in 2 3 4 5 6 7 8 9 10; do
-	    aco set S$s z$z 0
+    for m in S P ; do
+	for s in 1 2 3 4 5 6 7 ; do
+	    for z in 2 3 4 5 6 7 8 9 10; do
+		aco set $m$s z$z 0
+	    done
 	done
     done
 
@@ -27,15 +31,24 @@ case $1 in
 
     err=.0001
 
-    for s in 1 2 3 4 5 6 7 ; do
-	for z in 2 3 4 5 6 7 8 9 10; do
-	    aco set S$s z$z $err
-	    aco push
-	    sleep 2
-	    aco raytable all > S$s-z$z.rays
-	    aco set S$s z$z 0
+    for m in S P ; do
+	for s in 1 2 3 4 5 6 7 ; do
+	    for z in 2 3 4 5 6 7 8 9 10; do
+		aco set $m$s z$z $err
+		aco push
+		sleep 2
+		aco raytable all > $mS$s-z$z.rays
+		aco set $m$s z$z 0
+	    done
 	done
     done
+    ;;
+
+    plot)
+	file=$2
+
+	plottable graph file "| < $file.acorn row '!v'" title Acorn size 5 5 at 0 5 x,y marker circle	\
+		  graph file "| < $file.rays  row '!v'" title Zemax size 5 5 at 0 0 x,y marker circle
     ;;
 esac
 

@@ -39,7 +39,7 @@
 
 
 oo::class create ::acorn::BaseModel {
-    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce
+    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce 
     accessor surfaces basepar
 
     constructor {} {
@@ -232,7 +232,12 @@ oo::class create ::acorn::Model {
 	}
 
 	::oo::objdefine [self] [list forward $name [self] surfset1 $current $i $parmap]
-	::oo::objdefine [self] [list export $name]
+	::oo::objdefine [self] [list export  $name]
+
+	if { [$current $i get comment] ne {} } {
+	    ::oo::objdefine [self] [list forward [$current $i get comment] [self] surfset1 $current $i $parmap]
+	    ::oo::objdefine [self] [list export  [$current $i get comment]]
+	}
     }
     method surface-group { name args } {
 	set savedefault $default
