@@ -304,10 +304,21 @@ proc acorn::mkrays { name args } {
     return $name
 }
 
-proc acorn::prays { rays } {
-    puts "i	x	y	z	kz	ky	kz	v"
-    puts "-	-	-	-	--	--	--	-"
-    acorn::_prays [$rays getptr] [$rays length]
+proc acorn::prays { rays { pipe {} } { out stdout } } {
+
+    if { $pipe eq ">" } { set out [open $out w] }
+
+    set i 1
+
+    puts $out "id	x	y	z	l	m	n	v"
+    puts $out "-	-	-	-	--	--	--	-"
+
+    foreach row [$rays get px py pz kx ky kz vignetted] {
+  	puts $out "$i	[join $row \t]"
+	incr i
+    }
+
+    if { $pipe eq ">" } { close $out }
 }
 
 

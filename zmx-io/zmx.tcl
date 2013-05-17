@@ -95,7 +95,7 @@ oo::class create ::acorn::ZMX {
 	    rename $current {}
 	}
 
-	eval $mce($mce_current)
+#	eval $mce($mce_current)
     }
 
     method simple { args } {}

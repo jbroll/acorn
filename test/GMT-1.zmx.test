@@ -8,21 +8,21 @@ package require tcltest
 source util/starbase.tcl
 source util/starbase-acorn.tcl
 
-set Data test/GMT-0.zmx.data
+set Data test/GMT-1.zmx.data
 
 starbase_read Start $Data/start.rays
 set rays {}
 
-acorn::ZMX create Model source $Data/GMT-0.zmx
+acorn::ZMX create Model source $Data/GMT-1.zmx
 
-::tcltest::test GMT-0-rays-image { EvenASphere raytrace } -body {
+::tcltest::test GMT-1-rays-image { EvenASphere raytrace } -body {
     set rays [starbase2ray Start $rays]
     Model trace $rays
 
+    acorn::prays $rays > $Data/image.acorn
+
     lassign [starbase_raycompare $rays $Data/image.rays 0] sumx sumy sumz
 
-
-    acorn::prays $rays > $Data/image.acorn
 
     list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
 
@@ -30,27 +30,29 @@ acorn::ZMX create Model source $Data/GMT-0.zmx
     list 1 1 1
 } -result {1 1 1}
 
+exit
+
 
 set err 0.0001
-#set err 0.000022
 
-foreach surf { 7 } {
-    foreach r { x y rx ry } {
- 	::tcltest::test GMT-0-rays-S$surf-$r { GMT-0 raytrace } -body {
+foreach surf { 1 2 3 4 5 6 7 } {
+    foreach z { 2 3 4 5 6 7 8 9 10 } {
+ 	::tcltest::test GMT-1-rays-S$surf-z$z { GMT-0 raytrace } -body {
 
 	    set rays [starbase2ray Start $rays]
 
-	    Model S$surf set $r $err
+	    Model S$surf set z$z $err
 	    Model trace $rays
 
-	    lassign [starbase_raycompare $rays $Data/S$surf-$r.rays 0] sumx sumy sumz
+	    acorn::prays $rays > $Data/S$surf-z$z.acorn
 
-	    Model S$surf set $r 0.0
+	    lassign [starbase_raycompare $rays $Data/S$surf-z$z.rays 0] sumx sumy sumz
+
+	    Model S$surf set z$z 0.0
 
 	    #list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
 	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]
 
-	    acorn::prays $rays > $Data/S$surf-$r.acorn
 
 	    puts "$surf $r [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
 	    list 1 1 1

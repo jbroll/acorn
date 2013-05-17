@@ -24,6 +24,12 @@ add glass		- Done
 add ZMX parser		- Done
 
 
+Testing GMT-0 Translations work
+	      Rotations fail - secondary is deep in the NSO and rotaions are not about the parrent surface?
+
+Testing GMT-1 Zernike
+
+
 
 
 

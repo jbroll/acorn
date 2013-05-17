@@ -20,10 +20,10 @@ case $1 in
     aco push
 
     aco rays end  1						# Trace rays to surface 1 (planar).
-    aco raytable > start.rays	
+    aco raytable all > start.rays	
 
     aco rays end -1	 					# Trace rays to image plane.
-    aco raytable > image.rays
+    aco raytable all > image.rays
 
     err=.0001
 
@@ -32,10 +32,18 @@ case $1 in
 	    aco set S$s $r $err
 	    aco push
 	    sleep 2
-	    aco raytable > S$s-$r.rays
+	    aco raytable all > S$s-$r.rays
 	    aco set S$s $r 0
 	done
     done
+    ;;
+
+    plot)
+	file=$2
+
+	plottable graph file "| < $file.acorn row '!v'" title Acorn size 5 5 at 0 5 x,y marker circle	\
+		  graph file "| < $file.rays  row '!v'" title Zemax size 5 5 at 0 0 x,y marker circle
+
     ;;
 esac
 

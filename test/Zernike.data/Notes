@@ -10,17 +10,17 @@ case $1 in
     aco push
 
     aco rays end  1						# Trace rays to surface 1 (planar).
-    aco raytable > start.rays	
+    aco raytable all > start.rays	
 
     aco rays end -1	 					# Trace rays to image plane.
-    aco raytable > image.rays
+    aco raytable all > image.rays
 
     for surf in B C ; do
 	for z in 1 2 3 4 5 6 7 8 9 10 ; do
 	    aco set $surf z$z .05
 	    aco push
 	    sleep 2
-	    aco raytable > z`printf %02d $z`-$surf.rays
+	    aco raytable all > z`printf %02d $z`-$surf.rays
 	    aco set $surf z$z 0
 	done
     done
@@ -42,14 +42,4 @@ case $1 in
 		graph nobox title  Z4 size 3 3 file pasted.rays x_1,y_1 vector x_4,y_4 	\
 	
 esac
-
-exit
-echo raytable | aco file | plottable size 8 8 x,y marker circle
-
-exit
-
-echo rays nx 10 ny 10 start 1 end -1 | aco file
-
-aco set B z4 
-
 
