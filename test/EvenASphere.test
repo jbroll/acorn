@@ -8,7 +8,9 @@ package require tcltest
 source util/starbase.tcl
 source util/starbase-acorn.tcl
 
-starbase_read Start test/EvenData/start.rays
+set Data test/EvenASphere.data
+
+starbase_read Start $Data/start.rays
 set rays {}
 
 acorn::model Model {
@@ -22,7 +24,7 @@ acorn::model Model {
     set rays [starbase2ray Start $rays]
     Model trace $rays
 
-    lassign [starbase_raycompare $rays test/EvenData/image.rays 370] sumx sumy sumz
+    lassign [starbase_raycompare $rays $Data/image.rays 370] sumx sumy sumz
 
     puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
 
@@ -41,7 +43,7 @@ foreach surf { B C } {
 	    Model $surf set a$aa $def
 	    Model trace $rays
 
-	    lassign [starbase_raycompare $rays test/EvenData/a[format %02d $aa]-$surf.rays 370] sumx sumy sumz
+	    lassign [starbase_raycompare $rays $Data/a[format %02d $aa]-$surf.rays 370] sumx sumy sumz
 
 	    Model $surf set a$aa 0.0
 

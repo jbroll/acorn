@@ -22,7 +22,7 @@ proc starbase2ray { table { rays {} } } {
     set rays
 }
 
-starbase_read Start test/ZernData/start.rays
+starbase_read Start test/Zernike.data/start.rays
 set rays {}
 
 acorn::model Model {
@@ -36,7 +36,7 @@ acorn::model Model {
     set rays [starbase2ray Start $rays]
     Model trace $rays
 
-    lassign [starbase_raycompare $rays test/ZernData/image.rays 370] sumx sumy sumz
+    lassign [starbase_raycompare $rays test/Zernike.data/image.rays 370] sumx sumy sumz
 
 
     list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
@@ -56,7 +56,7 @@ foreach surf { B C } {
 	    Model $surf set z$zz $Zamount
 	    Model trace $rays
 
-	    lassign [starbase_raycompare $rays test/ZernData/z[format %02d $zz]-$surf.rays 370] sumx sumy sumz
+	    lassign [starbase_raycompare $rays test/Zernike.data/z[format %02d $zz]-$surf.rays 370] sumx sumy sumz
 
 	    Model $surf set z$zz 0.0
 

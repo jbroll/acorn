@@ -43,6 +43,7 @@ extern "C" {
 	    for ( int i = 0; i < nsurf; i++ ) {
 
 		if ( isinf(surf[i].p[Px_thickness]) ) { continue; }
+		//if (      !surf[i].enable           ) { continue; } 
 
 		Affine3d txforward;
 		Affine3d txreverse;

@@ -58,6 +58,8 @@ typedef struct _Surface {
 
     char*	glass;
     void*	glass_ptr;
+
+    //long	enable;
 } Surface;
 
 typedef struct _SurfaceList {
@@ -81,5 +83,4 @@ extern "C" {
     int  SurfSize(void);
     int  RaysSize(void);
 }
-
 

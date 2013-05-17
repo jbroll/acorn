@@ -2,13 +2,13 @@
 #
 lappend auto_path ./lib ../lib arec/lib
 
-source tcloo.tcl
-source unix.tcl
+#source tcloo.tcl
+#source unix.tcl
 
 package require acorn
 
 
-ZMX create GMT source zmx-models/GMT-1-AcOWFS-3.ZMX
+acorn::ZMX create GMT source zmx-models/GMT-1-AcOWFS-3.ZMX
 
 acorn::mkrays rays nx 100 x0 -12700 x1 12700 ny 100 y0 -12700 y1 12700
 

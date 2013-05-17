@@ -93,6 +93,8 @@ namespace eval acorn {
 
 	    string	glass
 	    long	glass_ptr
+
+	    #long	enable
 	}
 	arec::typedef ::acorn::SurfaceList {
 	    long 	 surf;

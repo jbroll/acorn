@@ -1,0 +1,41 @@
+
+case $1 in 
+ clear)
+    for s in 1 2 3 4 5 6 7 ; do
+	for z in 2 3 4 5 6 7 8 9 10; do
+	    aco set S$s z$z 0
+	done
+    done
+
+    aco push
+    ;;
+ data)
+    for s in 1 2 3 4 5 6 7 ; do
+	for z in 2 3 4 5 6 7 8 9 10; do
+	    aco set S$s z$z 0
+	done
+    done
+
+    aco  rays nx 100 ny 100 start 1 end -1
+    aco push
+
+    aco rays end  1						# Trace rays to surface 1 (planar).
+    aco raytable > start.rays	
+
+    aco rays end -1	 					# Trace rays to image plane.
+    aco raytable > image.rays
+
+    err=.0001
+
+    for s in 1 2 3 4 5 6 7 ; do
+	for z in 2 3 4 5 6 7 8 9 10; do
+	    aco set S$s z$z $err
+	    aco push
+	    sleep 2
+	    aco raytable > S$s-z$z.rays
+	    aco set S$s z$z 0
+	done
+    done
+    ;;
+esac
+

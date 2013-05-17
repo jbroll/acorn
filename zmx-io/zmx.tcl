@@ -60,6 +60,7 @@ namespace eval acorn {
     proc zmx-coordbrk { model surf } {}
     proc zmx-zernike  { model surf } {}
     proc zmx-dgrating { model surf } {}
+    proc zmx-lens-array-rect { model surf } {}
     proc zmx-evenasph { model surf } {
 	$model $surf set nterms 8
     }
@@ -69,7 +70,8 @@ namespace eval acorn {
 oo::class create ::acorn::ZMX {
     superclass ::acorn::BaseModel
 
-    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs		\
+    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs 	\
+	mce mce_current												\
 	Id Name Notes Temp Pres											\
 	params comment nonseqid nonseq nsoexit
 
@@ -92,6 +94,8 @@ oo::class create ::acorn::ZMX {
 	} else {
 	    rename $current {}
 	}
+
+	eval $mce($mce_current)
     }
 
     method simple { args } {}
@@ -105,6 +109,11 @@ oo::class create ::acorn::ZMX {
 	}
     }
 
+    method mce { config } {
+	set mce_current $config
+	eval $mce($config)
+    }
+
     method OBSC { args } {}
     method VERS { args } {}
     method UNIT { lens_unit src_prefix src_unit anal_prefix anal_unit args }	{}
@@ -116,6 +125,10 @@ oo::class create ::acorn::ZMX {
     method NOTE { args } { lappend Notes $args }
 
     method  SURF { id } { set Id $id;  set comment {} }
+
+    method xNOP { args } {
+	#puts "NOP $args"
+    } 
 
      # Common surface definition commands
      #
@@ -133,6 +146,9 @@ oo::class create ::acorn::ZMX {
 	if { $type eq "NONSEQCO" } {
 	    set grouptype non-sequential
 
+	    ::oo::objdefine [self] [list forward $Id [self] xNOP $Id]
+	    ::oo::objdefine [self] [list export  $Id]
+
 	    set nonseqid $Id
 	    set nonseq   0
 	    return
@@ -148,7 +164,7 @@ oo::class create ::acorn::ZMX {
 	}
 	set args {}
 
-	set type $::acorn::ZMXSurfaceMap([string tolower $type])		; # Map Zemaz surface type in to acorn.
+	set type $::acorn::ZMXSurfaceMap([string tolower $type])		; # Map Zemax surface type in to acorn.
 
 	set surftype $type
 
@@ -212,9 +228,7 @@ oo::class create ::acorn::ZMX {
      method COMM { args }  { set comment $args }
      method PPAR { args } { }
      method THIC { args } { }
-     method WAVE { args } { }
-     method PRAM { args } { }
-     method XFIE { args } { }
+
      method PARM { n value } {
 	 if { $grouptype ne "non-sequential" } {
 	     try { my [$current $surf get name] set $::acorn::ZMXParmMap($surftype,$n) $value
@@ -335,10 +349,8 @@ oo::class create ::acorn::ZMX {
     method GLRS { args } {}
     method GSTD { args } {}
     method HIDE { args } {}
-    method IGNR { args } {}
     method MAZH { args } {}
     method MIRR { args } {}
-    method MNUM { args } {}
     method MODE { args } {}
 
     method PFIL { args } {}
@@ -365,5 +377,16 @@ oo::class create ::acorn::ZMX {
     method XDAT { args } {}
     method XFLN { args } {}
     method YFLN { args } {}
+
+    # Multi Configuration Editor
+    #
+    method MNUM { n current } { set mce_current $current }				; # Multi Configure Number of configs
+
+    method WAVE { surf config args } { append mce($config) "my xWAVE $surf $args\n" }	; # Set Wavelength
+    method IGNR { surf config args } { append mce($config) "my xIGNR $surf $args\n" }	; # Ignore surface
+    method PRAM { surf config args } { append mce($config) "my xPRAM $surf $args\n" }	; # Set Parameter
+    method XFIE { surf config args } { append mce($config) "my xXFIE $surf $args\n" }
+
+    method xIGNR { surf value args } { my $surf set enable [expr !int($value)] }
 }
 

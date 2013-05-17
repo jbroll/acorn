@@ -39,7 +39,7 @@
 
 
 oo::class create ::acorn::BaseModel {
-    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs		\
+    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce
     accessor surfaces basepar
 
     constructor {} {
@@ -48,7 +48,7 @@ oo::class create ::acorn::BaseModel {
 	set default {}
 	set basemap { 	name name type type comment comment glass glass
 	    		aperture aperture aper_type aper_type aper_param aper_param aper_data aper_data aper_leng aper_leng 
-			traverse traverse infos infos thickness thickness
+			traverse traverse infos infos thickness thickness 
 	}
     	set basepar { x y z rx ry rz thickness aper_min aper_max n }
 	foreach par $basepar i [iota 0 [llength $basepar]-1] { lappend basemap $par p$i }
