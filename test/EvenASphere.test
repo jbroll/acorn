@@ -31,7 +31,7 @@ acorn::model Model {
 
 
 foreach surf { B C } {
-    set def .00000005
+    set	def 0.00000005
 
     foreach aa { 2 4 6 8 10 12 14 16 } {
  	::tcltest::test evenasph-rays-$surf-$aa { EvenASphere raytrace } -body {

@@ -117,7 +117,6 @@ extern "C" {
 
 			//printf("Next ");
 			//prays(ray, 1);
-		//if ( surf[i].z != 0 ) { prays(ray, 1); }
 		}
 
 		if ( !once ) {
@@ -129,7 +128,7 @@ extern "C" {
 			//prays(ray, 1);
 
 	    if ( once ) {
-		for ( j = 0, ray = R; j < nray; j++, ray = (Ray *) (((char *) ray) + rsize) ) { 	// Rays that have not traversed are vignetted.
+		for ( j = 0, ray = R; j < nray; j++, ray = (Ray *) (((char *) ray) + rsize) ) {	// Rays that have not traversed are vignetted.
 		    ray->vignetted = !traversed[j];
 		}
 		n  = surf[0].p[Px_n] > 0.0 ? surf[0].p[Px_n] : n;

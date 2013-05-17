@@ -1,15 +1,15 @@
 #!/usr/bin/env tclkit8.6
 #
-lappend auto_path ./lib ../lib
+lappend auto_path ./lib arec/lib
 
-source tcloo.tcl
-source unix.tcl
+#source tcloo.tcl
+#source unix.tcl
 
-source acorn-model.tcl
+#source acorn-model.tcl
 
 package require acorn
 
-ZMX create B source zmx-models/p8_110912af_072512ac.zmx
+acorn::ZMX create B source zmx-models/p8_110912af_072512ac.zmx
 
 #acorn::mkrays rays nx 200 x0 -12700 x1 12700 ny 200 y0 -12700 y1 12700
 #B trace rays

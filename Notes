@@ -13,15 +13,15 @@ add merit functions
 add plots
 
 add Para-axial
-add Zernike		- 
 
 add coord break		- Need test data
 add verbose debug
 
-add lenslets		- Test
+add lenslets		- Done/
 
-add glass	- Done
-add ZMX parser	- Done
+add Zernike		- Done/Tested
+add glass		- Done
+add ZMX parser		- Done
 
 
 

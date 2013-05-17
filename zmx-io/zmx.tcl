@@ -4,57 +4,66 @@
 
 namespace eval acorn {
 
-array set ZMXSurfaceMap {
-    standard	 	simple
-    coordbrk	 	coordbrk
-    evenasph     	evenasph
-    dgrating	 	dgrating
-    szernpha	 	zernike
-    szernsag	 	zernike
+    array set ZMXSurfaceMap {
+	standard	 	simple
+	coordbrk	 	coordbrk
+	evenasph     	evenasph
+	dgrating	 	dgrating
+	szernpha	 	zernike
+	szernsag	 	zernike
 
-    nsc_ssur	 	simple
-    nsc_zsur	 	zernike
-    nsc_annu	 	simple
+	nsc_ssur	 	simple
+	nsc_zsur	 	zernike
+	nsc_annu	 	simple
 
-    us_array.dll 	lens-array-rect
-    us_hexarray.dll	lens-array-hex
-}
+	us_array.dll 	lens-array-rect
+	us_hexarray.dll	lens-array-hex
+    }
 
-array set ZMXNSODMap {
-    simple,1	R
-    simple,2	K
-    simple,3	aper_max
+    array set ZMXNSODMap {
+	simple,1	R
+	simple,2	K
+	simple,3	aper_max
 
-    zernike,1	R
-    zernike,2	K
-    zernike,15	nterms
-    zernike,5	xdecenter
-    zernike,6	ydecenter
+	zernike,1	R
+	zernike,2	K
+	zernike,15	nterms
+	zernike,5	xdecenter
+	zernike,6	ydecenter
 
-}
+    }
 
-array set ZMXParmMap {
-    lens-array-rect,1	nx
-    lens-array-rect,2	ny
-    lens-array-rect,3	width
-    lens-array-rect,4	height
+    array set ZMXParmMap {
+	lens-array-rect,1	nx
+	lens-array-rect,2	ny
+	lens-array-rect,3	width
+	lens-array-rect,4	height
 
-    coordbrk,1		x
-    coordbrk,2		y
-    coordbrk,3		z
-    coordbrk,4		rx
-    coordbrk,5		ry
-    coordbrk,6		rz
+	coordbrk,1		x
+	coordbrk,2		y
+	coordbrk,3		z
+	coordbrk,4		rx
+	coordbrk,5		ry
+	coordbrk,6		rz
 
-    evenasph,1		a1
-    evenasph,2		a2
-    evenasph,3		a3
-    evenasph,4		a4
-    evenasph,5		a5
-    evenasph,6		a6
-    evenasph,7		a7
-    evenasph,8		a8
-}
+	evenasph,1		a2
+	evenasph,2		a4
+	evenasph,3		a6
+	evenasph,4		a8
+	evenasph,5		a10
+	evenasph,6		a12
+	evenasph,7		a14
+	evenasph,8		a16
+    }
+
+    proc zmx-simple   { model surf } {}
+    proc zmx-coordbrk { model surf } {}
+    proc zmx-zernike  { model surf } {}
+    proc zmx-dgrating { model surf } {}
+    proc zmx-evenasph { model surf } {
+	$model $surf set nterms 8
+    }
+
 }
 
 oo::class create ::acorn::ZMX {
@@ -181,12 +190,16 @@ oo::class create ::acorn::ZMX {
 	::oo::objdefine [self] [list forward $Id [self] surfset1 $current $surf $parmap]
 	::oo::objdefine [self] [list export  $Id]
 
+
 	if { $comment ne {} } {
 	    set name [string map { { } {} } [join [map word $comment { string totitle $word }]]]
 
 	    ::oo::objdefine [self] [list forward $name [self] surfset1 $current $surf $parmap]
 	    ::oo::objdefine [self] [list export  $name]
+
 	}
+
+	::acorn::zmx-$surftype [self] $Id
      }
      method CURV { curv  args } {
 	 if { $grouptype ne "non-sequential" } {
@@ -204,7 +217,7 @@ oo::class create ::acorn::ZMX {
      method XFIE { args } { }
      method PARM { n value } {
 	 if { $grouptype ne "non-sequential" } {
-	     try { my [$current $surf get name] set $::ZMXParmMap($surftype,$n) $value
+	     try { my [$current $surf get name] set $::acorn::ZMXParmMap($surftype,$n) $value
 	     } on error message {
 		 puts stderr "PARM $surftype $n $value : $message"
 		 #$current $surf set p$n $value

@@ -36,7 +36,7 @@ extern "C" {
     void EvenASpSag(Surface &s, double x, double y, double *dz, double *dx, double *dy)
     {
 	int    i;
-	int    nterms = s.p[Pm_nterms];
+	int    nterms = max(s.p[Pm_nterms], 8.0);
 
 	double adz = 0.0;
 	double adx = 0.0;
@@ -46,15 +46,18 @@ extern "C" {
 
 	for ( i = 0; i < nterms; i++ ) {
 	    rr = rr*r;						// rr is an odd.
-	    adx = adx + rr * s.p[Pm_a2+i] * (i+1*2);		// Make us a derrivitive.
+	    adx = adx + (i+1)*2 * s.p[Pm_a2+i] * rr;		// Make us a derrivitive.
 
 	    rr = rr*r;						// rr is an even.
-	    adz = adz + rr * s.p[Pm_a2+i];			// Make us the function.
+	    adz = adz +           s.p[Pm_a2+i] * rr;		// Make us the function.
 	}
 
+	    //printf("%.21f %.21f\n", adz, adx);
+	    //fflush(stdout);
+
 	*dz =  adz;
-	*dx = (adx / r) * x;					// Split slope on x,y.
-	*dy = (adx / r) * y;
+	*dx = -(adx / r) * x;					// Split slope on x,y.
+	*dy = -(adx / r) * y;
     }
 
   int traverse(double n0, double z, Surface &s, Ray &r)

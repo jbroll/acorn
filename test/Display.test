@@ -2,14 +2,13 @@
 #
 lappend auto_path /home/john/lib /Users/john/lib ./lib ../lib arec/lib tripack/lib
 
-source tcloo.tcl
-source ngon.tcl
+
 package require acorn
 package require tripack
 
-source 3d.tcl
-
-source display-common.tcl
+source util/3d.tcl
+source util/ngon.tcl
+source util/display-common.tcl
 
 
 acorn::model GMT {
