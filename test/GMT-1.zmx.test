@@ -72,28 +72,30 @@ acorn::model ::Model {
 
 set err 0.0001
 
-foreach surf { 7 1 2 3 4 5 6 } {
-    foreach z { 2 3 4 5 6 7 8 9 10 } {
- 	::tcltest::test GMT-1-rays-S$surf-z$z { GMT-0 raytrace } -body {
+foreach mirror { S P } {
+    foreach surf { 7 1 2 3 4 5 6 } {
+	foreach z { 2 3 4 5 6 7 8 9 10 } {
+	    ::tcltest::test GMT-1-rays-$mirror$surf-z$z { GMT-0 raytrace } -body {
 
-	    set rays [starbase2ray Start $rays]
+		set rays [starbase2ray Start $rays]
 
-	    Model S$surf set z$z $err
-	    Model trace $rays
+		Model $mirror$surf set z$z $err
+		Model trace $rays
 
-	    acorn::prays $rays > $Data/S$surf-z$z.acorn
+		acorn::prays $rays > $Data/$mirror$surf-z$z.acorn
 
-	    lassign [starbase_raycompare $rays $Data/S$surf-z$z.rays 0] sumx sumy sumz
+		lassign [starbase_raycompare $rays $Data/$mirror$surf-z$z.rays 0] sumx sumy sumz
 
-	    Model S$surf set z$z 0.0
+		Model $mirror$surf set z$z 0.0
 
-	    #list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
-	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]
+		#list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+		list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]
 
 
-	    puts "$surf $z [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
-	    list 1 1 1
-	} -result {1 1 1}
+		puts "$mirror $surf $z [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
+		list 1 1 1
+	    } -result {1 1 1}
+	}
     }
 }
 
