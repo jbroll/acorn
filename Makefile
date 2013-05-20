@@ -6,7 +6,7 @@ OS  =$(shell uname)
 
 INC= -I/Users/john/include -I/home/john/include
 
-CFLAGS=$(INC) -msse -fPIC
+CFLAGS=$(INC) -msse -fPIC -O2 
 
 SRC	= acorn.cpp aperture.cpp glass/glass.c glass/acorn-glass.cpp tpool/tpool.c
 TCL	= acorn.tcl acorn-model.tcl			\
