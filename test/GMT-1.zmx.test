@@ -13,17 +13,19 @@ set Data test/GMT-1.zmx.data
 starbase_read Start $Data/start.rays
 set rays {}
 
+#acorn::ZMX create Model source test/GMT-0.zmx.data/GMT-0.zmx
 #acorn::ZMX create Model source $Data/GMT-1.zmx
 
-acorn::model ::Model {
-    surface 0 { thickness Inf }
-    surface 1 { type coordbrk comment SkyRotation }
-    surface 2 { type coordbrk comment GuideError }
-    surface 3 { thickness -22000.0 }
-    surface 4 { comment {M2 BAFFLE} thickness 22000.0 }
-    surface 5 { thickness -10000.0 aper_type circular aper_max 12724.0 R -36000.0 }
-    surface 6 { type zernike comment FakeZ nterms 0.0 }
-        surface-group-non-sequential X {
+if { 1 } {
+    acorn::model ::Model {
+	surface 0 { thickness Inf }
+	surface 1 { type coordbrk comment SkyRotation }
+	surface 2 { type coordbrk comment GuideError }
+	surface 3 { thickness -22000.0 }
+	surface 4 { comment {M2 BAFFLE} thickness 22000.0 }
+	surface 5 { thickness -10000.0 aper_type circular aper_max 12724.0 R -36000.0 }
+	surface 6 { type zernike comment FakeZ nterms 0.0 }
+	surface-group-non-sequential X {
 		surface 7-1 { type zernike comment P7 n -1.0 z 10000.0 thickness -8000.0 aper_type circular aper_max 4182.5 R -36000.0 K -0.9982857 nradius 4182.5 nterms 48.0 }
 		surface 7-2 { type zernike comment P1 n -1.0 z 10000.0 rz 90.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
 		surface 7-3 { type zernike comment P2 n -1.0 z 10000.0 rz 150.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
@@ -31,11 +33,11 @@ acorn::model ::Model {
 		surface 7-5 { type zernike comment P4 n -1.0 z 10000.0 rz 270.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
 		surface 7-6 { type zernike comment P5 n -1.0 z 10000.0 rz 330.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
 		surface 7-7 { type zernike comment P6 n -1.0 z 10000.0 rz 30.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
-        }
-        surface 8 { thickness -0.001 }
-        surface 9 { thickness 2.048916313567 }
-        surface 10 { thickness -2.048916313567 }
-        surface-group-non-sequential X {
+	}
+	surface 8 { thickness -0.001 }
+	surface 9 { thickness 2.048916313567 }
+	surface 10 { thickness -2.048916313567 }
+	surface-group-non-sequential X {
 		surface 11-1 { type zernike comment S7 n -1.0 z -2262.47514 thickness 18000.0 aper_type circular aper_max 525.76 R 4163.900922 K -0.71692784 nradius 525.76 nterms 48.0 }
 		surface 11-2 { type zernike comment S1 n -1.0 z -2262.47514 rz 90.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
 		surface 11-3 { type zernike comment S2 n -1.0 z -2262.47514 rz 150.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
@@ -43,17 +45,26 @@ acorn::model ::Model {
 		surface 11-5 { type zernike comment S4 n -1.0 z -2262.47514 rz 270.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
 		surface 11-6 { type zernike comment S5 n -1.0 z -2262.47514 rz 330.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
 		surface 11-7 { type zernike comment S6 n -1.0 z -2262.47514 rz 30.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
-		surface 11-8 { z -2262.475140933 thickness 18000.0 aper_type circular R 1700.0 K 1700.0 }
-        }
-        surface 12 { comment ADJ thickness 0.001 }
-        surface 13 { comment {M1 VERTEX} thickness 4900.0 }
-        surface 14 { comment {IP TOP PLATE} thickness 620.0 }
-        surface 15 { comment {DG INSTRUMENT TOP} thickness 310.0 }
+		#surface 11-8 { z -2262.475140933 thickness 18000.0 aper_type circular R 1700.0 K 1700.0 }
+	}
+	surface 12 { comment ADJ thickness 0.001 }
+	surface 13 { comment {M1 VERTEX} thickness 4900.0 }
+	surface 14 { comment {IP TOP PLATE} thickness 620.0 }
+	surface 15 { comment {DG INSTRUMENT TOP} thickness 310.0 }
         surface 16 { comment {TELESCOPE FOCUS} R 2251.448 }
-        surface 17 {  }
+	surface 17 {  }
+    }
 }
 
-::tcltest::test GMT-1-rays-image { EvenASphere raytrace } -body {
+Model 11-1 nterms 0
+Model 11-2 nterms 0
+Model 11-3 nterms 0
+Model 11-4 nterms 0
+Model 11-5 nterms 0
+Model 11-6 nterms 0
+Model 11-7 nterms 0
+
+::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
     set rays [starbase2ray Start $rays]
     Model trace $rays
 
@@ -68,11 +79,11 @@ acorn::model ::Model {
     list 1 1 1
 } -result {1 1 1}
 
-
+#exit
 
 set err 0.0001
 
-foreach mirror { S P } {
+foreach mirror { P S } {
     foreach surf { 7 1 2 3 4 5 6 } {
 	foreach z { 2 3 4 5 6 7 8 9 10 } {
 	    ::tcltest::test GMT-1-rays-$mirror$surf-z$z { GMT-0 raytrace } -body {

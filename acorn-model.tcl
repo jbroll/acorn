@@ -144,7 +144,7 @@ oo::class create ::acorn::BaseModel {
     method print {} {
 	puts "acorn::model [self] \{"
 
-	set tab "    "
+	set tab "	"
 	foreach { type surf } $surfaces {
 	    if { $type eq "non-sequential" } { puts "${tab}surface-group-non-sequential X \{" ; set tab "		" }
 	    foreach i [iota 0 [$surf length]-1] {
