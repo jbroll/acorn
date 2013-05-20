@@ -99,17 +99,17 @@ inline int AcornSimpleIterativeIntersect(Surface &s, Ray &r, double z, Vector3d 
 
 	sagitta(s, r.p(X), r.p(Y), &zdz, &zdx, &zdy);
 
-	Vector3d P = Vector3d(r.p(X), r.p(Y), Az-zdz);		// Estimate point on the surface.
+	Vector3d P = Vector3d(r.p(X), r.p(Y), Az+zdz);		// Estimate point on the surface.
 
 								// Compute the normal to the conic + deformation
 	if ( R == 0.0 || abs(R) > 1.0e10 ) {			// Planar
-	    nhat = Vector3d(zdx, zdy, -Dsign*1.0);
+	    nhat = Vector3d(-zdx, -zdy, -Dsign*1.0);
 	} else {
 	    double cdz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
 	    double cdx = P(X)/cdz;				// These must be slopes to add with zernike slopes.
 	    double cdy = P(Y)/cdz;
 
-	    nhat = Vector3d(Rsign*Dsign*(cdx + zdx), Rsign*Dsign*(cdy + zdy), -Dsign*1);
+	    nhat = Vector3d(Dsign*(Rsign*cdx + zdx), Dsign*(Rsign*cdy + zdy), -Dsign*1);
 	}
 	nhat /= nhat.norm();
 

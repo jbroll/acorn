@@ -75,7 +75,7 @@ oo::class create ::acorn::BaseModel {
 	}
     }
 
-    method trace { rays { surfs { 0 end } } { wave 5000 } } {		# Assemble the surfaces to be traced.
+    method trace { rays { surfs { 0 end } } { wave 5000 } { thread 0 } } {		# Assemble the surfaces to be traced.
 	::acorn::SurfaceList create slist 0
 
 	lassign $surfs start end
@@ -114,7 +114,7 @@ oo::class create ::acorn::BaseModel {
 	    incr i
 	}
 
-	acorn::trace_rays 0 1 [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] 0
+	acorn::trace_rays 0 1 [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] $thread
 
 	rename slist {}
     }

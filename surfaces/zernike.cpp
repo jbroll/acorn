@@ -74,9 +74,9 @@ extern "C" {
 	zdx /= nradius;
 	zdy /= nradius;
 
-	*dz = -zdz;						// This makes the Zernike signs match Zemax.
-	*dx = -zdx;
-	*dy = -zdy;
+	*dz = zdz;
+	*dx = zdx;
+	*dy = zdy;
     }
 
   int traverse(double n0, double z, Surface &s, Ray &r)

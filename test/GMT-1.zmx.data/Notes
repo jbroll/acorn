@@ -54,6 +54,14 @@ case $1 in
 
 	plottable graph file "| < $file.acorn row '!v'" title Acorn size 5 5 at 0 5 x,y marker circle	\
 		  graph file "| < $file.rays  row '!v'" title Zemax size 5 5 at 0 0 x,y marker circle
+
+    ;;
+    vect)
+	file=$2
+	shift
+	shift
+
+	pastetable $file.rays $file.acorn | row '!v_1' | plottable size 8 8 x_1,y_1 vector x_2,y_2 $*
     ;;
 esac
 

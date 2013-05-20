@@ -45,20 +45,23 @@ extern "C" {
 		if ( isinf(surf[i].p[Px_thickness]) ) { continue; }
 		//if (      !surf[i].enable           ) { continue; } 
 
-		Affine3d txforward;
-		Affine3d txreverse;
-		Affine3d rtforward;
-		Affine3d rtreverse;
+		Affine3d txforward = Affine3d::Identity();
+		Affine3d txreverse  ;
+		Affine3d rtforward  ;
+		Affine3d rtreverse  ;
 
-		txforward   = Translation3d(-surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz])
+		txforward   = 
+			    Affine3d::Identity()
 			    * AngleAxisd(d2r(surf[i].p[Px_rx]), Vector3d(1.0, 0.0, 0.0))
 			    * AngleAxisd(d2r(surf[i].p[Px_ry]), Vector3d(0.0, 1.0, 0.0))
-			    * AngleAxisd(d2r(surf[i].p[Px_rz]), Vector3d(0.0, 0.0, 1.0));
+			    * AngleAxisd(d2r(surf[i].p[Px_rz]), Vector3d(0.0, 0.0, -1.0))
+			    * Translation3d(-surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz])
+			;
 
 		rtforward   =
 			      AngleAxisd(d2r(surf[i].p[Px_rx]), Vector3d(1.0, 0.0, 0.0))
 			    * AngleAxisd(d2r(surf[i].p[Px_ry]), Vector3d(0.0, 1.0, 0.0))
-			    * AngleAxisd(d2r(surf[i].p[Px_rz]), Vector3d(0.0, 0.0, 1.0));
+			    * AngleAxisd(d2r(surf[i].p[Px_rz]), Vector3d(0.0, 0.0, -1.0));
 
 		txreverse 	= txforward.inverse();
 		rtreverse 	= rtforward.inverse();

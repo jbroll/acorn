@@ -32,9 +32,8 @@ acorn::ZMX create Model source $Data/GMT-0.zmx
 
 
 set err 0.0001
-#set err 0.000022
 
-foreach surf { 7 } {
+foreach surf { 7 1 2 3 4 5 6 } {
     foreach r { x y rx ry } {
  	::tcltest::test GMT-0-rays-S$surf-$r { GMT-0 raytrace } -body {
 
