@@ -3,6 +3,9 @@ case $1 in
  clear)
     for m in S P ; do
 	for s in 1 2 3 4 5 6 7 ; do
+	    for r in x y rx ry ; do
+		aco set $m$s $r 0
+	    done
 	    for z in 2 3 4 5 6 7 8 9 10; do
 		aco set $m$s z$z 0
 	    done
@@ -12,13 +15,7 @@ case $1 in
     aco push
     ;;
  data)
-    for m in S P ; do
-	for s in 1 2 3 4 5 6 7 ; do
-	    for z in 2 3 4 5 6 7 8 9 10; do
-		aco set $m$s z$z 0
-	    done
-	done
-    done
+    ./Notes clear
 
     aco  rays nx 100 ny 100 start 1 end -1
     aco push
@@ -31,8 +28,16 @@ case $1 in
 
     err=.0001
 
+
     for m in S P ; do
 	for s in 1 2 3 4 5 6 7 ; do
+	    for r in x y rx ry ; do
+		aco set $m$s $r $err
+		aco push
+		sleep 2
+		aco raytable all > $m$s-$r.rays
+		aco set $m$s $r 0
+	    done
 	    for z in 2 3 4 5 6 7 8 9 10; do
 		aco set $m$s z$z $err
 		aco push
