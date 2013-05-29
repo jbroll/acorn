@@ -164,8 +164,6 @@ extern "C" {
 	if ( nthread == 0 ) {
 	    trace_rays0(z, n, surflist, nsurfs, ray, nray, rsize);
 	} else {
-	    if ( tp == NULL ) { tp = TPoolInit(64); }
-
 	    for ( int i = 0; i < nthread; i++ ) {
 		data[i].z        = z;
 		data[i].n        = n;
@@ -188,7 +186,9 @@ extern "C" {
     TPool *tp = NULL;
 
     void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, int nthread) {
-	 //trace_rays0(z, n, surflist, nsurfs, ray, nray);
+	if ( tp == NULL ) {
+	    tp = TPoolInit(64);
+	}
 
     	trace_rays_thread(z, n, surflist, nsurfs, ray, nray, rsize, tp, nthread);
     }
