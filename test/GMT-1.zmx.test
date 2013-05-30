@@ -14,9 +14,9 @@ starbase_read Start $Data/start.rays
 set rays {}
 
 #acorn::ZMX create Model source test/GMT-0.zmx.data/GMT-0.zmx
-#acorn::ZMX create Model source $Data/GMT-1.zmx
+acorn::ZMX create Model source $Data/GMT-1.zmx
 
-if { 1 } {
+if { 0 } {
     acorn::model ::Model {
 	surface 0 { thickness Inf }
 	surface 1 { type coordbrk comment SkyRotation }
