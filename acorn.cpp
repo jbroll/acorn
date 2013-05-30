@@ -52,16 +52,18 @@ extern "C" {
 
 		txforward   = 
 			    Affine3d::Identity()
-			    * AngleAxisd(d2r(surf[i].p[Px_rx]), Vector3d(1.0, 0.0, 0.0))
-			    * AngleAxisd(d2r(surf[i].p[Px_ry]), Vector3d(0.0, 1.0, 0.0))
 			    * AngleAxisd(d2r(surf[i].p[Px_rz]), Vector3d(0.0, 0.0, -1.0))
+			    * AngleAxisd(d2r(surf[i].p[Px_ry]), Vector3d(0.0, 1.0, 0.0))
+			    * AngleAxisd(d2r(surf[i].p[Px_rx]), Vector3d(1.0, 0.0, 0.0))
 			    * Translation3d(-surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz])
 			;
 
 		rtforward   =
-			      AngleAxisd(d2r(surf[i].p[Px_rx]), Vector3d(1.0, 0.0, 0.0))
+			    Affine3d::Identity()
+			    * AngleAxisd(d2r(surf[i].p[Px_rz]), Vector3d(0.0, 0.0, -1.0))
 			    * AngleAxisd(d2r(surf[i].p[Px_ry]), Vector3d(0.0, 1.0, 0.0))
-			    * AngleAxisd(d2r(surf[i].p[Px_rz]), Vector3d(0.0, 0.0, -1.0));
+			    * AngleAxisd(d2r(surf[i].p[Px_rx]), Vector3d(1.0, 0.0, 0.0))
+			    ;
 
 		txreverse 	= txforward.inverse();
 		rtreverse 	= rtforward.inverse();
