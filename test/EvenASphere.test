@@ -24,12 +24,16 @@ acorn::model Model {
     set rays [starbase2ray Start $rays]
     Model trace $rays
 
+    acorn::prays $rays > $Data/image.acorn
+
     lassign [starbase_raycompare $rays $Data/image.rays 370] sumx sumy sumz
 
-    puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+    #puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
 
     list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
 } -result {1 1 1}
+
+#exit
 
 
 foreach surf { B C } {
@@ -43,16 +47,18 @@ foreach surf { B C } {
 	    Model $surf set a$aa $def
 	    Model trace $rays
 
+	    acorn::prays $rays > $Data/a[format %02d $aa]-$surf.acorn
+
 	    lassign [starbase_raycompare $rays $Data/a[format %02d $aa]-$surf.rays 370] sumx sumy sumz
 
 	    Model $surf set a$aa 0.0
 
 	    set def [expr $def/400.0]
 
-	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+	    list [expr { sqrt($sumx) < 1e-8 }]	[expr { sqrt($sumy) < 1e-8 }]	[expr { sqrt($sumz) < 1e-8 }]
 
-	    puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
-	    list 1 1 1
+	    #puts "$surf a$aa [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+	    #list 1 1 1
 	} -result {1 1 1}
     }
 }

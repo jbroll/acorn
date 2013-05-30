@@ -19,33 +19,13 @@ add verbose debug
 
 add lenslets		- Done/
 
+add EvenAsphere		- Done/Tested	- Broken in Binospec?
 add Zernike		- Done/Tested
 add glass		- Done
 add ZMX parser		- Done
 
 
-Testing GMT-0 Translations work
-	      Rotations fail - secondary is deep in the NSO and rotaions are not about the parrent surface?
+Testing GMT-0 		- Done
+Testing GMT-1 Zernike	- Done
+Testing GMT-1-AoCWFS-1	- Testing - primary rotations fail.
 
-Testing GMT-1 Zernike
-
-
-
-
-
-jottable 10 x | column -N y | headoff | xpaset ds9 plot new name p scatter 
-
-
-1960  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-127:127:1,y:-127:127:1,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-1961  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-127:127:.1,y:-127:127:.1,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-1962  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-12:12:.01,y:-12:12:.01,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-1963  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-12:12:.01,y:-12:12:.01,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-
-1966  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-1:1:.01,y:-1:1:.01,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-1967  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-.1:.1:.001,y:-.1:.1:.001,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-1968  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-.01:.01:.0001,y:-.01:.01:.0001,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-1969  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-.001:.001:.00001,y:-.001:.001:.00001,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-1970  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-.01:.01:.00001,y:-.01:.01:.00001,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-1971  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-.005:.005:.00001,y:-.005:.005:.00001,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-1972  test/D.GMT-segment.test  | compute 'v=!v' | row v==1 | funimage 'STDIN[bincols=(x:-.005:.005:.00002,y:-.005:.005:.00002,v)]' STDOUT bitpix=32 | xpaset ds9 fits
-test/Zernike.test  | plottable size 8 8 x,y marker circle

@@ -2,6 +2,8 @@
 *.o
 *.so
 
+*.acorn
+
 zernike/zernike.c
 zernike/zernike.tab
 zernike/zerniketable

@@ -1,0 +1,70 @@
+acorn::model ::Model {
+	surface 0 { thickness Inf }
+	surface 1 { type coordbrk comment SkyRotation }
+	surface 2 { type coordbrk comment GuideError }
+	surface 3 { thickness -22000.0 }
+	surface 4 { comment {M2 BAFFLE} thickness 22000.0 }
+	surface 5 { thickness -10000.0 aper_type circular aper_max 12724.0 R -36000.0 }
+	surface 6 { type zernike comment FakeZ nterms 0.0 }
+        surface-group-non-sequential X {
+		surface 7-1 { type zernike comment P7 n -1.0 z 10000.0 thickness -8000.0 aper_type circular aper_max 4182.5 R -36000.0 K -0.9982857 nradius 4182.5 nterms 48.0 }
+		surface 7-2 { type zernike comment P1 n -1.0 z 10000.0 rz 90.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+		surface 7-3 { type zernike comment P2 n -1.0 z 10000.0 rz 150.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+		surface 7-4 { type zernike comment P3 n -1.0 z 10000.0 rz 210.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+		surface 7-5 { type zernike comment P4 n -1.0 z 10000.0 rz 270.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+		surface 7-6 { type zernike comment P5 n -1.0 z 10000.0 rz 330.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+		surface 7-7 { type zernike comment P6 n -1.0 z 10000.0 rz 30.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+        }
+        surface 8 { thickness -0.001 }
+        surface 9 { thickness 2.048916313567 }
+        surface 10 { thickness -2.048916313567 }
+        surface-group-non-sequential X {
+		surface 11-1 { type zernike comment S7 n -1.0 z -2262.47514 thickness 18000.0 aper_type circular aper_max 525.76 R 4163.900922 K -0.71692784 nradius 525.76 nterms 48.0 }
+		surface 11-2 { type zernike comment S1 n -1.0 z -2262.47514 rz 90.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+		surface 11-3 { type zernike comment S2 n -1.0 z -2262.47514 rz 150.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+		surface 11-4 { type zernike comment S3 n -1.0 z -2262.47514 rz 210.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+		surface 11-5 { type zernike comment S4 n -1.0 z -2262.47514 rz 270.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+		surface 11-6 { type zernike comment S5 n -1.0 z -2262.47514 rz 330.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+		surface 11-7 { type zernike comment S6 n -1.0 z -2262.47514 rz 30.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+		surface 11-8 { z -2262.475140933 thickness 18000.0 aper_type circular R 1700.0 K 1700.0 }
+        }
+        surface 12 { comment ADJ thickness 0.001 }
+        surface 13 { comment {M1 VERTEX} thickness 4900.0 }
+        surface 14 { comment {IP TOP PLATE} thickness 620.0 }
+        surface 15 { comment {DG INSTRUMENT TOP} thickness 310.0 }
+        surface 16 { comment {TELESCOPE FOCUS} R 2251.448 }
+        surface 17 { type coordbrk }
+        surface 18 { comment Pinhole }
+        surface 19 { type coordbrk comment AGWFPosition }
+        surface 20 { comment AGWF thickness 64.0 }
+        surface 21 { comment Collimator glass N-SSK8 thickness 8.0 R 42.260000000000005 }
+        surface 22 { glass N-SF56 thickness 3.5 R -33.36999999999997 }
+        surface 23 { thickness 57.78859484324 R -123.44999999999997 }
+        surface 24 { comment L0 glass BK7 thickness 1.0 }
+        surface 25 { type lens-array-rect comment SH thickness 6.0 R -3.128424286155137 nx 65.0 ny 65.0 width 0.3 height 0.3 }
+        surface 26 { comment 45759 thickness 22.357131 }
+        surface 27 { comment {Retainer AP} thickness 0.22315 }
+        surface 28 { glass SK2 thickness 6.2 R -99.20000000000317 }
+        surface 29 { thickness 0.4 aper_type circular aper_max 6.8 R -28.89999999999789 }
+        surface 30 { glass H-LAK1 thickness 2.85 aper_type circular aper_max 6.8 R 22.300000000002118 }
+        surface 31 { R -34.29999999999685 }
+        surface 32 { glass ZF3 thickness 1.6 R -34.29999999999685 }
+        surface 33 { thickness 0.4 aper_type circular aper_max 6.25 }
+        surface 34 { glass LAFN10 thickness 4.55 aper_type circular aper_max 6.25 R 10.54999999999999 }
+        surface 35 { R 37.3999999999979 }
+        surface 36 { glass ZF10 thickness 1.6 R 37.3999999999979 }
+        surface 37 { thickness 3.2870736148 aper_type circular aper_max 4.015 R 6.200000000001736 }
+        surface 38 { comment {AP Stop} thickness 3.714356394 aper_type circular aper_max 2.375 }
+        surface 39 { glass ZF10 thickness 1.6 R -6.200000000001736 }
+        surface 40 { R -37.3999999999979 }
+        surface 41 { glass LAFN10 thickness 4.55 R -37.3999999999979 }
+        surface 42 { thickness 0.4 aper_type circular aper_max 6.25 R -10.54999999999999 }
+        surface 43 { glass ZF3 thickness 1.6 aper_type circular aper_max 6.25 }
+        surface 44 { R 34.29999999999685 }
+        surface 45 { glass H-LAK1 thickness 2.85 R 34.29999999999685 }
+        surface 46 { thickness 0.4 aper_type circular aper_max 6.8 R -22.300000000002118 }
+        surface 47 { glass SK2 thickness 6.2 aper_type circular aper_max 6.8 R 28.89999999999789 }
+        surface 48 { thickness 0.22315 R 99.20000000000317 }
+        surface 49 { comment {Retainer AP} thickness 22.54790830844 }
+        surface 50 {  }
+}

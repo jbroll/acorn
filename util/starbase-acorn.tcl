@@ -1,4 +1,5 @@
 
+
 proc starbase2ray { table { rays {} } } {
     upvar $table T
 
@@ -19,8 +20,10 @@ proc starbase_raycompare { rays file zoff } {
     set sumx 0
     set sumy 0
     set sumz 0
+    set count 0
+
     starbase_foreachrow ARay -colvars row {
-	if { !$v } {
+	if { !$v && ![$rays [expr $row-1] get vignetted] } {
 	    lassign [$rays [expr $row-1] get px py pz] px py pz
 
 	    set pz [expr { $pz-$zoff }]
@@ -30,11 +33,13 @@ proc starbase_raycompare { rays file zoff } {
 	    set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
 	    set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
 	    set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
+
+	    incr count
 	}
 	
 
     }
 
-    list $sumx $sumy $sumz
+    list $sumx $sumy $sumz $count
 }
 

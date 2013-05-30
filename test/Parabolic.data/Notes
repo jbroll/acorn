@@ -1,0 +1,34 @@
+
+case $1 in 
+ data)
+    for z in x y rx ry ; do
+	aco set Mirror $z 0
+    done
+
+    aco  rays nx 11 ny 11 start 1 end -1
+    aco push
+
+    aco rays end  1						# Trace rays to surface 1 (planar).
+    aco raytable all > start.rays	
+
+    aco rays end -1	 					# Trace rays to image plane.
+    aco raytable all > image.rays
+
+    for surf in Mirror ; do
+	for z in x y rx ry ; do
+	    aco set $surf $z 1
+	    aco push
+	    sleep 2
+	    aco raytable all > $surf-$z.rays
+	    aco set $surf $z 0
+	done
+    done
+    ;;
+ plot)
+	file=$2
+
+	plottable graph file "| < $file.acorn row '!v'" title Acorn size 5 5 at 0 5 x,y marker circle	\
+		  graph file "| < $file.rays  row '!v'" title Zemax size 5 5 at 0 0 x,y marker circle
+	
+esac
+

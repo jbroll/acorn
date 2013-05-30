@@ -1,0 +1,63 @@
+#!/usr/bin/env tclkit8.6
+#
+lappend auto_path ./lib arec/lib
+
+package require acorn
+package require tcltest
+
+source util/starbase.tcl
+source util/starbase-acorn.tcl
+
+set Data test/Parabolic.data
+
+starbase_read Start $Data/start.rays
+set rays {}
+
+acorn::ZMX create Model source zmx-models/Parabolic.zmx
+
+#Model print
+
+
+if { 1 } {
+    ::tcltest::test parabolic-rays-image { Parabolic raytrace } -body {
+	set rays [starbase2ray Start $rays]
+	Model trace $rays
+
+	acorn::prays $rays > $Data/image.acorn
+
+	lassign [starbase_raycompare $rays $Data/image.rays 75.1] sumx sumy sumz count
+
+
+	list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+
+	#puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]	: $count"
+	#list 1 1 1
+    } -result {1 1 1}
+}
+
+
+set Zamount 1
+set errors { x y rx ry }
+#set errors rx
+foreach surf { Mirror } {
+    foreach zz $errors {
+ 	::tcltest::test Parabolic-rays-$surf-$zz { Parabolic raytrace } -body {
+	    set rays [starbase2ray Start $rays]
+
+	    Model $surf set $zz $Zamount
+	    Model trace $rays
+
+	    acorn::prays $rays > $Data/Mirror-$zz.acorn
+
+	    lassign [starbase_raycompare $rays $Data/Mirror-$zz.rays 75.1] sumx sumy sumz count
+
+	    Model $surf set $zz 0.0
+
+	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+
+	    #puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]	: $count"
+	    #list 1 1 1
+	} -result {1 1 1}
+    }
+}
+
