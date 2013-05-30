@@ -8,19 +8,16 @@ case $1 in
     ;;
 
  data)
-    for a in 2 4 6 8 10 12 14 16; do
-	aco set B a$a 0
-	aco set C a$a 0
-    done
+    ./Notes clear
 
     aco  rays nx 11 ny 11 start 1 end -1
     aco push
 
     aco rays end  1						# Trace rays to surface 1 (planar).
-    aco raytable > start.rays	
+    aco raytable all > start.rays	
 
     aco rays end -1	 					# Trace rays to image plane.
-    aco raytable > image.rays
+    aco raytable all > image.rays
 
     for surf in B C ; do
 	def=.00000005
@@ -28,38 +25,44 @@ case $1 in
 	    aco set $surf a$a $def
 	    aco push
 	    sleep 2
-	    aco raytable > a`printf %02d $a`-$surf.rays
+	    aco raytable all > a`printf %02d $a`-$surf.rays
 	    aco set $surf a$a 0
 
-	    def=`calc "$def/400"`
+	    def=`calc -v CONVFMT=%.16g "$def/400"`
 	done
     done
     ;;
- plot)
-	pastetable none.rays z*.rays > pasted.rays
+    plot)
+	file=$2
 
-	plottable toptitle "Zemax Z2 - Z10"						\
-		      nobox title  Z8 size 3 3 file pasted.rays x_1,y_1 vector x_8,y_8	\
-		graph nobox title  Z9 size 3 3 file pasted.rays x_1,y_1 vector x_9,y_9	\
-		graph nobox title Z10 size 3 3 file pasted.rays x_1,y_1 vector x_10,y_10\
-		at 5 0									\
-		graph nobox title  Z5 size 3 3 file pasted.rays x_1,y_1 vector x_5,y_5 	\
-		graph nobox title  Z6 size 3 3 file pasted.rays x_1,y_1 vector x_6,y_6	\
-		graph nobox title  Z7 size 3 3 file pasted.rays x_1,y_1 vector x_7,y_7 	\
-		at 2.5 0								\
-		graph nobox title  Z2 size 3 3 file pasted.rays x_1,y_1 vector x_2,y_2	\
-		graph nobox title  Z3 size 3 3 file pasted.rays x_1,y_1 vector x_3,y_3	\
-		graph nobox title  Z4 size 3 3 file pasted.rays x_1,y_1 vector x_4,y_4 	\
-	
+	plottable graph file "| < $file.acorn row '!v'" title Acorn size 5 5 at 0 5 x,y marker circle	\
+		  graph file "| < $file.rays  row '!v'" title Zemax size 5 5 at 0 0 x,y marker circle
+
+    ;;
+    delta)
+	file=$2
+	shift
+	shift
+
+	plottable graph file "| pastetable image.acorn - < $file.acorn | row '!v_2'" title Acorn size 5 5 at 0 5 x_1,y_1 vector x_2,y_2 $*	\
+		  graph file "| pastetable image.rays  - < $file.rays  | row '!v_2'" title Zemax size 5 5 at 0 0 x_1,y_1 vector x_2,y_2 $*
+
+	;;
+    pair)
+	file=$2
+	shift
+	shift
+
+	pastetable $file.rays $file.acorn | row '!v_1' | plottable size 8 8 x_1,y_1 vector x_2,y_2 $*
+    ;;
+    vect)
+	file1=$2
+	file2=$3
+	shift
+	shift
+	shift
+
+	pastetable $file1 $file2 | row '!v_1' | plottable size 8 8 x_1,y_1 vector x_2,y_2 $*
+    ;;
 esac
-
-exit
-echo raytable | aco file | plottable size 8 8 x,y marker circle
-
-exit
-
-echo rays nx 10 ny 10 start 1 end -1 | aco file
-
-aco set B z4 
-
 
