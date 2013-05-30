@@ -25,20 +25,10 @@ case $1 in
     done
     ;;
  plot)
-	pastetable none.rays z*.rays > pasted.rays
+	file=$2
 
-	plottable toptitle "Zemax Z2 - Z10"						\
-		      nobox title  Z8 size 3 3 file pasted.rays x_1,y_1 vector x_8,y_8	\
-		graph nobox title  Z9 size 3 3 file pasted.rays x_1,y_1 vector x_9,y_9	\
-		graph nobox title Z10 size 3 3 file pasted.rays x_1,y_1 vector x_10,y_10\
-		at 5 0									\
-		graph nobox title  Z5 size 3 3 file pasted.rays x_1,y_1 vector x_5,y_5 	\
-		graph nobox title  Z6 size 3 3 file pasted.rays x_1,y_1 vector x_6,y_6	\
-		graph nobox title  Z7 size 3 3 file pasted.rays x_1,y_1 vector x_7,y_7 	\
-		at 2.5 0								\
-		graph nobox title  Z2 size 3 3 file pasted.rays x_1,y_1 vector x_2,y_2	\
-		graph nobox title  Z3 size 3 3 file pasted.rays x_1,y_1 vector x_3,y_3	\
-		graph nobox title  Z4 size 3 3 file pasted.rays x_1,y_1 vector x_4,y_4 	\
+	plottable graph file "| < $file.acorn row '!v'" title Acorn size 5 5 at 0 5 x,y marker circle	\
+		  graph file "| < $file.rays  row '!v'" title Zemax size 5 5 at 0 0 x,y marker circle
 	
 esac
 
