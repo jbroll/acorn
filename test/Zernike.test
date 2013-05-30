@@ -9,7 +9,9 @@ source util/starbase.tcl
 source util/starbase-acorn.tcl
 
 
-starbase_read Start test/Zernike.data/start.rays
+set Data test/Zernike.data
+
+starbase_read Start $Data/start.rays
 set rays {}
 
 acorn::model Model {
@@ -23,7 +25,9 @@ acorn::model Model {
     set rays [starbase2ray Start $rays]
     Model trace $rays
 
-    lassign [starbase_raycompare $rays test/Zernike.data/image.rays 370] sumx sumy sumz
+    acorn::prays $rays > $Data/image.acorn
+
+    lassign [starbase_raycompare $rays $Data/image.rays 370] sumx sumy sumz
 
 
     list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
@@ -43,13 +47,15 @@ foreach surf { B C } {
 	    Model $surf set z$zz $Zamount
 	    Model trace $rays
 
-	    lassign [starbase_raycompare $rays test/Zernike.data/z[format %02d $zz]-$surf.rays 370] sumx sumy sumz
+	    acorn::prays $rays > $Data/z[format %02d $zz]-$surf.acorn
+
+	    lassign [starbase_raycompare $rays $Data/z[format %02d $zz]-$surf.rays 370] sumx sumy sumz
 
 	    Model $surf set z$zz 0.0
 
 	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
 
-	    #puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+	    #puts "$surf z$zz [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
 	    #list 1 1 1
 	} -result {1 1 1}
     }
