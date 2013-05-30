@@ -2,30 +2,75 @@
 #
 lappend auto_path ./lib ../lib arec/lib
 
-#source tcloo.tcl
-#source unix.tcl
-
 package require acorn
+package require tcltest
+
+source util/starbase.tcl
+source util/starbase-acorn.tcl
+
+set Data test/GMT-1-AcOWFS-3.zmx.data
+
+starbase_read Start $Data/start.rays
+set rays {}
+
+acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
+
+Model print
+exit
 
 
-acorn::ZMX create GMT source zmx-models/GMT-1-AcOWFS-3.ZMX
 
-acorn::mkrays rays nx 100 x0 -12700 x1 12700 ny 100 y0 -12700 y1 12700
+if { 0 } {
+    ::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+	set rays [starbase2ray Start $rays]
+	Model trace $rays
 
-#GMT S7 set z4 .05
+	acorn::prays $rays > $Data/image.acorn
 
-#GMT S1 set z4 .001
-#GMT S2 set z4 .003
-#GMT S3 set z4 .003
-#GMT S4 set z4 -.01
-#GMT S5 set z4 .003
-#GMT S6 set z4 -.1
+	lassign [starbase_raycompare $rays $Data/image.rays 0] sumx sumy sumz
 
-#timer A start
-    GMT trace rays
-#puts stderr [timer A stop]
 
-GMT print
+	list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }]	; # [expr { sqrt($sumz) < 1e-6 }]
 
-acorn::prays rays
+	#puts "XX x [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+	#list 1 1
+    } -result {1 1}
+}
+
+#exit
+
+set err 0.0001
+
+set mirrors { P S } 
+set mirrors P 
+
+set errros { x y rx ry z2 z3 z4 z5 z6 z7 z8 z9 z10 }
+set errors { rx ry } 
+
+foreach mirror $mirrors {
+
+    foreach surf { 7 1 2 3 4 5 6 } {
+	foreach e $errors {
+	    ::tcltest::test GMT-1-rays-$mirror$surf-$e { GMT-0 raytrace } -body {
+
+		set rays [starbase2ray Start $rays]
+
+		Model $mirror$surf set $e $err
+		Model trace $rays -1 5000 4
+
+		acorn::prays $rays > $Data/$mirror$surf-$e.acorn
+
+		lassign [starbase_raycompare $rays $Data/$mirror$surf-$e.rays 0] sumx sumy sumz
+
+		Model $mirror$surf set $e 0.0
+
+		list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }] ; # [expr { sqrt($sumz) < 1e-6 }]
+
+
+		puts "[incr i] $mirror $surf $e [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
+		list 1 1
+	    } -result {1 1}
+	}
+    }
+}
 

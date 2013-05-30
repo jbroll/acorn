@@ -1,20 +1,21 @@
 
 case $1 in 
  clear)
-    for s in 1 2 3 4 5 6 7 ; do
-	for z in 2 3 4 5 6 7 8 9 10; do
-	    aco set S$s z$z 0
+    for m in S P ; do
+	for s in 1 2 3 4 5 6 7 ; do
+	    for r in x y rx ry ; do
+		aco set $m$s $r 0
+	    done
+	    for z in 2 3 4 5 6 7 8 9 10; do
+		aco set $m$s z$z 0
+	    done
 	done
     done
 
     aco push
     ;;
  data)
-    for s in 1 2 3 4 5 6 7 ; do
-	for z in 2 3 4 5 6 7 8 9 10; do
-	    aco set S$s z$z 0
-	done
-    done
+    ./Notes clear
 
     aco  rays nx 100 ny 100 start 1 end -1
     aco push
@@ -27,15 +28,58 @@ case $1 in
 
     err=.0001
 
-    for s in 1 2 3 4 5 6 7 ; do
-	for z in 2 3 4 5 6 7 8 9 10; do
-	    aco set S$s z$z $err
-	    aco push
-	    sleep 2
-	    aco raytable all > S$s-z$z.rays
-	    aco set S$s z$z 0
+
+    for m in S P ; do
+	for s in 1 2 3 4 5 6 7 ; do
+	    for r in x y rx ry ; do
+		aco set $m$s $r $err
+		aco push
+		sleep 2
+		aco raytable all > $m$s-$r.rays
+		aco set $m$s $r 0
+	    done
+	    for z in 2 3 4 5 6 7 8 9 10; do
+		aco set $m$s z$z $err
+		aco push
+		sleep 2
+		aco raytable all > $m$s-z$z.rays
+		aco set $m$s z$z 0
+	    done
 	done
     done
+    ;;
+
+    plot)
+	file=$2
+
+	plottable graph file "| < $file.acorn row '!v'" title Acorn size 5 5 at 0 5 x,y marker circle	\
+		  graph file "| < $file.rays  row '!v'" title Zemax size 5 5 at 0 0 x,y marker circle
+
+    ;;
+    delta)
+	file=$2
+	shift
+	shift
+
+	plottable graph file "| pastetable image.acorn - < $file.acorn | row '!v_2'" title Acorn size 5 5 at 0 5 x_1,y_1 vector x_2,y_2 $*	\
+		  graph file "| pastetable image.rays  - < $file.rays  | row '!v_2'" title Zemax size 5 5 at 0 0 x_1,y_1 vector x_2,y_2 $*
+
+	;;
+    pair)
+	file=$2
+	shift
+	shift
+
+	pastetable $file.rays $file.acorn | row '!v_1' | plottable size 8 8 x_1,y_1 vector x_2,y_2 $*
+    ;;
+    vect)
+	file1=$2
+	file2=$3
+	shift
+	shift
+	shift
+
+	pastetable $file1 $file2 | row '!v_1' | plottable size 8 8 x_1,y_1 vector x_2,y_2 $*
     ;;
 esac
 

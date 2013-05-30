@@ -73,12 +73,15 @@ oo::class create ::acorn::ZMX {
     variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs 	\
 	mce mce_current												\
 	Id Name Notes Temp Pres											\
-	params comment nonseqid nonseq nsoexit
+	params comment nonseqid nonseq nsoexit									\
+	debug
 
-    accessor grouptype current surfaces default
+    accessor grouptype current surfaces default debug
 
     constructor { type args } {
 	next
+
+	set debug 0
 
 	procs TRAC BLNK CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD ENPD FLAP FLOA FTYP FWGN GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
 	      NSCD NSCS NSOA NSOD NSOH NSOO NSOP NSOQ NSOS NSOU NSOV NSOW PARM PPAR PRAM PFIL PICB POLS POPS PUSH PWAV PZUP RAIM ROPD SDMA SLAB STOP SURF		\
@@ -233,8 +236,7 @@ oo::class create ::acorn::ZMX {
 	 if { $grouptype ne "non-sequential" } {
 	     try { my [$current $surf get name] set $::acorn::ZMXParmMap($surftype,$n) $value
 	     } on error message {
-		 puts stderr "PARM $surftype $n $value : $message"
-		 #$current $surf set p$n $value
+		 if { $debug } { puts stderr "PARM $surftype $n $value : $message" }
 	     }
 	 } else {
 	     $current $surf set p$n $value

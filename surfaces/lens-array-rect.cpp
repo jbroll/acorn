@@ -89,10 +89,11 @@ extern "C" {
 
     nhat = AcornSimpleSurfaceNormal(r, R, K);
 
+    AcornRefract(r, nhat, n0, n);		// Reflect or Refract
+
     r.p(X) += cx;
     r.p(Y) += cy;
 
-    AcornRefract(r, nhat, n0, n);		// Reflect or Refract
 
     return 0;
   }
