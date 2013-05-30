@@ -7,7 +7,7 @@ namespace eval acorn {
     array set ZMXSurfaceMap {
 	standard	 	simple
 	coordbrk	 	coordbrk
-	evenasph     	evenasph
+	evenasph     		evenasph
 	dgrating	 	dgrating
 	szernpha	 	zernike
 	szernsag	 	zernike
@@ -54,6 +54,9 @@ namespace eval acorn {
 	evenasph,6		a12
 	evenasph,7		a14
 	evenasph,8		a16
+
+	dgrating,1		l/mm
+	dgrating,2		order
     }
 
     proc zmx-simple   { model surf } {}
@@ -71,7 +74,7 @@ oo::class create ::acorn::ZMX {
     superclass ::acorn::BaseModel
 
     variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs 	\
-	mce mce_current												\
+	pup mce mce_current												\
 	Id Name Notes Temp Pres											\
 	params comment nonseqid nonseq nsoexit									\
 	debug
@@ -80,6 +83,8 @@ oo::class create ::acorn::ZMX {
 
     constructor { type args } {
 	next
+
+	set pup {}
 
 	set debug 0
 
@@ -98,7 +103,9 @@ oo::class create ::acorn::ZMX {
 	    rename $current {}
 	}
 
-#	eval $mce($mce_current)
+
+	eval $pup
+	eval $mce($mce_current)
     }
 
     method simple { args } {}
@@ -112,7 +119,9 @@ oo::class create ::acorn::ZMX {
 	}
     }
 
-    method mce { config } {
+    method pickup { } { eval $pup }
+
+    method config { config } {
 	set mce_current $config
 	eval $mce($config)
     }
@@ -169,12 +178,14 @@ oo::class create ::acorn::ZMX {
 
 	set type $::acorn::ZMXSurfaceMap([string tolower $type])		; # Map Zemax surface type in to acorn.
 
-	set surftype $type
 
 	set surf [$current length]
 
+	set surftype $type
+
 	# Get the surface traverse and infos functions
 	#
+	$current $surf set type     $type
 	$current $surf set traverse $::acorn::SurfaceTypes($type)
 	$current $surf set infos    $::acorn::SurfaceInfos($type)
 
@@ -230,7 +241,6 @@ oo::class create ::acorn::ZMX {
      method CONI { conic args } {                my [$current $surf get name] set K $conic 	 }
      method COMM { args }  { set comment $args }
      method PPAR { args } { }
-     method THIC { args } { }
 
      method PARM { n value } {
 	 if { $grouptype ne "non-sequential" } {
@@ -361,7 +371,6 @@ oo::class create ::acorn::ZMX {
     method POPS { args } {}
     method PUSH { args } {}
     method PWAV { args } {}
-    method PZUP { args } {}
     method RAIM { args } {}
     method ROPD { args } {}
     method SDMA { args } {}
@@ -380,15 +389,31 @@ oo::class create ::acorn::ZMX {
     method XFLN { args } {}
     method YFLN { args } {}
 
+    # Pickups
+    #
+    method PZUP { from scale offset column } {						# Pick Up 
+	append pup "my xPZUP $Id $from $scale $offset $column\n"
+    }
+
+    method xPZUP { surf from scale offset column } {
+	my $surf thickness set [expr [my $from get thickness]*$scale]
+    }
+
+
     # Multi Configuration Editor
     #
-    method MNUM { n current } { set mce_current $current }				; # Multi Configure Number of configs
+    method MNUM { n curr } { set mce_current $curr }					; # Multi Configure Number of configs
 
     method WAVE { surf config args } { append mce($config) "my xWAVE $surf $args\n" }	; # Set Wavelength
     method IGNR { surf config args } { append mce($config) "my xIGNR $surf $args\n" }	; # Ignore surface
     method PRAM { surf config args } { append mce($config) "my xPRAM $surf $args\n" }	; # Set Parameter
     method XFIE { surf config args } { append mce($config) "my xXFIE $surf $args\n" }
+    method THIC { surf config args } { append mce($config) "my xTHIC $surf $args\n" }
 
-    method xIGNR { surf value args } { my $surf set enable [expr !int($value)] }
+    method xIGNR { surf value args } { #my $surf set enable [expr !int($value)] }
+    method xPRAM { surf value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
+    method xTHIC { surf value args }         { my $surf set thickness                                      $value }
+    method xXFIE { surf value args } { }
+    method xWAVE { surf value args } { }
 }
 
