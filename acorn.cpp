@@ -93,11 +93,9 @@ extern "C" {
 		    //printf("traverse %f %f\n", n, z);
 		    ray->vignetted = surf[i].traverse(n, z, &surf[i], ray);
 
-		    if ( !ray->vignetted ) {
-		        ray->vignetted = aper_clip(&surf[i], ray);
+		    if ( ray->vignetted || (!ray->vignetted && aper_clip(&surf[i], ray)) ) {
+		        ray->vignetted = i ? i : -1;
 		    }
-
-
 
 		    if ( once ) {
 			//printf("Here ");
