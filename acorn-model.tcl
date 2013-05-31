@@ -141,22 +141,26 @@ oo::class create ::acorn::BaseModel {
 	acorn::trace_rays $z 1 [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] 0
     }
 
-    method print {} {
-	puts "acorn::model [self] \{"
+    method print { { pipe {} } { out stdout } } {
+	if { $pipe eq ">" } { set out [open $out w] }
+
+	puts $out "acorn::model [self] \{"
 
 	set tab "	"
 	foreach { type surf } $surfaces {
-	    if { $type eq "non-sequential" } { puts "${tab}surface-group-non-sequential X \{" ; set tab "		" }
+	    if { $type eq "non-sequential" } { puts $out "${tab}surface-group-non-sequential X \{" ; set tab "		" }
 	    foreach i [iota 0 [$surf length]-1] {
 		#puts "	[[self] [$surf $i get name] getdict name type] : [[self] [$surf $i get name] get type]"
 		set stype [[self] [$surf $i get name] get type]
 		set values [[self] [$surf $i get name] getdict {*}[map { name value } $surfdefs($stype,pmap) { set name }]]
-		puts "${tab}surface [$surf $i get name] \{ [dict remove [dltpair $surfdefs($stype,pdef) $values] name] \}"
+		puts $out "${tab}surface [$surf $i get name] \{ [dict remove [dltpair $surfdefs($stype,pdef) $values] name] \}"
 	    }
 	    set tab "        "
-	    if { $type eq "non-sequential" } { puts "${tab}\}" }
+	    if { $type eq "non-sequential" } { puts $out "${tab}\}" }
 	}
-	puts "\}"
+	puts $out "\}"
+
+	if { $pipe eq ">" } { close $out }
     }
 }
 
