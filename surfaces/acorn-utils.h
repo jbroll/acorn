@@ -1,5 +1,4 @@
 
-
 inline double AcornSimpleSurfaceDistance(Ray &r, double z, double R, double K)
 {
     double d;

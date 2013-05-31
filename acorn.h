@@ -59,7 +59,7 @@ typedef struct _Surface {
     char*	glass;
     void*	glass_ptr;
 
-    //long	enable;
+    long	enable;
 } Surface;
 
 typedef struct _SurfaceList {

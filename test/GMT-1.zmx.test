@@ -16,8 +16,8 @@ set rays {}
 #acorn::ZMX create Model source test/GMT-0.zmx.data/GMT-0.zmx
 acorn::ZMX create Model source $Data/GMT-1.zmx
 
-#Model print
-#exit
+Model print
+exit
 
 
 ::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {

@@ -410,7 +410,7 @@ oo::class create ::acorn::ZMX {
     method XFIE { surf config args } { append mce($config) "my xXFIE $surf $args\n" }
     method THIC { surf config args } { append mce($config) "my xTHIC $surf $args\n" }
 
-    method xIGNR { surf value args } { #my $surf set enable [expr !int($value)] }
+    method xIGNR { surf value args }         { my $surf set enable [expr !int($value)] }
     method xPRAM { surf value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
     method xTHIC { surf value args }         { my $surf set thickness                                      $value }
     method xXFIE { surf value args } { }
