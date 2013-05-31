@@ -81,13 +81,20 @@ extern "C" {
 
 		    if ( ray->vignetted ) { continue; }
 
+
 		    ray->p = txforward * ray->p;		// Put the ray into the surface cs.
 		    ray->k = rtforward * ray->k;
 
 			//printf("Conv ");
 			//prays(ray, 1);
 
-		    if ( (long) surf[i].traverse == COORDBK ) { continue; }
+		    if ( (long) surf[i].traverse == COORDBK ) {
+			if ( xray ) {
+			    memcpy(xray, ray, rsize);
+			    xray += rsize;
+			}
+			continue; 
+		    }
 
 
 		    //printf("traverse %f %f\n", n, z);
@@ -165,7 +172,7 @@ extern "C" {
     void trace_rays_worker(TraceWork *work) {
 	 trace_rays0(work->z, work->n, work->surflist, work->nsurfs, work->ray, work->nray, work->rsize, work->xray);
     }
-    void trace_rays_thread(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, void *tp, char *xray, int nthread)
+    void trace_rays_thread(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, void *tp, int nthread, char *xray)
     {
 	TraceWork data[64];
 
@@ -198,12 +205,12 @@ extern "C" {
 
     TPool *tp = NULL;
 
-    void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, char *xray, int nthread) {
+    void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, int nthread, char *xray) {
 	if ( tp == NULL ) {
 	    tp = TPoolInit(64);
 	}
 
-    	trace_rays_thread(z, n, surflist, nsurfs, ray, nray, rsize, tp, xray, nthread);
+    	trace_rays_thread(z, n, surflist, nsurfs, ray, nray, rsize, tp, nthread, xray);
     }
 }
 
