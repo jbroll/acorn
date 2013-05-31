@@ -23,7 +23,7 @@ extern "C" {
 	}
     }
 
-    void trace_rays0(double z, double n, SurfaceList *surflist, int nsurfs, Ray *R, int nray, int rsize)
+    void trace_rays0(double z, double n, SurfaceList *surflist, int nsurfs, Ray *R, int nray, int rsize, char *xray)
     {
 	int *traversed = new int[nray];
 	Ray *ray;
@@ -121,6 +121,11 @@ extern "C" {
 		    ray->p = txreverse * ray->p;		// Put the ray back into global cs..
 		    ray->k = rtreverse * ray->k;
 
+		    if ( xray ) {
+			memcpy(xray, ray, rsize);
+			xray += rsize;
+		    }
+
 			//printf("Next ");
 			//prays(ray, 1);
 		}
@@ -152,19 +157,20 @@ extern "C" {
 	Ray 		*ray;
 	int		 nray;
 	int		rsize;
+	char		*xray;
 
 	TPoolThread	*t;
     } TraceWork;
 
     void trace_rays_worker(TraceWork *work) {
-	 trace_rays0(work->z, work->n, work->surflist, work->nsurfs, work->ray, work->nray, work->rsize);
+	 trace_rays0(work->z, work->n, work->surflist, work->nsurfs, work->ray, work->nray, work->rsize, work->xray);
     }
-    void trace_rays_thread(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, void *tp, int nthread)
+    void trace_rays_thread(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, void *tp, char *xray, int nthread)
     {
 	TraceWork data[64];
 
 	if ( nthread == 0 ) {
-	    trace_rays0(z, n, surflist, nsurfs, ray, nray, rsize);
+	    trace_rays0(z, n, surflist, nsurfs, ray, nray, rsize, xray);
 	} else {
 	    for ( int i = 0; i < nthread; i++ ) {
 		data[i].z        = z;
@@ -174,6 +180,11 @@ extern "C" {
 		data[i].ray      = (Ray *)((char *) ray + (nray/nthread)*i*rsize);
 		data[i].nray     =      nray/nthread;
 		data[i].rsize    = rsize;
+		if ( xray ) {
+		    data[i].xray = xray + (nray/nthread)*i*rsize;
+		} else {
+		    data[i].xray = NULL;
+		}
 
 		if ( i == nthread-1 ) { data[i].nray = nray - nray/nthread*i; }
 
@@ -187,12 +198,12 @@ extern "C" {
 
     TPool *tp = NULL;
 
-    void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, int nthread) {
+    void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, char *xray, int nthread) {
 	if ( tp == NULL ) {
 	    tp = TPoolInit(64);
 	}
 
-    	trace_rays_thread(z, n, surflist, nsurfs, ray, nray, rsize, tp, nthread);
+    	trace_rays_thread(z, n, surflist, nsurfs, ray, nray, rsize, tp, xray, nthread);
     }
 }
 

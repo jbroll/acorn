@@ -38,7 +38,7 @@ namespace eval acorn {
 
 	    void prays(void *r, int n);
 
-	    void trace_rays(double z, double n, void *surflist, int nsurfs, void *ray, int nray, int rsize, int nthread);
+	    void trace_rays(double z, double n, void *surflist, int nsurfs, void *ray, int nray, int rsize, char *xray, int nthread);
 
 	    typedef int  (*InfosFunc)(int info, char ***str, double **val);
 	    double glass_indx(void *glass, double wave);
@@ -142,7 +142,7 @@ namespace eval acorn {
 	return TCL_OK;
     }
     critcl::cproc trace_rays { double z double n long s int nsurf long r int nray int rsize int nthread } void {
-                  trace_rays(z, n, (void *) s, nsurf, (void *) r, nray, rsize, nthread); 
+                  trace_rays(z, n, (void *) s, nsurf, (void *) r, nray, rsize, NULL, nthread); 
     }
     critcl::cproc glass_indx { long glass double wave } double {
                   return glass_indx((void*)glass, wave); 
