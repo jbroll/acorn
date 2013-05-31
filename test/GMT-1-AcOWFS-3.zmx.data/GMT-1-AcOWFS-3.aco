@@ -33,6 +33,9 @@ acorn::model ::Model {
         surface 14 { comment {IP TOP PLATE} thickness 620.0 }
         surface 15 { comment {DG INSTRUMENT TOP} thickness 310.0 }
         surface 16 { comment {TELESCOPE FOCUS} R 2251.448 }
+if { 0 } {
+        surface 17 {  }
+} else {
         surface 17 { type coordbrk }
         surface 18 { comment Pinhole }
         surface 19 { type coordbrk comment AGWFPosition }
@@ -67,4 +70,5 @@ acorn::model ::Model {
         surface 48 { thickness 0.22315 R 99.20000000000317 }
         surface 49 { comment {Retainer AP} thickness 22.54790830844 }
         surface 50 {  }
+}
 }

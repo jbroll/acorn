@@ -13,17 +13,21 @@ set Data test/GMT-1-AcOWFS-3.zmx.data
 starbase_read Start $Data/start.rays
 set rays {}
 
-acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
+#acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
+source $Data/GMT-1-AcOWFS-3.aco
+#set Data test/GMT-1.zmx.data
 
 #Model print
 #exit
 
 
 
-if { 0 } {
+if { 1 } {
     ::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
 	set rays [starbase2ray Start $rays]
 	Model trace $rays
+
+	#Model print > $Data/image.model
 
 	acorn::prays $rays > $Data/image.acorn
 
@@ -44,12 +48,13 @@ set err 0.0001
 set mirrors { P S } 
 set mirrors P 
 
-set errros { x y rx ry z2 z3 z4 z5 z6 z7 z8 z9 z10 }
-set errors { rx ry } 
+set surfs { 7 1 2 3 4 5 6 }
+set surfs   7
+#set errors { x y rx ry z2 z3 z4 z5 z6 z7 z8 z9 z10 }
+set errors { x rx } 
 
 foreach mirror $mirrors {
-
-    foreach surf { 7 1 2 3 4 5 6 } {
+    foreach surf $surfs {
 	foreach e $errors {
 	    ::tcltest::test GMT-1-rays-$mirror$surf-$e { GMT-0 raytrace } -body {
 
@@ -57,6 +62,8 @@ foreach mirror $mirrors {
 
 		Model $mirror$surf set $e $err
 		Model trace $rays -1 5000 4
+
+		#Model print > $Data/$mirror$surf-$e.model
 
 		acorn::prays $rays > $Data/$mirror$surf-$e.acorn
 
@@ -67,7 +74,7 @@ foreach mirror $mirrors {
 		list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }] ; # [expr { sqrt($sumz) < 1e-6 }]
 
 
-		puts "[incr i] $mirror $surf $e [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
+		puts "[incr i] $mirror $surf $e [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]"
 		list 1 1
 	    } -result {1 1}
 	}

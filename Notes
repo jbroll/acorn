@@ -1,4 +1,14 @@
 
+Debug GMT-1-AcOWFS-3 rx
+	Choose 1 ray trace it through GMT-1 and GMT-1-AcOWFS-3
+		Check that position and cosines at surface 17 are the same.
+
+
+	Compare the output of [Model print] for surfaces after 17 in the x and rx cases.
+		unfriutfull
+
+	
+
 
 arec array  type
 arec struct type
