@@ -4,7 +4,7 @@ proc starbase2ray { table { rays {} } } {
     upvar $table T
 
     if { $rays eq "" } {
-	set rays [::acorn::Rays create rays[incr ::acorn::RAYS] 0]
+	set rays [::acorn::Rays create _rays[incr ::acorn::RAYS] 0]
     }
 
     starbase_foreachrow T -colvars row {
@@ -27,8 +27,6 @@ proc starbase_raycompare { rays file zoff } {
 	    lassign [$rays [expr $row-1] get px py pz] px py pz
 
 	    set pz [expr { $pz-$zoff }]
-
-	    #puts "$px $py $pz		$x $y $z"
 
 	    set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
 	    set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
