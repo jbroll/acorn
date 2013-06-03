@@ -14,8 +14,10 @@ proc starbase2ray { table { rays {} } } {
     set rays
 }
 
-proc starbase_raycompare { rays file zoff } {
+proc starbase_raycompare { rays file zoff { big 10000 } } {
     starbase_read ARay $file
+
+    set bigs {}
 
     set sumx 0
     set sumy 0
@@ -25,6 +27,11 @@ proc starbase_raycompare { rays file zoff } {
     starbase_foreachrow ARay -colvars row {
 	if { !$v && ![$rays [expr $row-1] get vignetted] } {
 	    lassign [$rays [expr $row-1] get px py pz] px py pz
+
+	    if { abs($x - $px) > $big || abs($y - $py) > $big } { 
+		lappend bigs $row [expr { $x - $px }] [expr { $y - $py }]
+		continue
+	    }
 
 	    set pz [expr { $pz-$zoff }]
 
@@ -38,6 +45,6 @@ proc starbase_raycompare { rays file zoff } {
 
     }
 
-    list $sumx $sumy $sumz $count
+    list $sumx $sumy $sumz $count $bigs
 }
 

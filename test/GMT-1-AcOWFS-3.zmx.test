@@ -13,14 +13,13 @@ set Data test/GMT-1-AcOWFS-3.zmx.data
 starbase_read Start $Data/start.rays
 set rays {}
 
-#acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
-source $Data/GMT-1-AcOWFS-3.aco
+acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
+
+#source $Data/GMT-1-AcOWFS-3.aco
 #set Data test/GMT-1.zmx.data
 
 #Model print
 #exit
-
-
 
 if { 1 } {
     ::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
@@ -31,8 +30,7 @@ if { 1 } {
 
 	acorn::prays $rays > $Data/image.acorn
 
-	lassign [starbase_raycompare $rays $Data/image.rays 0] sumx sumy sumz
-
+	lassign [starbase_raycompare $rays $Data/image.rays 0] sumx sumy sumz count bigs
 
 	list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }]	; # [expr { sqrt($sumz) < 1e-6 }]
 
@@ -49,9 +47,9 @@ set mirrors { P S }
 set mirrors P 
 
 set surfs { 7 1 2 3 4 5 6 }
-set surfs   7
-#set errors { x y rx ry z2 z3 z4 z5 z6 z7 z8 z9 z10 }
-set errors { x rx } 
+#set surfs   4
+set errors { x y rx ry z2 z3 z4 z5 z6 z7 z8 z9 z10 }
+#set errors { x rx } 
 
 foreach mirror $mirrors {
     foreach surf $surfs {
@@ -67,15 +65,16 @@ foreach mirror $mirrors {
 
 		acorn::prays $rays > $Data/$mirror$surf-$e.acorn
 
-		lassign [starbase_raycompare $rays $Data/$mirror$surf-$e.rays 0] sumx sumy sumz
+		lassign [starbase_raycompare $rays $Data/$mirror$surf-$e.rays 0 .25] sumx sumy sumz count bigs
+
+		if { [llength $bigs]/3 > 40 } { puts "BIGS: [llength $bigs] $surf $e $bigs" }
 
 		Model $mirror$surf set $e 0.0
 
+		#puts "[incr i] $mirror $surf $e [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]"
+
 		list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }] ; # [expr { sqrt($sumz) < 1e-6 }]
-
-
-		puts "[incr i] $mirror $surf $e [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]"
-		list 1 1
+		#list 1 1
 	    } -result {1 1}
 	}
     }

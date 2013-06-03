@@ -13,11 +13,10 @@ set Data test/GMT-1.zmx.data
 starbase_read Start $Data/start.rays
 set rays {}
 
-#acorn::ZMX create Model source test/GMT-0.zmx.data/GMT-0.zmx
 acorn::ZMX create Model source $Data/GMT-1.zmx
 
-Model print
-exit
+#Model print
+#exit
 
 
 ::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
@@ -27,7 +26,6 @@ exit
     acorn::prays $rays > $Data/image.acorn
 
     lassign [starbase_raycompare $rays $Data/image.rays 0] sumx sumy sumz
-
 
     list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }]	; # [expr { sqrt($sumz) < 1e-6 }]
 
@@ -52,7 +50,7 @@ foreach mirror { S P } {
 
 		acorn::prays $rays > $Data/$mirror$surf-$e.acorn
 
-		lassign [starbase_raycompare $rays $Data/$mirror$surf-$e.rays 0] sumx sumy sumz
+		lassign [starbase_raycompare $rays $Data/$mirror$surf-$e.rays 0] sumx sumy sumz count bigs
 
 		Model $mirror$surf set $e 0.0
 
