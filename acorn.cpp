@@ -130,6 +130,7 @@ extern "C" {
 
 		    if ( xray ) {
 			memcpy(xray, ray, rsize);
+			((Ray *)xray)->vignetted = 0;
 			xray += rsize;
 		    }
 
