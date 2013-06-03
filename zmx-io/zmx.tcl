@@ -121,9 +121,13 @@ oo::class create ::acorn::ZMX {
 
     method pickup { } { eval $pup }
 
-    method config { config } {
-	set mce_current $config
-	eval $mce($config)
+    method config { { config {} } } {
+	if { $config eq {} } { 
+	    return $mce_current
+	} else {
+	    set mce_current $config
+	    eval $mce($config)
+	}
     }
 
     method OBSC { args } {}
