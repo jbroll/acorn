@@ -95,6 +95,7 @@ proc glass-loader { pathlist } {
      set ::Glass({}) 0
      set ::Glass({{}}) 0
      set ::Glass({{{}}}) 0
+     set ::Glass((null)) 0
 
      set ::Glass(MIRROR) -1
 

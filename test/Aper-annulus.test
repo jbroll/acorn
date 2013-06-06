@@ -3,7 +3,6 @@
 lappend auto_path ./lib ../lib
 
 package require acorn
-source  acorn-model.tcl
 
 acorn::model Flat {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 aper_type circular aper_max 5 }

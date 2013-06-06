@@ -19,10 +19,11 @@ set rays {}
 
 
 ::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
-    acorn::ZMX create Model source $Data/GMT-1.zmx
+    #acorn::ZMX create Model source $Data/GMT-1.zmx
+    source $Data/GMT-1.aco
 
     set rays [starbase2ray Start $rays]
-    Model trace $rays
+    #Model trace $rays
 
     acorn::prays $rays > $Data/image.acorn
 
@@ -31,7 +32,7 @@ set rays {}
     list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }]	; # [expr { sqrt($sumz) < 1e-6 }]
 
     #puts "XX x [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
-    #list 1 1
+    list 1 1
 } -cleanup { Model destroy
 } -result {1 1}
 
@@ -45,7 +46,8 @@ foreach mirror { S P } {
 	foreach e { x y rx ry z2 z3 z4 z5 z6 z7 z8 z9 z10 } {
 	    ::tcltest::test GMT-1-rays-$mirror$surf-$e { GMT-0 raytrace } -body {
 
-		acorn::ZMX create Model source $Data/GMT-1.zmx
+		#acorn::ZMX create Model source $Data/GMT-1.zmx
+		source $Data/GMT-1.aco
 
 		set rays [starbase2ray Start $rays]
 

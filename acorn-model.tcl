@@ -60,6 +60,11 @@ oo::class create ::acorn::BaseModel {
 	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
 	set surf 0
     }
+    destructor {
+	foreach { type surf } $surfaces {
+	    rename $surfs {}
+	}
+    }
     method surfset1 { obj surf parmap cmd args } {
 	switch $cmd {
 	    length  { $obj $surf $cmd }
@@ -97,14 +102,14 @@ oo::class create ::acorn::BaseModel {
 
 		set s1 0
 
-		set aper [lindex [lindex [$surf $j get aperture] 0] 0]
+		set aper [$surf $j get aperture]
 
-		if { $aper ne {} } {
+		if { $aper ne {} && $aper ne "(null)" } {
 		    $surf $j set aper_data [$aper getptr]
 		    $surf $j set aper_leng [$aper length]
 		}
 
-		if { [$surf $j get glass] ne {} } {
+		if { [$surf $j get glass] ne {} && [$surf $j get glass] ne "(null)" } {
 		    if { [$surf $j get glass_ptr] == -1 } {
 			my [$surf $j get name] set n -1
 		    } else {

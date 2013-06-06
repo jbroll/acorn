@@ -2,8 +2,6 @@
 #
 lappend auto_path ./lib ../lib
 
-source tcloo.tcl
-
 package require acorn
 
 
@@ -34,10 +32,10 @@ acorn::model GMT {
 	surface S7	{ aper_type circular aper_max 525 }
     }
 
-    surface .		{ 							thickness   4900      		}
-    surface .		{        						thickness    620      		}
-    surface .   	{ 							thickness    310      		}
-    surface Focus	{ 							thickness      0      		}
+    surface .		{ 						thickness   4900      		}
+    surface .		{        					thickness    620      		}
+    surface .   	{ 						thickness    310      		}
+    surface Focus	{ 						thickness      0      		}
 }
 
 
@@ -47,3 +45,4 @@ GMT print
 GMT trace rays
 
 acorn::prays rays
+

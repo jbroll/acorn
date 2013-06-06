@@ -162,6 +162,7 @@ proc ::acorn::Aperture { type param } {
     switch $type {
 	circular -
 	annulus  -
+	(null)   -
 	{}	{ return {} } 
 	UDA 	{ return [[UDA create uda[incr ::UDA] source $param] polygon] }
 	default { error "Unknown aperture type : $type" }

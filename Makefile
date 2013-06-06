@@ -104,6 +104,15 @@ arec.Darwin.x86_64	:
 arec.Linux.x86_64 	:
 	@cd arec; $(MAKE) arec.Linux.x86_64
 
+test : test.$(OS)
+
+test.Darwin : FORCE
+	arch -i386   /usr/local/bin/tclsh8.6 ./acorn-test.tcl 
+	arch -x86_64 /usr/local/bin/tclsh8.6 ./acorn-test.tcl
+
+test.Linux : FORCE
+	tclsh8.6 ./acorn-test.tcl
+
 clean : 
 	$(MAKE) ARCH=Darwin.i386	clean-rm
 	$(MAKE) ARCH=Darwin.x86_64	clean-rm
@@ -115,3 +124,5 @@ clean.Darwin.i386: ARCH = Darwin.i368
 clean-rm :
 	rm -f *.o $(SURFS)
 
+
+FORCE:
