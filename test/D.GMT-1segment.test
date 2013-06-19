@@ -15,13 +15,13 @@ source util/rays.tcl
 	    default { R -36000.0	  K  -0.99828570	n  -1.00	thickness -20262.476419940002   aper_type UDA aper_param m1aper1e.uda } {
 
 	    surface P1	{ rz   0 }
-	    surface P2	{ rz  60 }
-	    surface P3	{ rz 120 }
-	    surface P4	{ rz 180 }
-	    surface P5	{ rz 240 }
-	    surface P6	{ rz 300 }
+#	    surface P2	{ rz  60 }
+#	    surface P3	{ rz 120 }
+#	    surface P4	{ rz 180 }
+#	    surface P5	{ rz 240 }
+#	    surface P6	{ rz 300 }
 
-	    surface P7	{ aper_type circular aper_max 4200 }
+#	    surface P7	{ aper_type circular aper_max 4200 }
 	}
 
 	surface-group-non-sequential Secondary		\
@@ -54,4 +54,4 @@ source util/rays.tcl
     acorn::rays-rms rays 1
 } -cleanup { GMT destroy
     	     rename rays {}
-} -result {0.0007056054172352937 0.00070506680205056 4413.50638268486 0.026794072846902644 22924}
+} -result {0.000392302728121411 9.574929950167434e-5 1664.8708042968378 0.010664828045425543 3262}

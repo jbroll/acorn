@@ -157,7 +157,7 @@ namespace eval acorn {
 
 
 proc ::acorn::Aperture { type param } {
-    set type [lindex [lindex $type 0] 0]
+    #set type $type
 
     switch $type {
 	circular -

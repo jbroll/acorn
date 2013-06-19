@@ -3,24 +3,34 @@
 lappend auto_path ./lib ../lib
 
 package require acorn
+package require tcltest
 
-acorn::model GMT {
-    surface Primary	{ R -36000.0	  K  -0.99828570	n  -1.00	thickness -20262.476419940002 
-   		  aper_type UDA aper_param m1aper1e.uda
+source util/rays.tcl
+
+::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+
+    acorn::model GMT {
+	surface Primary	{ R -36000.0	  K  -0.99828570	n  -1.00	thickness -20262.476419940002 
+		      aper_type UDA aper_param m1aper1e.uda
+	}
+
+	surface Secondary	{ R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	}
+	surface .		{ 							thickness   4900      		}
+	surface .		{        						thickness    620      		}
+	surface .   	{ 							thickness    310      		}
+	surface Fous	{ 							thickness      0      		}
     }
-
-    surface Secondary	{ R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	}
-    surface .		{ 							thickness   4900      		}
-    surface .		{        						thickness    620      		}
-    surface .   	{ 							thickness    310      		}
-    surface Fous	{ 							thickness      0      		}
-}
+    #GMT print
 
 
-acorn::mkrays rays nx 5 ny 5 box 12700
+    acorn::mkrays rays nx 50 ny 50 box 12700
 
-#GMT print
-GMT trace rays
+    GMT trace rays
 
-acorn::prays rays
+    #acorn::prays rays
+
+    acorn::rays-rms rays 1
+} -cleanup { GMT destroy
+    	     rename rays {}
+} -result {0.0003866388092453873 9.508914182891761e-5 1640.7074327862356 0.010513470739447577 198}
 

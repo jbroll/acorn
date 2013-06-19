@@ -41,7 +41,6 @@ extern "C" {
 	    if ( once ) { for ( int j = 0; j < nray; j++ ) { traversed[j] = 0; } }
 
 	    for ( int i = 0; i < nsurf; i++ ) {
-
 		if ( isinf(surf[i].p[Px_thickness]) ) { continue; }
 		if (      !surf[i].enable           ) { continue; } 
 

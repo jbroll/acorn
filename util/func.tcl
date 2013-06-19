@@ -26,9 +26,12 @@ proc jot { { nx - } { x0 - } { x1 - } { xi - } } {
     if { $x1 eq "-" } { set x1 [expr { $x0+$nx-1.0 }] }
     if { $xi eq "-" } { set xi [expr { ($x1-$x0)/($nx-1.0) }] }
 
+    #puts "jot $nx $x0 $x1 $xi"
+
     if { $nx == 1 } {
 	expr { ($x0+$x1)/2.0 }
     } else {
+	#puts [iota $x0 $x1 $xi]
 	iota $x0 $x1 $xi
     }
 }

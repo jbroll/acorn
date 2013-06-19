@@ -54,7 +54,7 @@ oo::class create ::acorn::BaseModel {
 	foreach par $basepar i [iota 0 [llength $basepar]-1] { lappend basemap $par p$i }
 	set anonsurf 0
 
-	set surfdefs(coordbrk,pdef) {}
+	set surfdefs(coordbrk,pdef) $basedef
 
 	set surftype {}
 	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
@@ -62,7 +62,7 @@ oo::class create ::acorn::BaseModel {
     }
     destructor {
 	foreach { type surf } $surfaces {
-	    rename $surfs {}
+	    rename $surf {}
 	}
     }
     method surfset1 { obj surf parmap cmd args } {
@@ -182,7 +182,7 @@ oo::class create ::acorn::Model {
     constructor { args } {
 	next 
 
-	procs surface coordinate-break surface-group surface-group-non-sequential
+	procs surface coordbrk surface-group surface-group-non-sequential
 
 
 	set body [lindex $args end]
@@ -201,7 +201,7 @@ oo::class create ::acorn::Model {
 
 	set current Surface-Add-Error
     }
-    method coordinate-break { name args } { surface name [list {*}[join $args] grouptype coordbk] }
+    method coordbrk { name args } { surface name [list {*}[join $args] type coordbrk] }
 
     method surface { name args } {
 
@@ -235,7 +235,7 @@ oo::class create ::acorn::Model {
 	if { ![info exists surfdefs($type,pmap)] } { set surfdefs($type,pmap) $parmap }
 
 	$current $i set {*}[mappair $parmap [dict merge $surfdefs($type,pdef) $default [join $args] [list name $name]]]
-	$current $i set aperture  [::acorn::Aperture [lindex [$current $i get aper_type] 0] [$current $i get aper_param]]
+	$current $i set aperture  [::acorn::Aperture [$current $i get aper_type] [$current $i get aper_param]]
 
 	$current $i set glass_ptr [glass-lookup [$current $i get glass]]
 

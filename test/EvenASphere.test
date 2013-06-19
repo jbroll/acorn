@@ -8,20 +8,26 @@ package require tcltest
 source util/starbase.tcl
 source util/starbase-acorn.tcl
 
-set Data test/EvenASphere.data
 
-starbase_read Start $Data/start.rays
-set rays {}
+source util/rays.tcl
 
-acorn::model Model {
-    surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type evenasph nterms 8 }
-    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type evenasph nterms 8 }
-    surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
-}
+    set Data test/EvenASphere.data
+
+    starbase_read Start $Data/start.rays
+    set rays {}
+
+
 
 ::tcltest::test evenasph-rays-image { EvenASphere raytrace } -body {
+    acorn::model Model {
+	surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
+	surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type evenasph nterms 8 }
+	surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type evenasph nterms 8 }
+	surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
+    }
+
     set rays [starbase2ray Start $rays]
+
     Model trace $rays
 
     acorn::prays $rays > $Data/image.acorn
@@ -31,9 +37,10 @@ acorn::model Model {
     #puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
 
     list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+} -cleanup { Model destroy
+	     rename $rays {}
+	     set     rays {}
 } -result {1 1 1}
-
-#exit
 
 
 foreach surf { B C } {
@@ -41,6 +48,13 @@ foreach surf { B C } {
 
     foreach aa { 2 4 6 8 10 12 14 16 } {
  	::tcltest::test evenasph-rays-$surf-$aa { EvenASphere raytrace } -body {
+
+	    acorn::model Model {
+		surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
+		surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type evenasph nterms 8 }
+		surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type evenasph nterms 8 }
+		surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
+	    }
 
 	    set rays [starbase2ray Start $rays]
 
@@ -59,6 +73,9 @@ foreach surf { B C } {
 
 	    #puts "$surf a$aa [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
 	    #list 1 1 1
+	} -cleanup { Model destroy
+	    	     rename $rays {}
+		     set     rays {}
 	} -result {1 1 1}
     }
 }

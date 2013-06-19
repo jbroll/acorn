@@ -19,10 +19,11 @@ source util/rays.tcl
 
     acorn::mkrays rays nx 3 ny 3 box 25
 
-    Parabolic print
+    #Parabolic print
     Parabolic trace rays
 
     acorn::rays-rms rays
 } -cleanup { Parabolic destroy
-} -result {0.0 0.0 0.0 3.9736429850260414e-8}
+    	     rename rays {}
+} -result {1.6747652892626934e-15 1.6747652892626934e-15 0.0 3.9736429850260414e-8 9}
 

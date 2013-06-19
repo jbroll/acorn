@@ -3,20 +3,29 @@
 lappend auto_path ./lib ../lib
 
 package require acorn
+package require tcltest
 
-acorn::model GMT {
-    surface Primary	{ R -36000.0	  K  -0.99828570	n  -1.00	thickness -20262.476419940002	}
-    surface Secondary	{ R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	}
-    surface .		{ 							thickness   4900      		}
-    surface .		{        						thickness    620      		}
-    surface .   	{ 							thickness    310      		}
-    surface Fous	{ 							thickness      0      		}
-}
+source util/rays.tcl
+
+::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+    acorn::model GMT {
+	surface Primary	  { R -36000.0	  K  -0.99828570	n  -1.00	thickness -20262.476419940002	}
+	surface Secondary { R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	}
+	surface .	  { 							thickness   4900      		}
+	surface .	  {        						thickness    620      		}
+	surface .   	  { 							thickness    310      		}
+	surface Fous	  { 							thickness      0      		}
+    }
 
 
-acorn::mkrays rays nx 3 ny 3 box 12700
+    acorn::mkrays rays nx 3 ny 3 box 12700
 
-GMT trace rays
+    GMT trace rays
 
-acorn::prays rays
+    #acorn::prays rays
+
+    acorn::rays-rms rays 1
+} -cleanup { GMT destroy
+    	     rename rays {}
+} -result {0.001846775309685383 0.001846775309685383 5830.0 0.04737476770307389 9}
 

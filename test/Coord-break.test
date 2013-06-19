@@ -3,20 +3,29 @@
 lappend auto_path ./lib ../lib
 
 package require acorn
-source  acorn-model.tcl
+package require tcltest
 
-acorn::model Break {
-    surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	-100 }
+source util/rays.tcl
 
-    coordinate-break . { y .1 thickness -100 } 
+::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+    acorn::model Break {
+	surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
+	surface B	{ R -400.0	K -1.0	n -1.00	thickness	-100 }
 
-    surface C	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
-}
+	coordbrk .	{ y 1 } 
+	surface .	{ R    0.0	K  0.0	n  1.00	thickness	-100 }
 
-acorn::mkrays rays nx 3 ny 3 box 25
+	surface C	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
+    }
+    #Break print
 
-Break trace rays
+    acorn::mkrays rays nx 3 ny 3 box 25
 
-acorn::prays rays
+    Break trace rays
+    #acorn::prays rays
+
+    acorn::rays-rms rays 1
+} -cleanup { Break destroy
+    	     rename rays {}
+} -result {2.9007785717557725e-15 1.0 0.0 1.0 9}
 
