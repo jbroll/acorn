@@ -13,9 +13,10 @@ set Data test/GMT-0.zmx.data
 starbase_read Start $Data/start.rays
 set rays {}
 
-acorn::ZMX create Model source $Data/GMT-0.zmx
 
 ::tcltest::test GMT-0-rays-image { EvenASphere raytrace } -body {
+    acorn::ZMX create Model source $Data/GMT-0.zmx
+
     set rays [starbase2ray Start $rays]
     Model trace $rays
 
@@ -24,11 +25,13 @@ acorn::ZMX create Model source $Data/GMT-0.zmx
 
     acorn::prays $rays > $Data/image.acorn
 
-    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+    list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }]
 
-    puts "XX x [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
-    list 1 1 1
-} -result {1 1 1}
+    #puts "XX x [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+    #list 1 1
+} -cleanup {
+    Model destroy
+} -result {1 1}
 
 
 set err 0.0001
@@ -36,6 +39,7 @@ set err 0.0001
 foreach surf { 7 1 2 3 4 5 6 } {
     foreach r { x y rx ry } {
  	::tcltest::test GMT-0-rays-S$surf-$r { GMT-0 raytrace } -body {
+	    acorn::ZMX create Model source $Data/GMT-0.zmx
 
 	    set rays [starbase2ray Start $rays]
 
@@ -46,14 +50,17 @@ foreach surf { 7 1 2 3 4 5 6 } {
 
 	    Model S$surf set $r 0.0
 
-	    #list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
-	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]
-
 	    acorn::prays $rays > $Data/S$surf-$r.acorn
 
-	    puts "$surf $r [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
-	    list 1 1 1
-	} -result {1 1 1}
+	    #list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+	    list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }]
+
+
+	    #puts "$surf $r [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
+	    #list 1 1
+	} -cleanup {
+	    Model destroy
+	} -result {1 1}
     }
 }
 

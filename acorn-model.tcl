@@ -81,26 +81,22 @@ oo::class create ::acorn::BaseModel {
     }
 
     method trace { rays { surfs { 0 end } } { wave 5000 } { thread 0 } { xray 0 } } {		# Assemble the surfaces to be traced.
-	::acorn::SurfaceList create slist 0
 
 	lassign $surfs start end
-	lassign $start s0 s1
-	lassign $end   e0 e1
+	set ok 0
 
-	if { $xray ne 0 } { 
-	    set xray [$xray getptr]
-	}
+	if { $xray ne 0 } { set xray [$xray getptr] }
+
+	::acorn::SurfaceList create slist 0
 
 	set i 0
 	foreach { type surf } $surfaces {
-	    if { $s0 > $i } { continue }
 
 	    slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
 
 	    foreach j [iota 0 [$surf length]-1] {
-		#if { $s1 > $i } { continue }
-
-		set s1 0
+		if { !$ok && $start eq [$surf $j get name] } { set ok 1 }
+		if { !$ok } { continue } 
 
 		set aper [$surf $j get aperture]
 
@@ -117,9 +113,14 @@ oo::class create ::acorn::BaseModel {
 		    }
 		}
 
-		#if { $i == $e0 && $j == $e1 } { break }
+
+		if { $end eq [$surf $j get name] } {
+		    slist $i set nsurf [expr $j+1]
+		    break
+		}
 	    }
-	    #if { $i == $e0 && $j == $e1 } { break }
+	    if { $j < [$surf length]-1 } { break }
+
 	    incr i
 	}
 
@@ -292,51 +293,4 @@ oo::class create ::acorn::Model {
 }
 
 proc acorn::model { args } { tailcall acorn::Model create {*}$args }
-
-proc acorn::mkrays { name args } {
-    if { $name eq "-" } { set name rays[incr ::acorn::RAYS] }
-    set pz 0
-
-    if { [info commands $name] eq {} } { acorn::Rays create $name 0 }
-
-    set args [dict merge { circle 0 nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - } $args]
-    dict with args {
-	if { [info exists box] } {
-	    set x0 [expr -$box]
-	    set x1 [expr  $box]
-	    set y0 [expr -$box]
-	    set y1 [expr  $box]
-	}
-
-	set i 0
-	foreach x [jot $nx $x0 $x1 $xi] {
-	    foreach y [jot $ny $y0 $y1 $yi] {
-		if { $circle && $x*$x+$y*$y > $x0*$x0+$y0+$y0 } { continue }
-
-		$name [$name length] set px $x py $y pz $pz kx 0.0 ky 0.0 kz 1.0 vignetted 0
-		incr i
-	    }
-	}
-    }
-
-    return $name
-}
-
-proc acorn::prays { rays { pipe {} } { out stdout } } {
-
-    if { $pipe eq ">" } { set out [open $out w] }
-
-    set i 1
-
-    puts $out "id	x	y	z	l	m	n	v"
-    puts $out "-	-	-	-	--	--	--	-"
-
-    foreach row [$rays get px py pz kx ky kz vignetted] {
-  	puts $out "$i	[join $row \t]"
-	incr i
-    }
-
-    if { $pipe eq ">" } { close $out }
-}
-
 

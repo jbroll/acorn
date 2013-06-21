@@ -1,19 +1,19 @@
 #!/usr/bin/env tclkit8.6
 #
-lappend auto_path ./lib ../lib
-
-source tcloo.tcl
-source unix.tcl
-
-source acorn-model.tcl
+lappend auto_path ./lib 
 
 package require acorn
+package require tcltest
 
-ZMX create GMT source zmx-models/GMT-NF-Sequential.zmx
+::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+    acorn::ZMX create GMT source zmx-models/GMT-NF-Sequential.zmx
+    #GMT print
 
-acorn::mkrays rays nx 5 x0 -12700 x1 12700 ny 5 y0 -12700 y1 12700
+    acorn::mkrays rays nx 5 x0 -12700 x1 12700 ny 5 y0 -12700 y1 12700
 
-#GMT print
-GMT trace rays
+    GMT trace rays
 
-acorn::prays rays
+    #acorn::prays rays
+
+} -cleanup { GMT destroy
+} -result {}

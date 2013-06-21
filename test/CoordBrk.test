@@ -1,0 +1,57 @@
+#!/usr/bin/env tclkit8.6
+#
+lappend auto_path ./lib ../lib
+
+package require acorn
+package require tcltest
+
+source util/rays.tcl
+source util/starbase.tcl
+source util/starbase-acorn.tcl
+
+set Data test/CoordBrk.data
+
+starbase_read Start $Data/start.rays
+starbase_read image1 $Data/image1.rays	; set ray1 [starbase2ray image1]
+starbase_read image2 $Data/image2.rays  ; set ray2 [starbase2ray image2]
+starbase_read image3 $Data/image3.rays  ; set ray3 [starbase2ray image3]
+set rays {}
+
+::tcltest::test CoordBrk { CoordBrk } -body {
+    acorn::ZMX create Model source test/CoordBrk.data/galvanometer.zmx
+    Model config 1
+
+    #acorn::ZMX create Model source test/CoordBrk.data/polygon.zmx
+
+    set rays [starbase2ray Start $rays]
+     Model trace $rays { 0 7 }
+     acorn::prays $rays > $Data/image1-7.acorn
+
+    set rays [starbase2ray Start $rays]
+     Model trace $rays 
+     acorn::prays $rays > $Data/image1.acorn
+
+
+    #puts stderr ""
+    #puts stderr [acorn::rays-stat $ray1]
+    #puts stderr [acorn::rays-stat $rays]
+
+    #Model config 2
+    #set rays [starbase2ray Start $rays]
+    #Model trace $rays
+
+    #puts stderr ""
+    #puts stderr [acorn::rays-stat $ray2]
+    #puts stderr [acorn::rays-stat $rays]
+
+    #Model config 3
+    #set rays [starbase2ray Start $rays]
+    #Model trace $rays
+
+    #puts stderr ""
+    ##puts stderr [acorn::rays-stat $ray3]
+    #puts stderr [acorn::rays-stat $rays]
+} -cleanup { Model destroy
+    	     rename $rays {}
+} -result {}
+

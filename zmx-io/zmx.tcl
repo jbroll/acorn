@@ -41,10 +41,9 @@ namespace eval acorn {
 
 	coordbrk,1		x
 	coordbrk,2		y
-	coordbrk,3		z
-	coordbrk,4		rx
-	coordbrk,5		ry
-	coordbrk,6		rz
+	coordbrk,3		rx
+	coordbrk,4		ry
+	coordbrk,5		rz
 
 	evenasph,1		a2
 	evenasph,2		a4
@@ -84,13 +83,14 @@ oo::class create ::acorn::ZMX {
     constructor { type args } {
 	next
 
-	set pup {}
+	set pup    {}
+	set mce(1) {}
 
 	set debug 0
 
-	procs TRAC BLNK CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD ENPD FLAP FLOA FTYP FWGN GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
-	      NSCD NSCS NSOA NSOD NSOH NSOO NSOP NSOQ NSOS NSOU NSOV NSOW PARM PPAR PRAM PFIL PICB POLS POPS PUSH PWAV PZUP RAIM ROPD SDMA SLAB STOP SURF		\
-	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVM XDAT XFLN YFLN XFIE RSCE RWRE MOFF OBSC SQAP ELOB WAVE THIC
+	procs TRAC BLNK CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD ENPD FLAP FLOA FTYP FWGN FWGT GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
+	      NSCD NSCS NSOA NSOD NSOH NSOO NSOP NSOQ NSOS NSOU NSOV NSOW PARM PPAR PRAM PFIL PICB POLS POPS PUSH PUPD PWAV PZUP RAIM ROPD SCOL SDMA SLAB STOP SURF		\
+	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVL WAVN WAVM WWGT WWGN XDAT XFLD XFLN YFLD YFLN XFIE RSCE RWRE MOFF OBSC SQAP ELOB WAVE THIC ZVDX ZVDY ZVCX ZVCY ZVAN
 
 	switch $type {
 	    source { eval [string map { $ \\$ ; \\; [ \\[ } [cat [lindex $args 0]]] }
@@ -127,9 +127,15 @@ oo::class create ::acorn::ZMX {
 	} else {
 	    set mce_current $config
 	    eval $mce($config)
+	    eval $pup
 	}
     }
 
+    method ZVAN { args } {}
+    method ZVCX { args } {}
+    method ZVCY { args } {}
+    method ZVDX { args } {}
+    method ZVDY { args } {}
     method OBSC { args } {}
     method VERS { args } {}
     method UNIT { lens_unit src_prefix src_unit anal_prefix anal_unit args }	{}
@@ -244,7 +250,6 @@ oo::class create ::acorn::ZMX {
      }
      method CONI { conic args } {                my [$current $surf get name] set K $conic 	 }
      method COMM { args }  { set comment $args }
-     method PPAR { args } { }
 
      method PARM { n value } {
 	 if { $grouptype ne "non-sequential" } {
@@ -360,6 +365,7 @@ oo::class create ::acorn::ZMX {
     method DMFS { args } {}
     method FLOA { args } {}
     method FTYP { args } {}
+    method FWGT { args } {}
     method FWGN { args } {}
     method GFAC { args } {}
     method GLRS { args } {}
@@ -374,9 +380,11 @@ oo::class create ::acorn::ZMX {
     method POLS { args } {}
     method POPS { args } {}
     method PUSH { args } {}
+    method PUPD { args } {}
     method PWAV { args } {}
     method RAIM { args } {}
     method ROPD { args } {}
+    method SCOL { args } {}
     method SDMA { args } {}
     method SLAB { args } {}
     method STOP { args } {}
@@ -388,25 +396,34 @@ oo::class create ::acorn::ZMX {
     method VDSZ { args } {}
     method VDXN { args } {}
     method VDYN { args } {}
+    method WAVL { args } {}
     method WAVM { args } {}
+    method WAVN { args } {}
+    method WWGT { args } {}
+    method WWGN { args } {}
     method XDAT { args } {}
+    method XFLD { args } {}
     method XFLN { args } {}
     method YFLN { args } {}
+    method YFLD { args } {}
 
     # Pickups
     #
-    method PZUP { from scale offset column } {						# Pick Up 
-	append pup "my xPZUP $Id [expr int($from)] $scale $offset $column\n"
-    }
+    method PZUP {       from scale offset column } { append pup "my xPZUP $Id [expr int($from)] $scale $offset $column\n" }
+    method PPAR { param from scale offset column } { append pup "my xPPAR $Id [expr int($from)] $scale $offset $column $param\n" }
 
-    method xPZUP { surf from scale offset column } {
-	my $surf thickness set [expr [my $from get thickness]*$scale]
+    method xPZUP { surf from scale offset column } { my $surf thickness set [expr [my $from get thickness]*$scale] }
+    method xPPAR { surf from scale offset column param } {
+	set value [my $from get $acorn::ZMXParmMap([my $surf get type],$param)]*$scale+$offset]
+
+	my     $surf set $acorn::ZMXParmMap([my $surf get type],$param) 	\
+	  [expr [my $from get $acorn::ZMXParmMap([my $surf get type],$param)]*$scale+$offset]
     }
 
 
     # Multi Configuration Editor
     #
-    method MNUM { n curr } { set mce_current $curr }					; # Multi Configure Number of configs
+    method MNUM { n { curr 1 } } { set mce_current $curr }					; # Multi Configure Number of configs
 
     method WAVE { surf config args } { append mce($config) "my xWAVE $surf $args\n" }	; # Set Wavelength
     method IGNR { surf config args } { append mce($config) "my xIGNR $surf $args\n" }	; # Ignore surface

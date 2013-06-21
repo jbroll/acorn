@@ -1,0 +1,49 @@
+
+case $1 in 
+ data)
+    aco  rays nx 15 ny 15 start 1 end -1
+    aco push
+
+    aco rays end  1						# Trace rays to surface 1 (planar).
+    aco raytable all > start.rays	
+
+    aco rays end  7	 					# Trace rays to image plane.
+    aco raytable all > image$2-7.rays
+
+    aco rays end -1	 					# Trace rays to image plane.
+    aco raytable all > image$2.rays
+    ;;
+    plot)
+	file=$2
+
+	plottable graph file "| < $file.acorn row '!v'" title Acorn size 5 5 at 0 5 x,y marker circle	\
+		  graph file "| < $file.rays  row '!v'" title Zemax size 5 5 at 0 0 x,y marker circle
+
+    ;;
+    delta)
+	file=$2
+	shift
+	shift
+
+	plottable graph file "| pastetable image.acorn - < $file.acorn | row '!v_2'" title Acorn size 5 5 at 0 5 x_1,y_1 vector x_2,y_2 $*	\
+		  graph file "| pastetable image.rays  - < $file.rays  | row '!v_2'" title Zemax size 5 5 at 0 0 x_1,y_1 vector x_2,y_2 $*
+
+	;;
+    pair)
+	file=$2
+	shift
+	shift
+
+	pastetable $file.rays $file.acorn | row '!v_1' | plottable size 8 8 x_1,y_1 vector x_2,y_2 $*
+    ;;
+    vect)
+	file1=$2
+	file2=$3
+	shift
+	shift
+	shift
+
+	pastetable $file1 $file2 | row '!v_1' | plottable size 8 8 x_1,y_1 vector x_2,y_2 $*
+    ;;
+esac
+
