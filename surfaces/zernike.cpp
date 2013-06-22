@@ -65,7 +65,7 @@ extern "C" {
 	double xdecenter = s.p[Pm_xdecenter];
 	double ydecenter = s.p[Pm_ydecenter];
 	double   nradius = s.p[Pm_nradius];
-	int      nzterms = s.p[Pm_nterms];
+	int      nzterms = (int) s.p[Pm_nterms];
 
 	double zdz, zdx, zdy;
 
@@ -89,7 +89,7 @@ extern "C" {
 
     Vector3d nhat;
 
-    int      nterms = s.p[Pm_nterms];
+    int      nterms = (int) s.p[Pm_nterms];
 
     if ( nterms ) {
 	if ( AcornSimpleIterativeIntersect(s, r, z, nhat, ZernikeSag) ) { return 1; }
