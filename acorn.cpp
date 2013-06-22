@@ -195,6 +195,7 @@ extern "C" {
 
 		if ( i == nthread-1 ) { data[i].nray = nray - nray/nthread*i; }
 
+printf("start thread\n");
 		data[i].t = TPoolThreadStart( (TPool*) tp, (TPoolWork) trace_rays_worker, &data[i]);
 	    }
 	    for ( int i = 0; i < nthread; i++ ) {

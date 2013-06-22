@@ -41,8 +41,8 @@ extern "C" {
 	double xc, yc;
 	double dx, dy;
 
-	int row =  round(y / h);
-	int col = (row % 2 == 0 ? round(x/p) : round(x/p + 0.5));
+	int row =  (int) round(y / h);
+	int col = (int) (row % 2 == 0 ? round(x/p) : round(x/p + 0.5));
 
 	yc = h * row;
 	xc = p * (col - (row % 2 != 0) / 2.);
@@ -91,7 +91,7 @@ extern "C" {
 	d = (z - r.p(Z))/r.k(Z);
     } else {					// http://www-physics.ucsd.edu/~tmurphy/astr597/exercises/raytrace-3d.pdf
 
-	if ( LensCenter(s.p[Pm_nx], s.p[Pm_nx], s.p[Pm_width], r.p(X), r.p(Y), &cx, &cy) ) { return 1; }
+	if ( LensCenter((int) s.p[Pm_nx], (int) s.p[Pm_nx], s.p[Pm_width], r.p(X), r.p(Y), &cx, &cy) ) { return 1; }
 
 	//printf("Center %f %f	: %f %f\n", r.p(X), r.p(Y), cx, cy);
 	r.p(X) -= cx;

@@ -2,8 +2,8 @@
 #
 lappend auto_path ./lib ../lib arec/lib
 
-package require acorn
 package require tcltest
+package require acorn
 
 source util/starbase.tcl
 source util/starbase-acorn.tcl
@@ -14,11 +14,11 @@ starbase_read Start $Data/start.rays
 set rays {}
 
 
-::tcltest::test GMT-0-rays-image { EvenASphere raytrace } -body {
+::tcltest::test GMT-0-rays-image { GMT-0 raytrace } -body {
     acorn::ZMX create Model source $Data/GMT-0.zmx
 
     set rays [starbase2ray Start $rays]
-    Model trace $rays
+    Model trace $rays {} 5000 16
 
     lassign [starbase_raycompare $rays $Data/image.rays 0] sumx sumy sumz
 
@@ -39,12 +39,13 @@ set err 0.0001
 foreach surf { 7 1 2 3 4 5 6 } {
     foreach r { x y rx ry } {
  	::tcltest::test GMT-0-rays-S$surf-$r { GMT-0 raytrace } -body {
+puts "$surf $r"
 	    acorn::ZMX create Model source $Data/GMT-0.zmx
 
 	    set rays [starbase2ray Start $rays]
 
 	    Model S$surf set $r $err
-	    Model trace $rays
+	    Model trace $rays {} 5000 16
 
 	    lassign [starbase_raycompare $rays $Data/S$surf-$r.rays 0] sumx sumy sumz
 

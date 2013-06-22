@@ -10,7 +10,7 @@ extern "C" {
  #include <stdlib.h>
 
  #define TCL_THREADS 1
- #define USE_TCL_STUBS 1
+// #define USE_TCL_STUBS 1
 
  #include "tcl.h"
  #include "tpool.h"
