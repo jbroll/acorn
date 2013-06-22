@@ -80,19 +80,18 @@ oo::class create ::acorn::BaseModel {
 	}
     }
 
-    method trace { rays { surfs { 0 end } } { wave 5000 } { thread 0 } { xray 0 } } {		# Assemble the surfaces to be traced.
-	if { $surfs eq {} || $surfs == -1 } {
-	    set surfs { 0 end }
-	}
+    method trace { rays { surfs {} } { wave 5000 } { thread 0 } { xray 0 } } {		# Assemble the surfaces to be traced.
+	set ok 0
+	if { $surfs eq {} || $surfs == -1 } { set ok 1 }
 
 	lassign $surfs start end
-	set ok 0
 
 	if { $xray ne 0 } { set xray [$xray getptr] }
 
 	::acorn::SurfaceList create slist 0
 
 	set i 0
+
 	foreach { type surf } $surfaces {
 
 	    slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]

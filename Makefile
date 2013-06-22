@@ -11,7 +11,8 @@ CFLAGS=$(INC) -msse -fPIC -O2
 SRC	= acorn.cpp aperture.cpp glass/glass.c glass/acorn-glass.cpp tpool/tpool.c
 TCL	= acorn.tcl acorn-model.tcl			\
 	  zmx-io/uda.tcl zmx-io/agf.tcl zmx-io/zmx.tcl	\
-	  util/unix.tcl  util/func.tcl  util/tcloo.tcl
+	  util/unix.tcl  util/func.tcl  util/tcloo.tcl	\
+	  tcltest.tcl
 
 
 SURFS	= surfaces/lib/$(ARCH)/simple.so		\
@@ -25,19 +26,19 @@ ACORN_SRCS = $(SRC) $(TCL)
 ACORN_OBJS = $(SURFS) 
 ACORN_UTIL = surfaces/acorn-utils.h
 
-all: zernike acorn.$(OS) arec.$(OS)
+all: zernike acorn.$(OS)
 
 acorn.Darwin :
 	@$(MAKE) ARCH=Darwin.i386	BITS=-m32	acorn.Darwin.i386 
 	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	acorn.Darwin.x86_64 
 	@$(MAKE) ARCH=Darwin.i386	BITS=-m32	arec.Darwin.i386 
 	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	arec.Darwin.x86_64 
-	@$(MAKE) test.Darwin
+	#@$(MAKE) test.Darwin
 
 acorn.Linux  :
 	@$(MAKE) ARCH=Linux.x86_64	acorn.Linux.x86_64
 	@$(MAKE) ARCH=Linux.x86_64	arec.Linux.x86_64
-	@$(MAKE) ARCH=Linux.x86_64	test.Linux
+	#@$(MAKE) ARCH=Linux.x86_64	test.Linux
 
 zernike/zernike.c :
 	cd zernike; $(MAKE)

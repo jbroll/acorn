@@ -8,7 +8,6 @@ lappend auto_path lib ../lib
 
 package require acorn
 
-#cd [file dirname [file normalize [info script]]]/test
 
 ::tcltest::configure -testdir [file dirname [file normalize [info script]]]/test -singleproc 1
 

@@ -1,13 +1,14 @@
 #!/usr/bin/env tclkit8.6
 #
-lappend auto_path ./lib ../lib
+lappend auto_path lib
 
-package require acorn
 package require tcltest
+package require acorn
 
 source util/rays.tcl
 
-::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -match tol -body {
+
     acorn::model GMT {
 	surface Primary	  { R -36000.0	  K  -0.99828570	n  -1.00	thickness -20262.476419940002	}
 	surface Secondary { R   4163.900922 K  -0.71692784	n  -1.00	thickness  20262.476419940002	}
@@ -27,5 +28,5 @@ source util/rays.tcl
     acorn::rays-rms rays 1
 } -cleanup { GMT destroy
     	     rename rays {}
-} -result {0.001846775309685383 0.001846775309685383 5830.0 0.04737476770307389 9}
+} -result {0.001846775309685383 0.001846775309685383 0.0026117346896128413 9}
 

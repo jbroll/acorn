@@ -7,7 +7,7 @@ package require tcltest
 
 source util/rays.tcl
 
-::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -match tol -body {
 
 
     acorn::model GMT {
@@ -54,4 +54,4 @@ source util/rays.tcl
     acorn::rays-rms rays 1
 } -cleanup { GMT destroy
     	     rename rays {}
-} -result {0.0007056054172352937 0.00070506680205056 4413.50638268486 0.026794072846902644 22924}
+} -result {0.0009320660775796353 0.0009313545964454249 0.0013176374908504642 22924}

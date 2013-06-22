@@ -2,8 +2,8 @@
 #
 lappend auto_path ./lib ../lib arec/lib
 
-package require acorn
 package require tcltest
+package require acorn
 
 source util/starbase.tcl
 source util/starbase-acorn.tcl
@@ -14,7 +14,7 @@ starbase_read Start $Data/start.rays
 set rays {}
 
 if { 1 } {
-    ::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+    ::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -match tol -body {
 	acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
 
 	set rays [starbase2ray Start $rays]
@@ -26,16 +26,15 @@ if { 1 } {
 
 	lassign [starbase_raycompare $rays $Data/image.rays 0] sumx sumy sumz count bigs
 
-	list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }]	; # [expr { sqrt($sumz) < 1e-6 }]
 
 	#puts "XX x [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
-	#list 1 1
+	list [expr { sqrt($sumx) }]	[expr { sqrt($sumy) }]	; # [expr { sqrt($sumz) }]
     } -cleanup {
     	Model destroy
-    } -result {1 1}
+    } -result { 0 0 }
 }
 
-#exit
+exit
 
 set err 0.0001
 
@@ -50,7 +49,7 @@ set errors { x y rx ry z2 z3 z4 z5 z6 z7 z8 z9 z10 }
 foreach mirror $mirrors {
     foreach surf $surfs {
 	foreach e $errors {
-	    ::tcltest::test GMT-1-rays-$mirror$surf-$e { GMT-0 raytrace } -body {
+	    ::tcltest::test GMT-1-rays-$mirror$surf-$e { GMT-0 raytrace } -match tol -body {
 		acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
 
 		set rays [starbase2ray Start $rays]
@@ -70,11 +69,10 @@ foreach mirror $mirrors {
 
 		#puts "[incr i] $mirror $surf $e [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]"
 
-		list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }] ; # [expr { sqrt($sumz) < 1e-6 }]
-		#list 1 1
+		list [expr { sqrt($sumx) }]	[expr { sqrt($sumy) }] ; # [expr { sqrt($sumz) }]
 	    } -cleanup {
 		Model destroy
-	    } -result {1 1}
+	    } -result { 0 0 }
 	}
     }
 }

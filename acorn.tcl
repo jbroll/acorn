@@ -15,7 +15,8 @@ critcl::tsources util/func.tcl util/tcloo.tcl util/unix.tcl 		\
 		 util/rays.tcl						\
 		 zmx-io/uda.tcl zmx-io/agf.tcl				\
 		 acorn-model.tcl acorn.tcl				\
-		 zmx-io/zmx.tcl
+		 zmx-io/zmx.tcl						\
+		 tcltest.tcl
 
 critcl::csources acorn.cpp aperture.cpp glass/acorn-glass.cpp glass/glass.c tpool/tpool.c
 

@@ -2,12 +2,12 @@
 #
 lappend auto_path ./lib ../lib
 
-package require acorn
 package require tcltest
+package require acorn
 
 source util/rays.tcl
 
-::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -match tol -body {
 
 
     acorn::model GMT {
@@ -20,7 +20,6 @@ source util/rays.tcl
 #	    surface P4	{ rz 180 }
 #	    surface P5	{ rz 240 }
 #	    surface P6	{ rz 300 }
-
 #	    surface P7	{ aper_type circular aper_max 4200 }
 	}
 
@@ -54,4 +53,4 @@ source util/rays.tcl
     acorn::rays-rms rays 1
 } -cleanup { GMT destroy
     	     rename rays {}
-} -result {0.000392302728121411 9.574929950167434e-5 1664.8708042968378 0.010664828045425543 3262}
+} -result {0.001373755188117314 0.00033529233298707894 0.0014140807139053815 3262}

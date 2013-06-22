@@ -1,14 +1,16 @@
-#!/usr/bin/env tclkit8.6
+#!/usr/bin/env tclsh8.6
 #
-lappend auto_path ./lib ../lib arec/lib
+lappend auto_path lib
 
-package require acorn
 package require tcltest
+package require acorn
 
 source util/rays.tcl
 
 
-::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+::tcltest::test A.parabola { A.parabola } -match tol -body {
+    set ::MatchTol 0.0000005
+
     acorn::model Parabolic {
 	surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
 	surface B	{ R -400.0	K -1.0	n -1.00	thickness	-200 }
@@ -25,5 +27,5 @@ source util/rays.tcl
     acorn::rays-rms rays
 } -cleanup { Parabolic destroy
     	     rename rays {}
-} -result {1.6747652892626934e-15 1.6747652892626934e-15 0.0 3.9736429850260414e-8 9}
+} -result {0 0 0 9}
 

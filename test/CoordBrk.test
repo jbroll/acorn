@@ -49,8 +49,8 @@ set rays {}
     #Model trace $rays
 
     #puts stderr ""
-    ##puts stderr [acorn::rays-stat $ray3]
-    #puts stderr [acorn::rays-stat $rays]
+    puts stderr [acorn::rays-stat $ray3]
+    puts stderr [acorn::rays-stat $rays]
 } -cleanup { Model destroy
     	     rename $rays {}
 } -result {}
