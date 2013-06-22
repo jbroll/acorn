@@ -1,0 +1,225 @@
+*+
+*KWIC annulr.f
+*
+*$Id: annulr.f,v 1.1 2004/03/16 15:49:44 dtn Exp $
+*
+*Revisions:
+*   93-Oct-15[T. Gaetz]
+*      . eliminate io to unit 6; unit 6 now feeds binary pipe and
+*        should be clear of ascii output; see unit 8 for messages
+*-
+
+      SUBROUTINE ANNULR (NP, OBSC, NDIM, NDXARR, COFMAT,
+     *                   XN, YN, ANNP, ANNX, ANNY, IER)
+C   /******************************************/
+C    *
+C    *    BAUER ASSOCIATES, INC.
+C    *
+C    *    ANNULR FORTRAN
+C    *    WRITTEN BY P. GLENN (617) 235-8775
+C    *            ON 5/2/88
+C    *
+C   /******************************************/
+C
+C  EVALUATE ANNULAR ZERNIKE POLYNOMIALS AT POINT (XN, YN) AND
+C  THEIR PARTIAL DERIVATIVES. THE MAXIMUM NUMBER OF TERMS ALLOWED
+C  (NMAX) IS 325, WHICH ALLOWS 25 RADIAL DEGREES OF FREEDOM.
+C
+C  INPUT ARGUMENTS:
+C    NP : I*4 - NUMBER OF ZERNIKE TERMS DESIRED
+C    OBSC: R*8 - LINEAR OBSCURATION RATIO
+C    NDIM: I*4 - DIMENSION OF THE 2-D SQUARE ARRAY NDXARR
+C    NDXARR: I*4 - 2-D ARRAY OF INDICES INTO COFMAT.
+C                  (SEE ZBUILD FOR DETAILED DOCUMENTATION.)
+C    COFMAT: R*8 - ARRAY OF COEFFICIENTS DEFINING THE ZERNIKES.
+C                  (SEE ZBUILD FOR DETAILED DOCUMENTATION.)
+C    XN : R*4 - NORMALIZED X COORD. = X / R2S = R * COS (THETA)
+C    YN : R*4 - NORMALIZED Y COORD. = Y / R2S = R * SIN (THETA)
+C
+C  OUTPUT ARGUMENTS:
+C    ANNP : R*4 - ARRAY (NP) VALUES OF ANNULAR ZERNIKE POLYNOMIALS
+C    ANNX : R*4 - ARRAY (NP) OF 1/2 THE PARTIAL DERIVATIVES OF ANNP WRT
+C                 XN
+C    ANNY : R*4 - ARRAY (NP) OF 1/2 THE PARTIAL DERIVATIVES OF ANNP WRT
+C                 YN
+C    IER  : I*4 - ERROR CODE
+C         : 0 - NO ERROR
+C         : 1 - (XN, YN) IS OUTSIDE THE UNIT DISK OR INSIDE THE
+C               CENTRAL OBSCURATION
+C         : 2 - 0 < OR = NP < 3 - WARNING, NP SET TO 3
+C         : 4 - NP > NMAX - WARNING, NP RESET TO NMAX = 325
+C         : 6 - NP < 0 - FATAL ERROR
+C         : 7 - NDXARR OR COFMAT ERROR - FATAL ERROR
+C         : OTHERWISE - COMBINATION OF ABOVE ERRORS
+C
+C  EXTERNAL REFERENCES: INCLIN
+C
+C  COSM (I): COS ((I - 2) THETA)
+C  SINM (I): SIN ((I - 2) THETA)
+C  RN (I): R ** (I - 1)
+C
+C
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      IMPLICIT INTEGER (I-N) 
+      DIMENSION NDXARR (NDIM, NDIM), COFMAT (1)
+      DIMENSION COSM (27), SINM (27), RN (25)
+      DIMENSION ANNP (NP), ANNX (NP), ANNY (NP)
+C
+C
+C  INITIALIZE R ** 0, COS/SIN (0 THETA), NMAX, IER
+C
+      DATA RN (1) /1.D0/
+      DATA COSM (2), SINM (2) /1.D0, 0.D0/
+      DATA NMAX /325/
+      IER = 0
+      IF (NP .GE. 0) GOTO 100
+C
+C  NP LESS THAN 0
+C
+      IER = 6
+C      WRITE (8, 500) IER
+      GOTO 499
+100   IF (NP .GE. 3) GOTO 110
+C
+C  MINIMUM NP IS 3.  NP IS RESET TO 3.
+C
+      NP = 3
+      IER = 2
+C      WRITE (8, 510) IER
+      GOTO 120
+110   IF (NP .LE. NMAX) GOTO 120
+C
+C  NP GREATER THAN NMAX.  NP IS RESET TO NMAX.
+C
+      NP = NMAX
+      IER = 4
+C      WRITE (8, 520) IER
+C
+C  CHECK FOR ALLOWABLE COORDINATE MAGNITUDE
+C
+120   RSQ = XN * XN + YN * YN
+      R = DSQRT (RSQ)
+      IF (R .LE. 1.D0 .AND. R .GE. OBSC) GOTO 130
+      IER = IER + 1
+C
+C  EVALUATE THE FIRST THREE ZERNIKE POLYNOMIALS
+C
+130   ANNP (1) = 1.0
+      C11 = COFMAT (NDXARR (2, 2))
+      ANNP (2) = C11 * XN
+      ANNP (3) = C11 * YN
+C
+C  EVALUATE ONE HALF OF THE FIRST THREE PARTIAL DERIVATIVES
+C
+      ANNX (1) = 0.D0
+      ANNX (2) = C11 / 2.D0
+      ANNX (3) = 0.D0
+      ANNY (1) = 0.D0
+      ANNY (2) = 0.D0
+      ANNY (3) = C11 / 2.D0
+C
+C  INITIALIZE THE REST OF THE TERMS TO ZERO
+C
+      IF (NP .EQ. 3) GO TO 499
+      DO 140 IP = 4, NP
+      ANNP (IP) = 0.D0
+      ANNX (IP) = 0.D0
+      ANNY (IP) = 0.D0
+140   CONTINUE
+C
+C  EVALUATE THE FIRST TWO COSINES AND SINES, AND THE FIRST R
+C
+      COSM (3) = 1.D0
+      COSM (1) = 1.D0
+      SINM (3) = 0.D0
+      SINM (1) = 0.D0
+      IF (R .EQ. 0.D0) GO TO 145
+      COSM (3) = XN / R
+      COSM (1) = COSM (3)
+      SINM (3) = YN / R
+      SINM (1) = - SINM (3)
+145   CONTINUE
+      COSM (4) = COSM (3) ** 2 - SINM (3) ** 2
+      SINM (4) = 2.D0 * SINM (3) * COSM (3)
+      RN (2) = R
+C
+C  DO THE REST OF THE TERMS, LOOPING FIRST OVER RADIAL ORDER
+C  AND THEN OVER AZIMUTHAL ORDER
+C
+      IZERK = 4
+      DO 250 I = 3, NDIM
+      NORD = I - 1
+      RN (I) = RN (I - 1) * R
+      COSM (I + 2) = COSM (I + 1) * COSM (3) - SINM (I + 1) * SINM (3)
+      SINM (I + 2) = SINM (I + 1) * COSM (3) + COSM (I + 1) * SINM (3)
+      JBOT = 1 + MOD (NORD, 2)
+      DO 240 J = JBOT, I, 2
+      IF (NDXARR (I, J) .NE. 0) GO TO 150
+C
+C  NDXARR OR COFMAT ERROR
+C
+      IER = 7
+C      WRITE (8, 530) IER
+      GOTO 499
+C
+C  LOOP OVER THE TERMS IN THIS POLYNOMIAL
+C
+150   MORD = J - 1
+      NTERMS = 1 + (NORD - MORD) / 2
+      DO 190 ITERM = 1, NTERMS
+      N = NORD - 2 * (ITERM - 1)
+      DNPM4 = (N + MORD) / 4.D0
+      DNMM4 = (N - MORD) / 4.D0
+      NDX = NDXARR (I, J) + ITERM - 1
+C
+C  INCREMENT THE COSINE POLYNOMIAL AND ITS DERIVATIVES
+C  (LEAVE THE COSINE OUT OF THE POLYNOMIAL FOR NOW)
+C
+      ANNP (IZERK) = ANNP (IZERK) + COFMAT (NDX) * RN (N + 1)
+      IF (N .EQ. 0) GO TO 160
+      ANNX (IZERK) = ANNX (IZERK) +
+     *     COFMAT (NDX) * RN (N) * (DNPM4 * COSM (J) +
+     *                              DNMM4 * COSM (J + 2))
+      ANNY (IZERK) = ANNY (IZERK) +
+     *     COFMAT (NDX) * RN (N) * (DNMM4 * SINM (J + 2) -
+     *                              DNPM4 * SINM (J))
+C
+C  INCREMENT THE SINE POLYNOMIAL DERIVATIVES IF APPROPRIATE
+C
+160   IF (IZERK .EQ. NP .OR. MORD .EQ. 0) GO TO 190
+      ANNX (IZERK + 1) = ANNX (IZERK + 1) +
+     *     COFMAT (NDX) * RN (N) * (DNMM4 * SINM (J + 2) +
+     *                              DNPM4 * SINM (J))
+      ANNY (IZERK + 1) = ANNY (IZERK + 1) +
+     *     COFMAT (NDX) * RN (N) * (DNPM4 * COSM (J) -
+     *                              DNMM4 * COSM (J + 2))
+190   CONTINUE
+C
+C  SET THE SINE POLYNOMIAL IF APPROPRIATE
+C
+      IF (IZERK .EQ. NP .OR. MORD .EQ. 0) GO TO 220
+      ANNP (IZERK + 1) = ANNP (IZERK) * SINM (J + 1)
+C
+C  PUT THE COSINE INTO THE ORIGINAL COSINE POLYNOMIAL
+C
+220   ANNP (IZERK) = ANNP (IZERK) * COSM (J + 1)
+C
+C  INCREMENT IZERK BY 1 OR 2 AS APPROPRIATE, CHECK FOR ALL POLY'S DONE
+C
+      IF (IZERK .EQ. NP) GO TO 499
+      IF (MORD .GT. 0) IZERK = IZERK + 1
+      IF (IZERK .EQ. NP) GO TO 499
+      IZERK = IZERK + 1
+240   CONTINUE
+250   CONTINUE
+C
+499   RETURN
+C
+C500   FORMAT ('-ANNULR ERROR CODE = ', I3, ' NP < 0')
+C510   FORMAT ('-ANNULR ERROR CODE = ', I3, 'MINIMUM NP IS 3. ',
+C     1         'NP IS RESET TO 3.')
+C520   FORMAT ('-ANNULR ERROR CODE = ', I3, 'NP > NMAX.  NP RESET ',
+C     2         'TO NMAX.')
+C530   FORMAT ('-ANNULR ERROR CODE = ', I3, ' NDXARR OR COFMAT ERROR')
+C
+      END

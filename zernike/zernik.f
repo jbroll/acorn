@@ -1,0 +1,257 @@
+*+
+*KWIC zernik.f
+*
+*$Id: zernik.f,v 1.1 2004/03/16 15:50:17 dtn Exp $ 
+*
+*Revisions:
+*   95-Oct-10[T. Gaetz]
+*      . eliminate output to unit 6
+*   94-Jan-27[T. Gaetz]
+*      . collapse data statements to reduce number of continuations
+*        (the SPARC10 compiler seems to be enforcing the F77 standard
+*        limit of 19 continuations.
+*-
+!
+!  UPDATED 5/2/88 TO
+!    (1) CORRECT A MATH ERROR IN THE DERIVATIVE CALCULATIONS
+!    (2) CORRECT AN INDEXING ERROR THAT PREVENTED THE FULL NUMBER
+!        (325) OF POLYNOMIALS FROM BEING USED
+!    (3) USE FULL DOUBLE PRECISION MATH
+!  PAUL GLENN, BAUER ASSOCIATES, INC.
+!
+      SUBROUTINE ZERNIK (NP, XN, YN, ZERP, ZERX, ZERY, IER)
+C   /****************************************
+C    *
+C    *    PERKIN-ELMER CORPORATE COMPUTING
+C    *      SOFTWARE ENGINEERING SECTION
+C    *
+C    *    ZERNIK FORTRAN
+C    *    WRITTEN BY VALERIE WALLACE
+C    *            ON 10/07/80
+C    *
+C    *    UPDATE:   11/03/80
+C    *    TIME:     15:34:28
+C    *
+C    ******************************************/
+C
+C  EVALUATE ZERNIKE POLYNOMIALS AT POINT (XN, YN) AND THEIR PARTIAL
+C  DERIVATIVES. THE MAXIMUM NUMBER OF TERMS ALLOWED (NMAX) IS 325
+C  WHICH ALLOWS 20 RADIAL DEGREES OF FREEDOM.
+C
+C  INPUT ARGUMENTS:
+C    NP : I*4 - NUMBER OF ZERNIKE TERMS DESIRED
+C    XN : R*4 - NORMALIZED X COORD. = X / R2S = R * COS (THETA)
+C    YN : R*4 - NORMALIZED Y COORD. = Y / R2S = R * SIN (THETA)
+C
+C  OUTPUT ARGUMENTS:
+C    ZERP : R*4 - ARRAY (NP) VALUES OF ZERNIKE POLYNOMIALS
+C    ZERX : R*4 - ARRAY (NP) OF 1/2 THE PARTIAL DERIVATIVES OF ZERP WRT
+C                 XN
+C    ZERY : R*4 - ARRAY (NP) OF 1/2 THE PARTIAL DERIVATIVES OF ZERP WRT
+C                 YN
+C    IER  : I*4 - ERROR CODE
+C         : 0 - NO ERROR
+C         : 1 - (XN, YN) IS OUTSIDE THE UNIT DISK
+C         : 2 - 0 < OR = NP < 3 - WARNING, NP SET TO 3
+C         : 4 - NP > NMAX - WARNING, NP RESET TO NMAX = 325
+C         : 6 - NP < 0 - FATAL ERROR
+C         : OTHERWISE - COMBINATION OF ABOVE ERRORS
+C
+C  EXTERNAL REFERENCES: INCLIN
+C
+C  CS : R ** M * COS (M * THETA)
+C  CX : PARTIAL OF CS WRT X
+C  CY : PARTIAL OF CS WRT Y
+C  SS : R ** M * SIN (M * THETA)
+C  SX : PARTIAL OF SS WRT X
+C  SY : PARTIAL OF SS WRT Y
+C       WHERE M = N - 1
+C
+      
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      IMPLICIT INTEGER (I-N)
+ 
+      DIMENSION CX(25), CY(25), CS(25), SX(25), SY(25), SS(25),
+     1          ZERP(NP), ZERX(NP), ZERY(NP), SQRTN (25), FACT (26)
+      DOUBLE PRECISION DUX, DUY, SUM
+C
+C  SQRTN : SQRT (N)
+!  (USE FULL DOUBLE PRECISION)
+      DATA SQRTN /
+     &    1.00000000000000000000D+00,    1.41421356237309500000D+00,
+     &    1.73205080756887700000D+00,    2.00000000000000000000D+00,
+     &    2.23606797749979000000D+00,    2.44948974278317800000D+00,
+     &    2.64575131106459100000D+00,    2.82842712474619000000D+00,
+     &    3.00000000000000000000D+00,    3.16227766016838000000D+00,
+     &    3.31662479035540000000D+00,    3.46410161513775400000D+00,
+     &    3.60555127546398900000D+00,    3.74165738677394100000D+00,
+     &    3.87298334620741700000D+00,    4.00000000000000000000D+00,
+     &    4.12310562561766100000D+00,    4.24264068711928500000D+00,
+     &    4.35889894354067400000D+00,    4.47213595499958000000D+00,
+     &    4.58257569495584000000D+00,    4.69041575982343000000D+00,
+     &    4.79583152331271900000D+00,    4.89897948556635600000D+00,
+     &    5.00000000000000000000D+00/
+C
+C  FACT (N) : (N-1)]
+!  (USE FULL DOUBLE PRECISION)
+      DATA FACT /
+     &    1.00000000000000000000D+00,    1.00000000000000000000D+00,
+     &    2.00000000000000000000D+00,    6.00000000000000000000D+00,
+     &    2.40000000000000000000D+01,    1.20000000000000000000D+02,
+     &    7.20000000000000000000D+02,    5.04000000000000000000D+03,
+     &    4.03200000000000000000D+04,    3.62880000000000000000D+05,
+     &    3.62880000000000000000D+06,    3.99168000000000000000D+07,
+     &    4.79001600000000000000D+08,    6.22702080000000000000D+09,
+     &    8.71782912000000000000D+10,    1.30767436800000000000D+12,
+     &    2.09227898880000000000D+13,    3.55687428096000000000D+14,
+     &    6.40237370572800000000D+15,    1.21645100408832000000D+17,
+     &    2.43290200817664000000D+18,    5.10909421717094400000D+19,
+     &    1.12400072777760800000D+21,    2.58520167388849800000D+22,
+     &    6.20448401733239400000D+23,    1.55112100433309900000D+25/
+C
+C  INITIALIZE NMAX, IER
+      DATA NMAX /325/
+      IER = 0
+C
+      IF (NP .GE. 0) GOTO 100
+C  NP LESS THAN 0
+      IER = 6
+C      WRITE (8, 500) IER
+      GOTO 499
+C
+100   IF (NP .GE. 3) GOTO 110
+C MINIMUM NP IS 3.  NP IS RESET TO 3.
+      NP = 3
+      IER = 2
+C      WRITE (8, 510) IER
+      GOTO 120
+C
+110   IF (NP .LE. NMAX) GOTO 120
+C
+C  NP GREATER THAN NMAX.  NP IS RESET TO NMAX.
+      NP = NMAX
+      IER = 4
+C      WRITE (8, 520) IER
+C
+120   IF (XN * XN + YN * YN .LE. 1) GOTO 130
+      IER = IER + 1
+C
+C  EVALUATE ZERNIK POLYNOMIALS AND THEIR PARTIAL DERIVATIVES.
+C
+130   CX(1) = 0.0
+      CY(1) = 0.0
+      CS(1) = 1.0
+      CX(2) = 0.5
+      CY(2) = 0.0
+      CS(2) = XN
+      SX(1) = 0.0
+      SY(1) = 0.0
+      SS(1) = 0.0
+      SX(2) = 0.0
+      SY(2) = 0.5
+      SS(2) = YN
+      Y2 = YN ** 2
+      X2 = XN ** 2
+      R2 = X2 + Y2
+      COS2TH = X2 - Y2
+      SIN2TH = 2.0 * XN * YN
+C
+C  EVALUATE FIRST THREE POLYNOMIALS
+      ZERP(1) = 1.0
+      ZERP(2) = 2.0 * XN
+      ZERP(3) = 2.0 * YN
+C
+C  EVALUATE ONE HALF OF THE PARTIAL DERIVATIVES OF THE FIRST
+C  THREE POLYNOMIALS.
+      ZERX(1) = 0.0
+      ZERX(2) = 1.0
+      ZERX(3) = 0.0
+      ZERY(1) = 0.0
+      ZERY(2) = 0.0
+      ZERY(3) = 1.0
+C
+      IP = 3
+      MS = 2
+C
+C  EVALUATE REMAINING TERMS
+C
+      N = 3
+C
+C
+140   IF (IP .GE. NP) GO TO 499
+      CS(N) = CS(N - 2) * COS2TH - SS(N - 2) * SIN2TH
+      CX(N) = CX(N - 2) * COS2TH + CS(N - 2) * XN
+     1         -SX(N - 2) * SIN2TH - SS(N - 2) * YN
+
+      CY(N) = CY(N - 2) * COS2TH - CS(N - 2) * YN
+     2         - SY(N - 2) * SIN2TH - SS(N - 2) * XN
+
+      SS(N) = SS(N - 2) * COS2TH + CS(N - 2) * SIN2TH
+      SX(N) = SX(N - 2) * COS2TH + SS(N - 2) * XN
+     3         + CX(N - 2) * SIN2TH + CS(N - 2) * YN
+      SY(N) = SY(N - 2) * COS2TH - SS(N - 2) * YN
+     4         + CY(N - 2) * SIN2TH + CS(N - 2) * XN
+
+      MS = 3 - MS
+
+      DO 180 M = MS, N, 2
+        IF (IP .GT. NP) GOTO 499
+          NMM = (N - M) / 2
+          NPM = NMM + M
+          TERM = FACT(N) / (FACT(NMM + 1) * FACT(NPM))
+          SUM = TERM
+          DUX = 0.0
+          DUY = 0.0
+
+          IF (NMM .LE. 0) GOTO 160
+          DO 150 L = 1, NMM
+              TERM = (NMM + 1 - L) * (NPM - L) * TERM / (L * (L - N))
+              DUX = R2 * DUX + XN * SUM
+              DUY = R2 * DUY + YN * SUM
+              SUM = R2 * SUM + TERM
+150           CONTINUE
+
+160       SUM = SUM * SQRTN (N)
+          DUX = DUX * SQRTN (N)
+          DUY = DUY * SQRTN (N)
+
+          IF (M .GT. 1) GOTO 170
+            IP = IP + 1
+
+            IF (IP .GT. NP) GOTO 499
+C  USE COSINE TERM
+            ZERP(IP) = SUM * CS(M)
+            ZERX (IP) = DUX * CS(M) + SUM * CX(M)
+            ZERY (IP) = DUY * CS(M) + SUM * CY(M)
+
+            GOTO 180
+
+170         SUM = SUM * SQRTN (2)
+            DUX = DUX * SQRTN (2)
+            DUY = DUY * SQRTN (2)
+
+            IP = IP + 1
+
+            IF (IP .GT. NP) GO TO 499
+C  USE SINE TERM
+            ZERP(IP) = SUM * SS(M)
+            ZERX (IP) = DUX * SS(M) + SUM * SX(M)
+            ZERY (IP) = DUY * SS(M) + SUM * SY(M)
+
+            IP = IP + 1
+
+            IF (IP .GT. NP) GOTO 499
+C
+C  USE COSINE TERM
+            ZERP (IP) = SUM * CS (M)
+            ZERX (IP) = DUX * CS (M) + SUM * CX (M)
+            ZERY (IP) = DUY * CS (M) + SUM * CY (M)
+
+180         CONTINUE
+
+      N = N + 1
+C
+      GOTO 140
+C
+499   RETURN
+      END
