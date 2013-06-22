@@ -26,6 +26,7 @@ ACORN_SRCS = $(SRC) $(TCL)
 ACORN_OBJS = $(SURFS) 
 ACORN_UTIL = surfaces/acorn-utils.h
 
+
 all: zernike acorn.$(OS)
 
 acorn.Darwin :
@@ -72,9 +73,9 @@ surfaces/lib/$(ARCH)/dgrating.so : surfaces/dgrating.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
 	g++ $(BITS) -fPIC -O2 -shared $(INC) surfaces/dgrating.cpp -o surfaces/lib/$(ARCH)/dgrating.so
 
-surfaces/lib/$(ARCH)/zernike.so : surfaces/zernike.cpp acorn.h zernike/lib/$(ARCH)/zernike.o $(ACORN_UTIL)
+surfaces/lib/$(ARCH)/zernike.so : surfaces/zernike.cpp acorn.h zernike/lib/$(ARCH)/zernike.a $(ACORN_UTIL)
 	@mkdir -p zernike/lib/$(ARCH)
-	g++ $(BITS) -fPIC -O2 -shared $(INC) surfaces/zernike.cpp zernike/lib/$(ARCH)/zernike.o -o surfaces/lib/$(ARCH)/zernike.so
+	g++ $(BITS) -fPIC -O2 -shared $(INC) surfaces/zernike.cpp zernike/lib/$(ARCH)/zernike.a -o surfaces/lib/$(ARCH)/zernike.so
 	
 surfaces/lib/$(ARCH)/lens-array-rect.so : surfaces/lens-array-rect.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
@@ -92,9 +93,8 @@ glass/lib/$(ARCH)/glass.o : glass/glass.c
 	@mkdir -p glass/lib/$(ARCH)
 	gcc $(BITS) -fPIC -O2 -c $(INC) glass/glass.c -o glass/lib/$(ARCH)/glass.o
 
-zernike/lib/$(ARCH)/zernike.o : zernike/zernike.c 
-	@mkdir -p zernike/lib/$(ARCH)
-	gcc $(BITS) -fPIC -O2 -c zernike/zernike.c -o zernike/lib/$(ARCH)/zernike.o
+zernike/lib/$(ARCH)/zernike.a : FORCE
+	cd zernike; $(MAKE) ARCH=$(ARCH) lib/$(ARCH)/zernike.a
 
 arec.Darwin.i386	:
 	@cd arec; $(MAKE) arec.Darwin.i386

@@ -1,9 +1,27 @@
 
+OS  =$(shell uname)
+
 FC=gfortran-mp-4.7
 #FC=gfortran-4.6
-CFLAGS= -m32 -O3 
+CFLAGS= $(BITS) -O3 
 
-all : zernike.c
+ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
+
+
+zernike.Darwin : 
+	@$(MAKE) ARCH=Darwin.i386   BITS=-m32 lib/Darwin.i386/zernike.a
+	@$(MAKE) ARCH=Darwin.x86_64 BITS=     lib/Darwin.x86_64/zernike.a
+
+zernike.Linux :
+	@$(MAKE) ARCH=Linux.x86_64 BITS=    
+
+zernike.a : lib/$(ARCH)/zernike.a
+
+
+lib/$(ARCH)/zernike.a : $(ZOBJ)
+	ar cr lib/$(ARCH)/zernike.a $(ZOBJ)
+
+
 
 zerniketable : zerniketable.c
 	cc zerniketable.c -o zerniketable
@@ -19,8 +37,8 @@ zernike.c : zernike.tab mkzernike
 ztest_c: ztest.c zernike.o
 	cc -DZERNIKE_STD=zernike_std $(CFLAGS) -o ztest_c ztest.c zernike.o -lm
 
-zernike.o : zernike.c
-	cc $(CFLAGS) -c zernike.c 
+lib/$(ARCH)/zernike.o : zernike.c
+	cc $(CFLAGS) -c zernike.c -o lib/$(ARCH)/zernike.o
 
 
 
@@ -28,8 +46,14 @@ zernike.o : zernike.c
 ztest_f: ztest.c zernik_std.c zernik.o
 	cc -DZERNIKE_STD=zernikf_std $(CFLAGS) -o ztest_f ztest.c zernik_std.c zernik.o
 
-zernik.o : zernik.f
-	$(FC) $(CFLAGS) -c zernik.f
+lib/$(ARCH)/zernik.o : zernik.f
+	$(FC) $(CFLAGS) -c zernik.f -o lib/$(ARCH)/zernik.o
+
+lib/$(ARCH)/annulr.o : annulr.f
+	$(FC) $(CFLAGS) -c annulr.f -o lib/$(ARCH)/annulr.o
+
+lib/$(ARCH)/zernik_std.o : zernik_std.c
+	cc $(CFLAGS) -c zernik_std.c -o lib/$(ARCH)/zernik_std.o
 
 zcmp : zcmp.c zernik_std.c zernik.o zernike.o
 	cc $(CFLAGS) -o zcmp zcmp.c zernike.o zernik_std.c zernik.o -lm
@@ -38,3 +62,6 @@ test: ztest_c ztest_f
 	rm -f gmon.out ; time ./ztest_c #; gprof ztest_c > ztest_c.gmon
 	rm -f gmon.out ; time ./ztest_f #; gprof ztest_f > ztest_f.gmon
 
+
+clean:
+	rm *.o *.a

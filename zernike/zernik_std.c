@@ -14,6 +14,12 @@ void zernikf_std(double x, double y, int n, double *c, double *z, double *dx, do
 
 	//    printf("	%.3f %.3f\n", x, y);
 
+	*z  = 0;
+	*dx = 0;
+	*dy = 0;
+
+	if ( !n ) { return; };
+
 	zernik_(&n, &x, &y, Z, X, Y, &err);
 
 //	for ( i = 0; i < n; i++ ) {
@@ -21,11 +27,7 @@ void zernikf_std(double x, double y, int n, double *c, double *z, double *dx, do
 //	}
 
 
- 	if ( err != 0 ) { printf("ier %d\n", err); }
-
-	*z  = 0;
-	*dx = 0;
-	*dy = 0;
+// 	if ( err != 0 ) { printf("ier %d\n", err); }
 
 	for ( i = 0; i < n; i++ ) {
 	    *z  += Z[i]*c[i];
