@@ -1,8 +1,8 @@
 
 OS  =$(shell uname)
 
-FC=gfortran-mp-4.7
-#FC=gfortran-4.6
+#FC=gfortran-mp-4.7
+FC=gfortran-4.6
 CFLAGS= $(BITS) -O3 
 
 ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
