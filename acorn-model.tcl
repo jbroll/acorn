@@ -81,6 +81,9 @@ oo::class create ::acorn::BaseModel {
     }
 
     method trace { rays { surfs { 0 end } } { wave 5000 } { thread 0 } { xray 0 } } {		# Assemble the surfaces to be traced.
+	if { $surfs eq {} || $surfs == -1 } {
+	    set surfs { 0 end }
+	}
 
 	lassign $surfs start end
 	set ok 0
