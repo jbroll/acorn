@@ -451,7 +451,7 @@ oo::class create ::acorn::ZMX {
     method xIGNR { surf value args }         { my $surf set enable [expr !int($value)] }
     method xPRAM { surf value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
     method xTHIC { surf value args }         { my $surf set thickness                                      $value }
-    method xXFIE { surf value args } { }
-    method xWAVE { surf value args } { }
+    method xXFIE { surf value args } { 	# X field value }
+    method xWAVE { surf value args } {  # Wavelength }
 }
 
