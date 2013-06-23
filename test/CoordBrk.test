@@ -2,8 +2,8 @@
 #
 lappend auto_path ./lib ../lib
 
-package require acorn
 package require tcltest
+package require acorn
 
 source util/rays.tcl
 source util/starbase.tcl
@@ -17,9 +17,15 @@ starbase_read image2 $Data/image2.rays  ; set ray2 [starbase2ray image2]
 starbase_read image3 $Data/image3.rays  ; set ray3 [starbase2ray image3]
 set rays {}
 
-::tcltest::test CoordBrk { CoordBrk } -body {
+    lappend zemax {*}[acorn::rays-stat $ray1]
+    lappend zemax {*}[acorn::rays-stat $ray2]
+    lappend zemax {*}[acorn::rays-stat $ray3]
+
+::tcltest::test CoordBrk { CoordBrk } -match tol -body {
     acorn::ZMX create Model source test/CoordBrk.data/galvanometer.zmx
     Model config 1
+
+    set wave [expr [Model wavelength get current]*10000]
 
     #acorn::ZMX create Model source test/CoordBrk.data/polygon.zmx
 
@@ -28,30 +34,34 @@ set rays {}
      acorn::prays $rays > $Data/image1-7.acorn
 
     set rays [starbase2ray Start $rays]
-     Model trace $rays 
+     Model trace $rays {} $wave
      acorn::prays $rays > $Data/image1.acorn
 
 
     #puts stderr ""
-    #puts stderr [acorn::rays-stat $ray1]
-    #puts stderr [acorn::rays-stat $rays]
+    #puts [format "%7.3f %7.3f %7.3f %7.3f %7.3f %d" {*}[acorn::rays-stat $ray1]]
+    #puts [format "%7.3f %7.3f %7.3f %7.3f %7.3f %d" {*}[acorn::rays-stat $rays]]
+    lappend acorn {*}[acorn::rays-stat $rays]
 
-    #Model config 2
-    #set rays [starbase2ray Start $rays]
-    #Model trace $rays
-
-    #puts stderr ""
-    #puts stderr [acorn::rays-stat $ray2]
-    #puts stderr [acorn::rays-stat $rays]
-
-    #Model config 3
-    #set rays [starbase2ray Start $rays]
-    #Model trace $rays
+    Model config 2
+    set rays [starbase2ray Start $rays]
+    Model trace $rays {} $wave
 
     #puts stderr ""
-    puts stderr [acorn::rays-stat $ray3]
-    puts stderr [acorn::rays-stat $rays]
+    #puts [format "%7.3f %7.3f %7.3f %7.3f %7.3f %d" {*}[acorn::rays-stat $ray2]]
+    #puts [format "%7.3f %7.3f %7.3f %7.3f %7.3f %d" {*}[acorn::rays-stat $rays]]
+    lappend acorn {*}[acorn::rays-stat $rays]
+
+    Model config 3
+    set rays [starbase2ray Start $rays]
+    Model trace $rays {} $wave
+
+    #puts stderr ""
+    #puts [format "%7.3f %7.3f %7.3f %7.3f %7.3f %d" {*}[acorn::rays-stat $ray3]]
+    #puts [format "%7.3f %7.3f %7.3f %7.3f %7.3f %d" {*}[acorn::rays-stat $rays]]
+    lappend acorn {*}[acorn::rays-stat $rays]
+
 } -cleanup { Model destroy
     	     rename $rays {}
-} -result {}
+} -result $zemax
 

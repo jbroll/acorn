@@ -73,10 +73,11 @@ oo::class create ::acorn::ZMX {
     superclass ::acorn::BaseModel
 
     variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs 	\
-	pup mce mce_current												\
+	pup mce mce_current											\
 	Id Name Notes Temp Pres											\
 	params comment nonseqid nonseq nsoexit									\
-	debug
+	debug													\
+	wavelength
 
     accessor grouptype current surfaces default debug
 
@@ -116,6 +117,13 @@ oo::class create ::acorn::ZMX {
 	}
 	if { $n > 15 } {
 	    my [$current $surf get name] set z[expr $n-15] $value
+	}
+    }
+
+    method wavelength { op args } { 
+	switch $op {
+	    set { dict set  wavelength {*}$args }
+	    get { dict get $wavelength {*}$args }
 	}
     }
 
@@ -396,11 +404,20 @@ oo::class create ::acorn::ZMX {
     method VDSZ { args } {}
     method VDXN { args } {}
     method VDYN { args } {}
-    method WAVL { args } {}
-    method WAVM { args } {}
-    method WAVN { args } {}
-    method WWGT { args } {}
-    method WWGN { args } {}
+
+    method WAVL { wave }          { dict set wavelength current $wave }
+    method WAVM { n wave weight } {
+				    dict set wavelength wave    $wave
+				    dict set wavelength weight  $weight
+    }
+    method WWGT { weight } {	    dict set wavelength weight  $weight }
+    method WAVN { args } {
+	foreach wave   $args {	    dict set wavelength wave    $wave }
+    }
+    method WWGN { args } {
+	foreach weight $args {      dict set wavelength weight  $weight }
+    }
+
     method XDAT { args } {}
     method XFLD { args } {}
     method XFLN { args } {}

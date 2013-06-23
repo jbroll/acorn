@@ -56,6 +56,8 @@ inline Vector3d AcornSimpleSurfaceNormal(Ray &r, double R, double K)
 
 inline void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
 {
+    double Dsign = r.k(Z)/fabs(r.k(Z));
+
     if      ( n == -1 ) {			// Reflect
 					    	// http://http.developer.nvidia.com/Cg/reflect.html
 	//printf("nhat %f %f %f\n", n0, r.k(X), r.k(Y), r.k(Z));
