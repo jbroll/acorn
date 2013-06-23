@@ -407,15 +407,15 @@ oo::class create ::acorn::ZMX {
 
     method WAVL { wave }          { dict set wavelength current $wave }
     method WAVM { n wave weight } {
-				    dict set wavelength wave    $wave
-				    dict set wavelength weight  $weight
+				    dict set wavelength $n wave    $wave
+				    dict set wavelength $n weight  $weight
     }
     method WWGT { weight } {	    dict set wavelength weight  $weight }
     method WAVN { args } {
-	foreach wave   $args {	    dict set wavelength wave    $wave }
+	foreach wave   $args {	    dict set wavelength [incr n] wave    $wave }
     }
     method WWGN { args } {
-	foreach weight $args {      dict set wavelength weight  $weight }
+	foreach weight $args {      dict set wavelength [incr n] weight  $weight }
     }
 
     method XDAT { args } {}
