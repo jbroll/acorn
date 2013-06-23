@@ -13,14 +13,15 @@ set err 0.0001
 set Data test/GMT-1-AcOWFS-3.zmx.data
 
 starbase_read Start $Data/start.rays
-set rays {}
+set rays rays
 
 acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
 
-    set rays [starbase2ray Start $rays]
+    acorn::mkrays rays nx 300 x0 -12700 x1 12700 ny 300 y0 -12700 y1 12700
     Model trace $rays
 
     set n 1
+    rename rays {}
 
 
 set mirrors { P S } 
@@ -31,7 +32,7 @@ foreach mirror $mirrors {
     foreach surf $surfs {
 	foreach e $errors {
 
-		set rays [starbase2ray Start $rays]
+		acorn::mkrays rays nx 300 x0 -12700 x1 12700 ny 300 y0 -12700 y1 12700
 
 		Model $mirror$surf set $e $err
 		Model trace $rays -1 5000 4
@@ -39,6 +40,8 @@ foreach mirror $mirrors {
 		Model $mirror$surf set $e 0.0
 
 		incr n
+
+		rename rays {}
 	}
     }
 }
