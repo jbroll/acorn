@@ -3,7 +3,7 @@ set MatchTol 0.000001
 
 
 try {
-    [package present tcltest] 
+    package present tcltest
 
     ::tcltest::customMatch tol TolMatch
     proc TolMatch { a b } {

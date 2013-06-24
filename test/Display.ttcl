@@ -2,9 +2,9 @@
 #
 lappend auto_path /home/john/lib /Users/john/lib ./lib ../lib arec/lib tripack/lib
 
-
 package require acorn
 package require tripack
+
 
 source util/3d.tcl
 source util/ngon.tcl
