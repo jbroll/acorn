@@ -284,14 +284,17 @@ oo::class create ::acorn::ZMX {
      }
      method ELAP { w h  } {
      	$current $surf set aper_type eliptical 
-     	$current $surf set aper_max  [expr $w/2.0] 
-     	$current $surf set aper_min  [expr $h/2.0] 
+	my [$current $surf get name] set aper_max  [expr $w/2.0] 
+	my [$current $surf get name] set aper_min  [expr $h/2.0] 
      }
      method CLAP { n rad args  } {
-	    $current $surf set aper_type circular 
-	    my [$current $surf get name] set aper_max  $rad 
+	$current $surf set aper_type circular 
+	my [$current $surf get name] set aper_max  $rad 
      }
-     method FLAP { n rad args  } {}
+     method FLAP { n rad args  } {
+     	$current $surf set aper_type circular 
+	my [$current $surf get name] set aper_max  $rad 
+     }
      method OBDC { x y  } { # aperture decenter }
 
      method GLAS { name args } {

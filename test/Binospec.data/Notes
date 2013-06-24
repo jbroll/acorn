@@ -1,0 +1,8 @@
+
+# iconv -f UTF-16 < raytrace.txt -t UTF-8 | overwrite raytrace.txt 
+#< raytrace.txt fldtotable -skip 22 surf x y z l m n > raytrace.rays
+
+#test/binospec0.ttcl | plottable size 8 8 x,y marker circle xaxis min -.0005 max .0005 yaxis min -.0005 max .0005
+
+
+
