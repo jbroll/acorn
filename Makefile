@@ -27,22 +27,23 @@ ACORN_OBJS = $(SURFS)
 ACORN_UTIL = surfaces/acorn-utils.h
 
 
-all: zernike acorn.$(OS)
+all: acorn.$(OS)
 
 acorn.Darwin :
 	@$(MAKE) ARCH=Darwin.i386	BITS=-m32	acorn.Darwin.i386 
 	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	acorn.Darwin.x86_64 
+	@$(MAKE) ARCH=Darwin.i386	BITS=-m32	nproc.Darwin.i386 
+	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	nproc.Darwin.x86_64 
 	@$(MAKE) ARCH=Darwin.i386	BITS=-m32	arec.Darwin.i386 
 	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	arec.Darwin.x86_64 
 	#@$(MAKE) test.Darwin
 
 acorn.Linux  :
 	@$(MAKE) ARCH=Linux.x86_64	acorn.Linux.x86_64
+	@$(MAKE) ARCH=Linux.x86_64	nproc.Linux.x86_64
 	@$(MAKE) ARCH=Linux.x86_64	arec.Linux.x86_64
 	#@$(MAKE) ARCH=Linux.x86_64	test.Linux
 
-zernike/zernike.c :
-	cd zernike; $(MAKE)
 
 acorn.Darwin.i386   : lib/acorn/macosx-ix86/acorn.dylib		arec.Darwin.i386	$(ACORN_OBJS)
 acorn.Darwin.x86_64 : lib/acorn/macosx-x86_64/acorn.dylib	arec.Darwin.x86_64	$(ACORN_OBJS)
@@ -58,6 +59,22 @@ lib/acorn/macosx-x86_64/acorn.dylib :	$(ACORN_SRCS)
 
 lib/acorn/linux-x86_64/acorn.so :	$(ACORN_SRCS)
 	ARCH=$(ARCH) critcl -pkg acorn 
+
+
+nproc.Darwin.i386   : lib/nproc/macosx-ix86/nproc.dylib	
+nproc.Darwin.x86_64 : lib/nproc/macosx-x86_64/nproc.dylib
+nproc.Linux.x86_64  : lib/nproc/linux-x86_64/nproc.so
+
+lib/nproc/macosx-ix86/nproc.dylib   :	nproc.tcl
+	ARCH=Darwin.i386 critcl -target macosx-x86_32 -pkg nproc 
+	rm -rf lib/nproc/macosx-ix86
+	mv lib/nproc/macosx-x86_32 lib/nproc/macosx-ix86
+
+lib/nproc/macosx-x86_64/nproc.dylib :	nproc.tcl
+	ARCH=Darwin.x86_64 critcl -target macosx-x86_64 -pkg nproc 
+
+lib/nproc/linux-x86_64/nproc.so :	nproc.tcl
+	ARCH=$(ARCH) critcl -pkg nproc 
 
 
 
