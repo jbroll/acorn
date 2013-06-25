@@ -84,9 +84,9 @@ oo::class create ::acorn::ZMX {
     constructor { type args } {
 	next
 
-	set apertures {}
-	set pup    {}
-	set mce(1) {}
+	set objects {}
+	set pup     {}
+	set mce(1)  {}
 
 	set debug 0
 

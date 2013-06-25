@@ -2,8 +2,8 @@
 #
 lappend auto_path ./lib ../lib arec/lib
 
-package require acorn
 package require tcltest
+package require acorn
 
 source util/starbase.tcl
 source util/starbase-acorn.tcl
@@ -46,23 +46,22 @@ foreach mirror { S P } {
 	    ::tcltest::test GMT-1-rays-$mirror$surf-$e { GMT-0 raytrace } -match tol -body {
 
 		acorn::ZMX create Model source $Data/GMT-1.zmx
-		after 10000
 
-		#set rays [starbase2ray Start $rays]
+		set rays [starbase2ray Start $rays]
 
-		#Model $mirror$surf set $e $err
+		Model $mirror$surf set $e $err
 
-		#Model trace $rays -1 5000 4
+		Model trace $rays -1 5000 4
 
-		#acorn::prays $rays > $Data/$mirror$surf-$e.acorn
+		acorn::prays $rays > $Data/$mirror$surf-$e.acorn
 
-		#lassign [starbase_raycompare $rays $Data/$mirror$surf-$e.rays 0] sumx sumy sumz count bigs
+		lassign [starbase_raycompare $rays $Data/$mirror$surf-$e.rays 0] sumx sumy sumz count bigs
 
-		#Model $mirror$surf set $e 0.0
+		Model $mirror$surf set $e 0.0
 
 		#puts "[incr i] $mirror $surf $e [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
-		#list [expr { sqrt($sumx) }]	[expr { sqrt($sumy) }]	; # [expr { sqrt($sumz) }]
-		list 0 0 
+		list [expr { sqrt($sumx) }]	[expr { sqrt($sumy) }]	; # [expr { sqrt($sumz) }]
+		#list 0 0 
 	    } -cleanup { Model destroy
 			 rename $rays {}
 			 set     rays {}

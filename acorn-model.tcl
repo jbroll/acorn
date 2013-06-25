@@ -243,8 +243,8 @@ oo::class create ::acorn::Model {
 
 	$current $i set {*}[mappair $parmap [dict merge $surfdefs($type,pdef) $default [join $args] [list name $name]]]
 
-	lappend objects [set aper [::acorn::Aperture [$current $i get aper_type] [$current $i get aper_param]]]
-	$current $surf set aperture [$aper polygon]
+	lappend objects {*}[set aper [::acorn::Aperture [$current $i get aper_type] [$current $i get aper_param]]]
+	if { $aper ne {} } { $current $i set aperture [$aper polygon] }
 
 	$current $i set glass_ptr [glass-lookup [$current $i get glass]]
 
