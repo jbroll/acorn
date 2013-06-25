@@ -1,7 +1,6 @@
 # Zemax ZMX file.
 #
 # 
-
 namespace eval acorn {
 
     array set ZMXSurfaceMap {
@@ -74,6 +73,7 @@ oo::class create ::acorn::ZMX {
 
     variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs 	\
 	pup mce mce_current											\
+	objects													\
 	Id Name Notes Temp Pres											\
 	params comment nonseqid nonseq nsoexit									\
 	debug													\
@@ -84,8 +84,9 @@ oo::class create ::acorn::ZMX {
     constructor { type args } {
 	next
 
-	set pup    {}
-	set mce(1) {}
+	set objects {}
+	set pup     {}
+	set mce(1)  {}
 
 	set debug 0
 
@@ -344,7 +345,9 @@ oo::class create ::acorn::ZMX {
 
 	$current $surf set aper_type  UDA
 	$current $surf set aper_param [string map { {"} {} } $aperture]
-	$current $surf set aperture [::acorn::Aperture [$current $surf get aper_type] [$current $surf get aper_param]]
+
+	lappend objects [set aper [::acorn::Aperture [$current $surf get aper_type] [$current $surf get aper_param]]]
+	$current $surf set aperture [$aper polygon]
      }
      method NSCS { args } {}
      method NSOD { n value a b c d e f } {

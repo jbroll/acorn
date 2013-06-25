@@ -39,7 +39,7 @@
 
 
 oo::class create ::acorn::BaseModel {
-    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce 
+    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce objects
     accessor surfaces basepar
 
     constructor {} {
@@ -64,6 +64,10 @@ oo::class create ::acorn::BaseModel {
 	foreach { type surf } $surfaces {
 	    rename $surf {}
 	}
+	foreach object $objects { 
+	    $object destroy
+	}
+
     }
     method surfset1 { obj surf parmap cmd args } {
 	switch $cmd {
@@ -179,7 +183,7 @@ oo::class create ::acorn::BaseModel {
 oo::class create ::acorn::Model {
     superclass ::acorn::BaseModel
 
-    variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs
+    variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs objects
     accessor grouptype current surfaces default basepar
 
     constructor { args } {
@@ -238,7 +242,9 @@ oo::class create ::acorn::Model {
 	if { ![info exists surfdefs($type,pmap)] } { set surfdefs($type,pmap) $parmap }
 
 	$current $i set {*}[mappair $parmap [dict merge $surfdefs($type,pdef) $default [join $args] [list name $name]]]
-	$current $i set aperture  [::acorn::Aperture [$current $i get aper_type] [$current $i get aper_param]]
+
+	lappend objects {*}[set aper [::acorn::Aperture [$current $i get aper_type] [$current $i get aper_param]]]
+	if { $aper ne {} } { $current $i set aperture [$aper polygon] }
 
 	$current $i set glass_ptr [glass-lookup [$current $i get glass]]
 
