@@ -93,6 +93,11 @@ oo::class create ::acorn::BaseModel {
 	if { $xray ne 0 } { set xray [$xray getptr] }
 
 	::acorn::SurfaceList create slist 0
+	::acorn::ModelData   create mdata 1
+
+	mdata 0 set z 0
+	mdata 0 set n 1
+	mdata 0 set w $wave
 
 	set i 0
 
@@ -130,7 +135,7 @@ oo::class create ::acorn::BaseModel {
 	    incr i
 	}
 
-	acorn::trace_rays 0 1 [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] $thread $xray
+	acorn::trace_rays [mdata getptr] [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] $thread $xray
 
 	rename slist {}
     }

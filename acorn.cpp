@@ -23,8 +23,9 @@ extern "C" {
 	}
     }
 
-    void trace_rays0(double z, double n, SurfaceList *surflist, int nsurfs, Ray *R, int nray, int rsize, char *xray)
+    void trace_rays0(MData *m, SurfaceList *surflist, int nsurfs, Ray *R, int nray, int rsize, char *xray)
     {
+
 	int *traversed = new int[nray];
 	Ray *ray;
 
@@ -51,11 +52,11 @@ extern "C" {
 
 		txforward   = 
 			    Affine3d::Identity()
-			    * Translation3d(0.0, 0.0,  z)
+			    * Translation3d(0.0, 0.0,  m->z)
 				* AngleAxisd(d2r( surf[i].p[Px_rz]), Vector3d(0.0, 0.0, -1.0))
 				* AngleAxisd(d2r(-surf[i].p[Px_ry]), Vector3d(0.0, 1.0,  0.0))
 				* AngleAxisd(d2r(-surf[i].p[Px_rx]), Vector3d(1.0, 0.0,  0.0))
-			    * Translation3d(0.0, 0.0, -z)
+			    * Translation3d(0.0, 0.0, -m->z)
 			    * Translation3d(-surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz])
 			;
 
@@ -97,7 +98,7 @@ extern "C" {
 
 
 		    //printf("traverse %f %f\n", n, z);
-		    ray->vignetted = surf[i].traverse(n, z, &surf[i], ray);
+		    ray->vignetted = surf[i].traverse(m, &surf[i], ray);
 
 		    if ( ray->vignetted || (!ray->vignetted && aper_clip(&surf[i], ray)) ) {
 		        ray->vignetted = i ? i : -1;
@@ -138,8 +139,8 @@ extern "C" {
 		}
 
 		if ( !once ) {
-		    n  = surf[i].p[Px_n] > 0.0 ? surf[i].p[Px_n] : n;
-		    z += surf[i].p[Px_thickness];
+		    m->n  = surf[i].p[Px_n] > 0.0 ? surf[i].p[Px_n] : m->n;
+		    m->z += surf[i].p[Px_thickness];
 		}
 	    }
 			//printf("Done ");
@@ -149,16 +150,18 @@ extern "C" {
 		for ( j = 0, ray = R; j < nray; j++, ray = (Ray *) (((char *) ray) + rsize) ) {	// Rays that have not traversed are vignetted.
 		    ray->vignetted = !traversed[j];
 		}
-		n  = surf[0].p[Px_n] > 0.0 ? surf[0].p[Px_n] : n;
-		z += surf[0].p[Px_thickness];
+		m->n  = surf[0].p[Px_n] > 0.0 ? surf[0].p[Px_n] : m->n;
+		m->z += surf[0].p[Px_thickness];
 	    }
 	}
 	delete [] traversed;
     }
 
     typedef struct _TraceWork {
+	MData		 m;
 	double		 z;
 	double		 n;
+	double		 w;
 	SurfaceList 	*surflist;
 	int		 nsurfs;
 	Ray 		*ray;
@@ -170,18 +173,17 @@ extern "C" {
     } TraceWork;
 
     void trace_rays_worker(TraceWork *work) {
-	 trace_rays0(work->z, work->n, work->surflist, work->nsurfs, work->ray, work->nray, work->rsize, work->xray);
+	 trace_rays0(&work->m, work->surflist, work->nsurfs, work->ray, work->nray, work->rsize, work->xray);
     }
-    void trace_rays_thread(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, void *tp, int nthread, char *xray)
+    void trace_rays_thread(MData *m, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, void *tp, int nthread, char *xray)
     {
 	TraceWork data[64];
 
 	if ( nthread == 0 ) {
-	    trace_rays0(z, n, surflist, nsurfs, ray, nray, rsize, xray);
+	    trace_rays0(m, surflist, nsurfs, ray, nray, rsize, xray);
 	} else {
 	    for ( int i = 0; i < nthread; i++ ) {
-		data[i].z        = z;
-		data[i].n        = n;
+		data[i].m        = *m;
 		data[i].surflist = surflist;
 		data[i].nsurfs   = nsurfs;
 		data[i].ray      = (Ray *)((char *) ray + (nray/nthread)*i*rsize);
@@ -205,12 +207,12 @@ extern "C" {
 
     TPool *tp = NULL;
 
-    void trace_rays(double z, double n, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, int nthread, char *xray) {
+    void trace_rays(MData *m, SurfaceList *surflist, int nsurfs, Ray *ray, int nray, int rsize, int nthread, char *xray) {
 	if ( tp == NULL ) {
-	    tp = TPoolInit(64);
+	    tp = TPoolInit(128);
 	}
 
-    	trace_rays_thread(z, n, surflist, nsurfs, ray, nray, rsize, tp, nthread, xray);
+    	trace_rays_thread(m, surflist, nsurfs, ray, nray, rsize, tp, nthread, xray);
     }
 }
 

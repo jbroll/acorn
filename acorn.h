@@ -26,7 +26,7 @@
 #define ACORN_PARAMETERS	1
 #define ACORN_STRINGS		2
 
-typedef int (*TraceFunc)(double z, double n, struct _Surface *s, struct _Ray *r);
+typedef int (*TraceFunc)(struct _MData *m, struct _Surface *s, struct _Ray *r);
 typedef int (*InfosFunc)(int info, char **str, double **val);
 
 enum PX_Param {
@@ -74,6 +74,12 @@ typedef struct _Ray {
     Vector3d	k;
     int		vignetted;
 } Ray;
+
+typedef struct _MData {
+    double n;
+    double z;
+    double w;
+} MData;
 
 void aper_init(Surface *s, Affine3d transform);
 int  aper_clip(Surface *s, Ray *r);

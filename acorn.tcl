@@ -40,7 +40,7 @@ namespace eval acorn {
 
 	    void prays(void *r, int n);
 
-	    void trace_rays(double z, double n, void *surflist, int nsurfs, void *ray, int nray, int rsize, int nthread, char *xray);
+	    void trace_rays(void *mdata, void *surflist, int nsurfs, void *ray, int nray, int rsize, int nthread, char *xray);
 
 	    typedef int  (*InfosFunc)(int info, char ***str, double **val);
 	    double glass_indx(void *glass, double wave);
@@ -69,6 +69,10 @@ namespace eval acorn {
 	    if { ![set ::acorn::SurfaceInfos([file rootname [file tail $type]]) [acorn::getsymbol $type info]] } {
 		error "Cannot load traverse from $type"
 	    }
+	}
+
+	arec::typedef ::acorn::ModelData {
+	    double	z, n, w;
 	}
 
 	arec::typedef ::acorn::Rays {
@@ -144,8 +148,8 @@ namespace eval acorn {
 
 	return TCL_OK;
     }
-    critcl::cproc trace_rays { double z double n long s int nsurf long r int nray int rsize int nthread long xray } void {
-                  trace_rays(z, n, (void *) s, nsurf, (void *) r, nray, rsize, nthread, (char *) xray); 
+    critcl::cproc trace_rays { long m long s int nsurf long r int nray int rsize int nthread long xray } void {
+                  trace_rays((void *) m, (void *) s, nsurf, (void *) r, nray, rsize, nthread, (char *) xray); 
     }
     critcl::cproc glass_indx { long glass double wave } double {
                   return glass_indx((void*)glass, wave); 

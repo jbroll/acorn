@@ -48,8 +48,11 @@ extern "C" {
 	return 0;
     }
 
-  int traverse(double n0, double z, Surface &s, Ray &r)
+  int traverse(MData *m, Surface &s, Ray &r)
   {
+	double n0 = m->n;
+	double  z = m->z;
+
     double d;
 
     double R = s.p[Pm_R];
