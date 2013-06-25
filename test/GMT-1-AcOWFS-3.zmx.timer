@@ -15,13 +15,15 @@ set Data test/GMT-1-AcOWFS-3.zmx.data
 
 set rays rays
 
-acorn::mkrays rays nx $siz x0 -12700 x1 12700 ny $siz y0 -12700 y1 12700
-
-set bytes [rays getbytes]
 
 acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
 
     acorn::mkrays start nx 300 x0 -12700 x1 12700 ny 300 y0 -12700 y1 12700
+    set bytes [start getbytes]
+
+    acorn::Rays create rays [start length]
+    #rays setbytes $bytes
+    arec::copy rays start
 
     Model trace $rays {} 5000 64
 
@@ -37,7 +39,8 @@ foreach mirror $mirrors {
     foreach surf $surfs {
 	foreach e $errors {
 
-		rays setbytes $bytes
+		#rays setbytes $bytes
+		arec::copy rays start
 
 		Model $mirror$surf set $e $err
 		Model trace $rays {} 5000 32
