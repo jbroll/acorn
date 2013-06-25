@@ -2,21 +2,40 @@
 #
 lappend auto_path ./lib arec/lib
 
-#source tcloo.tcl
-#source unix.tcl
-
-#source acorn-model.tcl
-
+package require tcltest
 package require acorn
+
+source util/rays.tcl
+
 
 acorn::ZMX create B source zmx-models/p8_110912af_072512ac.zmx
 
-acorn::mkrays rays nx 200 x0 -12700 x1 12700 ny 200 y0 -12700 y1 12700
-B trace rays
+puts [B config]
+puts [B 70 get thickness]
+
+set wavelength [expr [B wavelength get 1 wave]*10000]
+
+acorn::mkrays rays nx 50 x0 -128 x1 128 ny 50 y0 -128 y1 128
+
+#acorn::Rays create rays  1
+#rays set py 128 kz 1
+
+#acorn::Rays create trak 70
 
 
-#B print
+#puts [rays get]
+#puts [rays length]
+
+B trace rays {} $wavelength 1 ; #trak
+
+
+
+puts [acorn::rays-rms rays 1]
+
+B print
 
 acorn::prays rays
+#acorn::prays trak
+
 
 

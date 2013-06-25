@@ -1,7 +1,6 @@
 # Zemax ZMX file.
 #
 # 
-
 namespace eval acorn {
 
     array set ZMXSurfaceMap {
@@ -73,18 +72,21 @@ oo::class create ::acorn::ZMX {
     superclass ::acorn::BaseModel
 
     variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs 	\
-	pup mce mce_current												\
+	pup mce mce_current											\
+	objects													\
 	Id Name Notes Temp Pres											\
 	params comment nonseqid nonseq nsoexit									\
-	debug
+	debug													\
+	wavelength
 
     accessor grouptype current surfaces default debug
 
     constructor { type args } {
 	next
 
-	set pup    {}
-	set mce(1) {}
+	set objects {}
+	set pup     {}
+	set mce(1)  {}
 
 	set debug 0
 
@@ -116,6 +118,13 @@ oo::class create ::acorn::ZMX {
 	}
 	if { $n > 15 } {
 	    my [$current $surf get name] set z[expr $n-15] $value
+	}
+    }
+
+    method wavelength { op args } { 
+	switch $op {
+	    set { dict set  wavelength {*}$args }
+	    get { dict get $wavelength {*}$args }
 	}
     }
 
@@ -275,14 +284,17 @@ oo::class create ::acorn::ZMX {
      }
      method ELAP { w h  } {
      	$current $surf set aper_type eliptical 
-     	$current $surf set aper_max  [expr $w/2.0] 
-     	$current $surf set aper_min  [expr $h/2.0] 
+	my [$current $surf get name] set aper_max  [expr $w/2.0] 
+	my [$current $surf get name] set aper_min  [expr $h/2.0] 
      }
      method CLAP { n rad args  } {
-	    $current $surf set aper_type circular 
-	    my [$current $surf get name] set aper_max  $rad 
+	$current $surf set aper_type circular 
+	my [$current $surf get name] set aper_max  $rad 
      }
-     method FLAP { n rad args  } {}
+     method FLAP { n rad args  } {
+     	$current $surf set aper_type circular 
+	my [$current $surf get name] set aper_max  $rad 
+     }
      method OBDC { x y  } { # aperture decenter }
 
      method GLAS { name args } {
@@ -333,7 +345,9 @@ oo::class create ::acorn::ZMX {
 
 	$current $surf set aper_type  UDA
 	$current $surf set aper_param [string map { {"} {} } $aperture]
-	$current $surf set aperture [::acorn::Aperture [$current $surf get aper_type] [$current $surf get aper_param]]
+
+	lappend objects [set aper [::acorn::Aperture [$current $surf get aper_type] [$current $surf get aper_param]]]
+	$current $surf set aperture [$aper polygon]
      }
      method NSCS { args } {}
      method NSOD { n value a b c d e f } {
@@ -396,11 +410,20 @@ oo::class create ::acorn::ZMX {
     method VDSZ { args } {}
     method VDXN { args } {}
     method VDYN { args } {}
-    method WAVL { args } {}
-    method WAVM { args } {}
-    method WAVN { args } {}
-    method WWGT { args } {}
-    method WWGN { args } {}
+
+    method WAVL { wave }          { dict set wavelength current $wave }
+    method WAVM { n wave weight } {
+				    dict set wavelength $n wave    $wave
+				    dict set wavelength $n weight  $weight
+    }
+    method WWGT { weight } {	    dict set wavelength weight  $weight }
+    method WAVN { args } {
+	foreach wave   $args {	    dict set wavelength [incr n] wave    $wave }
+    }
+    method WWGN { args } {
+	foreach weight $args {      dict set wavelength [incr n] weight  $weight }
+    }
+
     method XDAT { args } {}
     method XFLD { args } {}
     method XFLN { args } {}
@@ -434,7 +457,7 @@ oo::class create ::acorn::ZMX {
     method xIGNR { surf value args }         { my $surf set enable [expr !int($value)] }
     method xPRAM { surf value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
     method xTHIC { surf value args }         { my $surf set thickness                                      $value }
-    method xXFIE { surf value args } { }
-    method xWAVE { surf value args } { }
+    method xXFIE { surf value args } { 	# X field value }
+    method xWAVE { surf value args } {  # Wavelength }
 }
 

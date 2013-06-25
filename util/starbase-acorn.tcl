@@ -24,22 +24,31 @@ proc starbase_raycompare { rays file zoff { big 10000 } } {
     set sumz 0
     set count 0
 
+    set px 0
+    set py 0
+    set pz 0
+
     starbase_foreachrow ARay -colvars row {
+	$rays [expr $row-1] get vignetted
+
+	    continue
+
 	if { !$v && ![$rays [expr $row-1] get vignetted] } {
-	    lassign [$rays [expr $row-1] get px py pz] px py pz
+
+	   # lassign [$rays [expr $row-1] get px py pz] px py pz
 
 	    if { abs($x - $px) > $big || abs($y - $py) > $big } { 
-		lappend bigs $row [expr { $x - $px }] [expr { $y - $py }]
+	#	lappend bigs $row [expr { $x - $px }] [expr { $y - $py }]
 		continue
 	    }
 
-	    set pz [expr { $pz-$zoff }]
+	#    set pz [expr { $pz-$zoff }]
 
-	    set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
-	    set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
-	    set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
+	#    set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]
+	#    set sumy [expr { $sumy + ($y - $py)*($y - $py) } ]
+	#    set sumz [expr { $sumz + ($z - $pz)*($z - $pz) } ]
 
-	    incr count
+	#    incr count
 	}
 	
 

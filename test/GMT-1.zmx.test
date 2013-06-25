@@ -2,8 +2,8 @@
 #
 lappend auto_path ./lib ../lib arec/lib
 
-package require acorn
 package require tcltest
+package require acorn
 
 source util/starbase.tcl
 source util/starbase-acorn.tcl
@@ -18,7 +18,7 @@ set rays {}
 #exit
 
 
-::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -body {
+::tcltest::test GMT-1-rays-image { GMT-1 raytrace } -match tol -body {
     acorn::ZMX create Model source $Data/GMT-1.zmx
 
     set rays [starbase2ray Start $rays]
@@ -43,13 +43,14 @@ set err 0.0001
 foreach mirror { S P } {
     foreach surf { 7 1 2 3 4 5 6 } {
 	foreach e { x y rx ry z2 z3 z4 z5 z6 z7 z8 z9 z10 } {
-	    ::tcltest::test GMT-1-rays-$mirror$surf-$e { GMT-0 raytrace } -body {
+	    ::tcltest::test GMT-1-rays-$mirror$surf-$e { GMT-0 raytrace } -match tol -body {
 
 		acorn::ZMX create Model source $Data/GMT-1.zmx
 
 		set rays [starbase2ray Start $rays]
 
 		Model $mirror$surf set $e $err
+
 		Model trace $rays -1 5000 4
 
 		acorn::prays $rays > $Data/$mirror$surf-$e.acorn
@@ -60,6 +61,7 @@ foreach mirror { S P } {
 
 		#puts "[incr i] $mirror $surf $e [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
 		list [expr { sqrt($sumx) }]	[expr { sqrt($sumy) }]	; # [expr { sqrt($sumz) }]
+		#list 0 0 
 	    } -cleanup { Model destroy
 			 rename $rays {}
 			 set     rays {}

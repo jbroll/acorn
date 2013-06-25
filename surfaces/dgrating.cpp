@@ -49,16 +49,10 @@ extern "C" {
 	double K = s.p[Pm_K];
 	double n = s.p[Px_n];
 
-	// Intersect
-	//
-	// establish sign flippy dealies
-	//
-	double Ksign = 1.0;
-	double Dsign = r.k(Z)/fabs(r.k(Z));
-	double Rsign = R/fabs(R);
-
 	Vector3d nhat;
 
+	// Intersect
+	//
 	d = AcornSimpleSurfaceDistance(r, z, R, K);
 
 	// Ray/Surface Intersection position
