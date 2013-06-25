@@ -28,6 +28,9 @@ using namespace Eigen;
 	    if ( !strcmp(s->aper_type, "circular") ) {
 		return r->p(X)*r->p(X)+r->p(Y)*r->p(Y) > s->p[Px_aper_max]*s->p[Px_aper_max];
 	    }
+	    if ( !strcmp(s->aper_type, "obstruction") ) {
+		return r->p(X)*r->p(X)+r->p(Y)*r->p(Y) < s->p[Px_aper_min]*s->p[Px_aper_min];
+	    }
 
 	    if ( !strcmp(s->aper_type, "annulus") )  {
 		return r->p(X)*r->p(X)+r->p(Y)*r->p(Y) > s->p[Px_aper_max]*s->p[Px_aper_max]

@@ -145,7 +145,6 @@ oo::class create ::acorn::ZMX {
     method ZVCY { args } {}
     method ZVDX { args } {}
     method ZVDY { args } {}
-    method OBSC { args } {}
     method VERS { args } {}
     method UNIT { lens_unit src_prefix src_unit anal_prefix anal_unit args }	{}
     method ENVD { temp pres args }	{ set Temp $temp; set Pres $pres }
@@ -294,6 +293,10 @@ oo::class create ::acorn::ZMX {
      method FLAP { n rad args  } {
      	$current $surf set aper_type circular 
 	my [$current $surf get name] set aper_max  $rad 
+     }
+     method OBSC { x rad args } {
+     	$current $surf set aper_type obstruction 
+	my [$current $surf get name] set aper_min  $rad 
      }
      method OBDC { x y  } { # aperture decenter }
 

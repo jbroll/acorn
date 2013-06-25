@@ -163,6 +163,7 @@ proc ::acorn::Aperture { type param } {
     #set type $type
 
     switch $type {
+	obstruction -
 	circular -
 	annulus  -
 	(null)   -
