@@ -8,46 +8,45 @@ package require acorn
 source util/starbase.tcl
 source util/starbase-acorn.tcl
 
+set siz 300
 set err 0.0001
 
 set Data test/GMT-1-AcOWFS-3.zmx.data
 
-starbase_read Start $Data/start.rays
 set rays rays
+
+acorn::mkrays rays nx $siz x0 -12700 x1 12700 ny $siz y0 -12700 y1 12700
+
+set bytes [rays getbytes]
 
 acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
 
     acorn::mkrays start nx 300 x0 -12700 x1 12700 ny 300 y0 -12700 y1 12700
-    acorn::Rays create rays [start length]
-    arec::copy rays start
 
-
-    Model trace $rays
+    Model trace $rays {} 5000 64
 
 
     set n 1
-    rename rays {}
 
 
 set mirrors { P S } 
 set surfs { 7 1 2 3 4 5 6 }
-set errors { x y rx ry z2 z3 z4 z5 z6 z7 z8 z9 z10 }
+set errors [list x y z rx ry {*}[map z [iota 4 45] { concat z$z }]]
 
 foreach mirror $mirrors {
     foreach surf $surfs {
 	foreach e $errors {
 
-		#arec::copy rays start
-		acorn::mkrays rays nx 300 x0 -12700 x1 12700 ny 300 y0 -12700 y1 12700
+		rays setbytes $bytes
 
 		Model $mirror$surf set $e $err
-		Model trace $rays -1 5000 4
+		Model trace $rays {} 5000 32
 
 		Model $mirror$surf set $e 0.0
 
 		incr n
 
-		rename rays {}
+		#puts [acorn::rays-rms rays]
 	}
     }
 }
