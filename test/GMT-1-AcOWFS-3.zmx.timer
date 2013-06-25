@@ -1,6 +1,6 @@
 #!/usr/bin/env tclkit8.6
 #
-lappend auto_path ./lib ../lib arec/lib
+lappend auto_path ./lib ../lib arec/lib /home/john/lib/tcllib-1.13/modules
 
 package require tcltest
 package require acorn

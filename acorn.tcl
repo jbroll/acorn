@@ -97,6 +97,7 @@ namespace eval acorn {
 	    long	glass_ptr
 
 	    long	enable
+	    long	annot
 	}
 	arec::typedef ::acorn::SurfaceList {
 	    long 	 surf;
