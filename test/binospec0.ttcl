@@ -10,10 +10,14 @@ source util/rays.tcl
 
 acorn::ZMX create B source zmx-models/p8_110912af_072512ac.zmx
 
-puts [B config]
+puts [B config 1]
 puts [B 70 get thickness]
 
 set wavelength [expr [B wavelength get 1 wave]*10000]
+
+set w1 [B wavelength get 1 wave]
+set w2 [B wavelength get 2 wave]
+set w3 [B wavelength get 3 wave]
 
 acorn::mkrays rays nx 50 x0 -128 x1 128 ny 50 y0 -128 y1 128 circle 1
 
@@ -26,7 +30,7 @@ acorn::mkrays rays nx 50 x0 -128 x1 128 ny 50 y0 -128 y1 128 circle 1
 #puts [rays get]
 #puts [rays length]
 
-B trace rays {} $wavelength 1 ; #trak
+B trace rays {} [expr $w3*10000] 1 ; #trak
 
 
 

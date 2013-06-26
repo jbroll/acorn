@@ -159,9 +159,6 @@ extern "C" {
 
     typedef struct _TraceWork {
 	MData		 m;
-	double		 z;
-	double		 n;
-	double		 w;
 	SurfaceList 	*surflist;
 	int		 nsurfs;
 	Ray 		*ray;

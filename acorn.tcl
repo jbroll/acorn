@@ -72,7 +72,7 @@ namespace eval acorn {
 	}
 
 	arec::typedef ::acorn::ModelData {
-	    double	z, n, w;
+	    double	n, z, w;
 	}
 
 	arec::typedef ::acorn::Rays {
