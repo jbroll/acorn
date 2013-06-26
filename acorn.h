@@ -60,7 +60,7 @@ typedef struct _Surface {
     void*	glass_ptr;
 
     long	enable;
-    long	annot;
+    long	annote;
 } Surface;
 
 typedef struct _SurfaceList {

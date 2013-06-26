@@ -97,6 +97,12 @@ extern "C" {
     r.p(X) += cx;
     r.p(Y) += cy;
 
+    if ( s.annote ) {
+	int *here = (int *) (((char *) &r) + s.annote);
+
+	here[0] = cx;
+	here[1] = cy;
+    }
 
     return 0;
   }
