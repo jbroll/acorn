@@ -76,7 +76,7 @@ extern "C" {
 	d = (z - r.p(Z))/r.k(Z);
     } else {					// http://www-physics.ucsd.edu/~tmurphy/astr597/exercises/raytrace-3d.pdf
 
-	if ( LensCenter(s.p[Pm_nx], s.p[Pm_nx], s.p[Pm_width], r.p(X), r.p(Y), &cx, &cy) ) { return 1; }
+	if ( LensCenter((int) s.p[Pm_nx], (int) s.p[Pm_nx], s.p[Pm_width], r.p(X), r.p(Y), &cx, &cy) ) { return 1; }
 
 	//printf("Center %f %f	: %f %f\n", r.p(X), r.p(Y), cx, cy);
 	r.p(X) -= cx;
@@ -98,7 +98,7 @@ extern "C" {
     r.p(Y) += cy;
 
     if ( s.annote ) {
-	int *here = (int *) (((char *) &r) + s.annote);
+	double *here = (double *) (((char *) &r) + s.annote);
 
 	here[0] = cx;
 	here[1] = cy;
