@@ -3,7 +3,6 @@
 lappend auto_path /home/john/lib /Users/john/lib ./lib ../lib tripack/lib
 
 
-source tcloo.tcl
 source ngon.tcl
 source display-common.tcl
 source 3d.tcl

@@ -142,6 +142,11 @@ oo::class create ::acorn::BaseModel {
 
     method trace1 { surface rays { z 0 } } {
 	::acorn::SurfaceList create slist 0
+	::acorn::ModelData   create mdata 1
+
+	mdata set n 1
+	mdata set z $z
+	mdata set w 5000
 
 	foreach { type surf } $surfaces {			# Find the surface to trace
 	    foreach j [iota 0 [$surf length]-1] {
@@ -152,14 +157,14 @@ oo::class create ::acorn::BaseModel {
 
 	set aper [lindex [lindex [$surf $j get aperture] 0] 0]
 
-	if { $aper ne {} } {
+	if { $aper ne {} && $aper ne "(null)" } {
 	    $surf $j set aper_data [$aper getptr]
 	    $surf $j set aper_leng [$aper length]
 	}
 	slist 0 set surf [expr { [$surf getptr]+[acorn::Surfs size]*$j }] nsurf 1 type 0
 
 
-	acorn::trace_rays $z 1 [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] 0
+	acorn::trace_rays [mdata getptr] [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] 0 0
     }
 
     method print { { pipe {} } { out stdout } } {

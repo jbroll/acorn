@@ -15,18 +15,23 @@ extern "C" {
 
   static const char  *MyParamsNames[] = { "R", "K", "nx", "ny", "width", "height" };
   static const double MyParamsValue[] = { 0.0, 0.0, 10, 10, 1.0, 1.0 };
+  static const char  *MyAnnote[] = { "double cx", "double cy" };
 
-  int info(int command, char **strings, void **values) 
+  int info(int command, char ***strings, void **values) 
   {
     switch ( command ) {
 	case ACORN_PARAMETERS: {
 
-	    *strings = (char *)   MyParamsNames;
+	    *strings = (char **)   MyParamsNames;
 	    *values  = (double *) MyParamsValue;
 
 	    return sizeof(MyParamsNames)/sizeof(char *);
         }
 	case ACORN_STRINGS: { return 0; }
+        case ACORN_ANNOTE:  {
+	    *strings = (char **) MyAnnote;
+	    return 1; 
+	}
     }
     return 0;
   }
@@ -98,7 +103,7 @@ extern "C" {
     r.p(Y) += cy;
 
     if ( s.annote ) {
-	int *here = (int *) (((char *) &r) + s.annote);
+	double *here = (double *) (((char *) &r) + s.annote);
 
 	here[0] = cx;
 	here[1] = cy;

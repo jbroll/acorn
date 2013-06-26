@@ -110,9 +110,13 @@ proc display { m } {
 	foreach j [iota 0 [$surf length]-1] {
 	    set name [$surf $j get name]
 
+		puts  [$m $name get aper_type]
+
 	    switch [$m $name get aper_type] {
 	     UDA -
 	     circular {
+		 puts [surface-polygon $m $name $z]
+
 		catch { .win create polygon [surface-polygon $m $name $z] -color $color   -style outline }
 	     }
 	    }
@@ -164,7 +168,7 @@ proc acorn-tree { m } {
 
 GMT print
 display GMT
-acorn-tree GMT
+#acorn-tree GMT
 
 .win transform -camera {} "lookat all"
 

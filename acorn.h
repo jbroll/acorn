@@ -25,6 +25,7 @@
 
 #define ACORN_PARAMETERS	1
 #define ACORN_STRINGS		2
+#define ACORN_ANNOTE		3
 
 typedef int (*TraceFunc)(struct _MData *m, struct _Surface *s, struct _Ray *r);
 typedef int (*InfosFunc)(int info, char **str, double **val);
