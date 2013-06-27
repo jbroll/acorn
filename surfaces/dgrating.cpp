@@ -85,13 +85,13 @@ extern "C" {
 	double uy = r.k(Y) + nn * (dpdy);
 	double uz = r.k(Z);
 
-	rad = nx*ux + ny*uy + nz*uz;
-	rad = 1.0 - (ux*ux + uy*uy + uz*uz) + rad*rad;
+	rad = nx*ux + ny*uy + nz*uz;				// rad = nhat.dot(U);
+	rad = 1.0 - (ux*ux + uy*uy + uz*uz) + rad*rad;		// rad = 1.0 - U.dot(U) + rad*rad;
 
 	if ( rad <= 0.0 ) { rad = 0.0; 
 	} else 		  { rad = sqrt(rad); }
 
-	r.k(X) = ux - (nx*ux + ny*uy + nz*uz)*nx + nx * rad;
+	r.k(X) = ux - (nx*ux + ny*uy + nz*uz)*nx + nx * rad;	// r.k = U - nhat.dot(U) + nhat * rad;
 	r.k(Y) = uy - (nx*ux + ny*uy + nz*uz)*ny + ny * rad;
 	r.k(Z) = uz - (nx*ux + ny*uy + nz*uz)*nz + nz * rad;
 #endif
