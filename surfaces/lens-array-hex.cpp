@@ -15,6 +15,7 @@ extern "C" {
 
   static const char  *MyParamsNames[] = { "R", "K", "nx", "ny", "width", "height" };
   static const double MyParamsValue[] = { 0.0, 0.0, 10, 10, 1.0, 1.0 };
+  static const char  *MyAnnote[] = { "double cx", "double cy" };
 
   int info(int command, char **strings, void **values) 
   {
@@ -27,6 +28,10 @@ extern "C" {
 	    return sizeof(MyParamsNames)/sizeof(char *);
         }
 	case ACORN_STRINGS: { return 0; }
+        case ACORN_ANNOTE:  {
+	    *strings = (char **) MyAnnote;
+	    return 1; 
+	}
     }
     return 0;
   }
@@ -113,6 +118,13 @@ extern "C" {
     r.p(Y) += cy;
 
     AcornRefract(r, nhat, n0, n);		// Reflect or Refract
+
+    if ( s.annote ) {
+	double *here = (double *) (((char *) &r) + s.annote);
+
+	here[0] = cx;
+	here[1] = cy;
+    }
 
     return 0;
   }
