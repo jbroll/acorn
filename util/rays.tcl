@@ -2,11 +2,12 @@
 proc acorn::mkrays { name args } {
     if { $name eq "-" } { set name rays[incr ::acorn::RAYS] }
     set pz 0
+    set args [dict merge { type acorn::Rays circle 0 nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - } $args]
 
-    if { [info commands $name] eq {} } { acorn::Rays create $name 0 }
 
-    set args [dict merge { circle 0 nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - } $args]
     dict with args {
+	if { [info commands $name] eq {} } { $type create $name 0 }
+
 	if { [info exists box] } {
 	    set x0 [expr -$box]
 	    set x1 [expr  $box]

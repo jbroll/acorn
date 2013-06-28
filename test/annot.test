@@ -1,0 +1,29 @@
+#!/usr/bin/env tclsh8.6
+#
+lappend auto_path lib
+
+package require tcltest
+package require acorn
+
+source util/rays.tcl
+
+source test/GMT-1-AcOWFS-3.aco
+
+arec::typedef ARays {
+    inline acorn::Rays
+    double cx
+    double cy
+}
+
+acorn::mkrays rays type ARays nx 10 x0 -12700 x1 12700 ny 10 y0 -12700 y1 12700
+
+puts "cx off [ARays offsets cx]"
+
+GMT SH set annot [ARays offsets cx]
+puts "Annote [GMT SH get annot]"
+
+GMT trace rays
+
+puts [rays-map rays { !$vignetted } { vignetted cx cy }]
+
+
