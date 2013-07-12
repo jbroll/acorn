@@ -15,6 +15,22 @@ arec::typedef ARays {
     double cy
 }
 
+arec::typedef Center {
+    double cx
+    double cy
+}
+
+arec::typedef Spots {
+    char*  name
+    Center center 400
+}
+
+
+
+Spots create spots 400
+
+puts [spots getdict]
+
 acorn::mkrays rays type ARays nx 10 x0 -12700 x1 12700 ny 10 y0 -12700 y1 12700
 
 puts "cx off [ARays offsets cx]"
@@ -24,6 +40,8 @@ puts "Annote [GMT SH get annot]"
 
 GMT trace rays
 
-puts [rays-map rays { !$vignetted } { vignetted cx cy }]
+acorn::rays-wfs-bin [rays getptr] [rays type size] [ARays offsets cx]
+
+#puts [rays-select rays { !$vignetted } { vignetted cx cy }]
 
 
