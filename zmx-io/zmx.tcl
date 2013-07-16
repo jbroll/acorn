@@ -451,7 +451,7 @@ oo::class create ::acorn::ZMX {
     #
     method MNUM { n { curr 1 } } { set mce_current $curr }					; # Multi Configure Number of configs
 
-    method WAVE { surf config args } { append mce($config) "my xWAVE $surf $args\n" }	; # Set Wavelength
+    method WAVE { wave config args } { append mce($config) "my xWAVE $wave $args\n" }	; # Set Wavelength
     method IGNR { surf config args } { append mce($config) "my xIGNR $surf $args\n" }	; # Ignore surface
     method PRAM { surf config args } { append mce($config) "my xPRAM $surf $args\n" }	; # Set Parameter
     method XFIE { surf config args } { append mce($config) "my xXFIE $surf $args\n" }
@@ -461,6 +461,6 @@ oo::class create ::acorn::ZMX {
     method xPRAM { surf value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
     method xTHIC { surf value args }         { my $surf set thickness                                      $value }
     method xXFIE { surf value args } { 	# X field value }
-    method xWAVE { surf value args } {  # Wavelength }
+    method xWAVE { wave value args } {  dict set wavelength $wave wave $value }
 }
 

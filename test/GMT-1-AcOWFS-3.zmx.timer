@@ -25,7 +25,7 @@ acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
     #rays setbytes $bytes
     arec::copy rays start
 
-    Model trace $rays {} 5000 64
+    Model trace $rays {} 5000 16
 
 
     set n 1
@@ -43,7 +43,7 @@ foreach mirror $mirrors {
 		arec::copy rays start
 
 		Model $mirror$surf set $e $err
-		Model trace $rays {} 5000 32
+		Model trace $rays {} 5000 16
 
 		Model $mirror$surf set $e 0.0
 

@@ -19,6 +19,10 @@ set w1 [B wavelength get 1 wave]
 set w2 [B wavelength get 2 wave]
 set w3 [B wavelength get 3 wave]
 
+set w $w1
+
+puts stderr "wave : $w"
+
 acorn::mkrays rays nx 50 x0 -128 x1 128 ny 50 y0 -128 y1 128 circle 1
 
 #acorn::Rays create rays  1
@@ -30,7 +34,7 @@ acorn::mkrays rays nx 50 x0 -128 x1 128 ny 50 y0 -128 y1 128 circle 1
 #puts [rays get]
 #puts [rays length]
 
-B trace rays {} [expr $w3*10000] 1 ; #trak
+B trace rays {} [expr $w*10000] 1 ; #trak
 
 
 
