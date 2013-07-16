@@ -106,7 +106,7 @@ proc rays-foreach { rays body } {
     uplevel 1 $cmd
 }
 
-proc rays-map { rays expr { cols {} } } {
+proc rays-select { rays expr { cols {} } } {
     if { $cols eq "" } {
 	set cols [$rays type names]
     }

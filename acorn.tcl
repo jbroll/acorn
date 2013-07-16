@@ -23,7 +23,11 @@ critcl::csources acorn.cpp aperture.cpp glass/acorn-glass.cpp glass/glass.c tpoo
 critcl::clibraries -lstdc++
 
 
-source util/tcloo.tcl
+try { 			set ::Surfaces $env(ACORN_SURFACES)
+} on error message { 	set ::Surfaces surfaces }
+
+try { 			set ::GlassDir $env(ACORN_GLASS)
+} on error message { 	set ::GlassDir glass }
 
 namespace eval acorn {
     variable SurfaceTypes
@@ -62,7 +66,7 @@ namespace eval acorn {
 	set ::acorn::SurfaceTypes(coordbrk)	-1
 	set ::acorn::SurfaceInfos(coordbrk)	-1
 
-	foreach type [glob ./surfaces/lib/[arch]/*.so] {
+	foreach type [glob $::Surfaces/lib/[arch]/*.so] {
 	    if { ![set ::acorn::SurfaceTypes([file rootname [file tail $type]]) [acorn::getsymbol $type traverse]] } {
 		error "Cannot load traverse from $type"
 	    }
@@ -113,7 +117,7 @@ namespace eval acorn {
 	if { [acorn::SurfSize] != [::acorn::Surfs size] } { error "acorn size mismatch Surfs [acorn::SurfSize] != [::acorn::Surfs size]" }
 	if { [acorn::GlasSize] != [::acorn::Glass size] } { error "acorn size mismatch Glass [acorn::GlasSize] != [::acorn::Glass size]" }
 
-	glass-loader glass
+	glass-loader $::GlassDir
     }
 
     critcl::cproc RaysSize {} int { return RaysSize(); }

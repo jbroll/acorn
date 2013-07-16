@@ -21,7 +21,7 @@ source util/rays.tcl
 
     #acorn::prays rays
 
-    rays-map rays { !$vignetted } _i
+    rays-select rays { !$vignetted } _i
 
 } -cleanup { Flat destroy
     	     rename rays {}

@@ -84,9 +84,10 @@ oo::class create ::acorn::ZMX {
     constructor { type args } {
 	next
 
-	set objects {}
-	set pup     {}
-	set mce(1)  {}
+	set objects     {}
+	set pup         {}
+	set mce(1)      {}
+	set mce_current 1
 
 	set debug 0
 
@@ -97,6 +98,7 @@ oo::class create ::acorn::ZMX {
 	switch $type {
 	    source { eval [string map { $ \\$ ; \\; [ \\[ } [cat [lindex $args 0]]] }
 	    string { eval {*}$args }
+	    default { error "Unknown constructor type : $type" }
 	}
 
 	if { [$current length] } {
@@ -189,6 +191,7 @@ oo::class create ::acorn::ZMX {
      }
 
      method Process-Type { type comm args } {
+
 	if { $type eq "USERSURF" } {
 	    set args [lassign $args type]
 	}
