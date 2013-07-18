@@ -1,0 +1,10 @@
+<html>
+<h3>Acorn</h3>
+
+<ul> [: file [glob -tails -directory models *.zmx] { <li> <a href="model?$file"> $file </a> }] </ul>
+
+<pre>
+[jquery]
+</pre>
+
+</html>

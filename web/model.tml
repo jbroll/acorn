@@ -1,0 +1,11 @@
+<html>
+  [jquery]
+  [jqgrid]
+
+<head>
+</head>
+<h3>Acorn Model : [lindex [dict get $state request query] 0]</h3>
+
+  [zmx-table [lindex [dict get $state request query] 0]]
+
+</html>

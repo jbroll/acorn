@@ -1,0 +1,36 @@
+
+uplevel #0 {
+
+    source template.tcl
+}
+
+
+= jquery {} {
+    	<script type="text/css" src="/files/css/smoothness/jquery-ui-1.10.3.custom.min.css"></script>
+    	<script type="text/javascript" src="/files/js/jquery-1.9.0.min.js"></script>
+}
+= jqgrid {} {
+    	<script type="text/css" src="/files/css/ui.jqgrid.css"></script>
+
+    	<script type="text/javascript" src="/files/js/i18n/grid.locale-en.js"></script>
+    	<script type="text/javascript" src="/files/js/jquery.jqGrid.min.js"></script>
+}
+
+
+= zmx-table { model } {
+    [try { ::acorn::ZMX create model source models/$model } on error message {}]
+
+    [model foreach-surface surf {
+	append x \t $surf \n
+    }]
+
+
+     <pre>
+$x
+    </pre>
+
+    [model destroy]
+}
+
+
+
