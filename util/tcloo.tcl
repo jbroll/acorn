@@ -35,6 +35,7 @@ proc oo::define::private { method name args body } {
 	oo::define $currentclass [subst { method $name { $args } { $body }; unexport $name }]
 }
 
+
 #proc oo::define::public  { method name args body } {
 #        uplevel 1 [list method $name $args $body]
 #	uplevel 1 [list   export $name]
@@ -61,6 +62,9 @@ proc procs args {
 	proc [uplevel 1 { namespace current }]::$proc args [subst { tailcall my $proc {*}\$args }]
     }
 }
+
+
+
     #oo::class create X {
     #    constructor {} {
     #	procs a b c 
