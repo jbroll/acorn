@@ -9,9 +9,9 @@ INC= -I/Users/john/include -I/home/john/include
 CFLAGS=$(INC) -msse -fPIC -O2 $(BITS)
 
 SRC	= acorn.cpp aperture.cpp glass/glass.c glass/acorn-glass.cpp tpool/tpool.c
-TCL	= acorn.tcl acorn-model.tcl			\
-	  zmx-io/uda.tcl zmx-io/agf.tcl zmx-io/zmx.tcl	\
-	  util/unix.tcl  util/func.tcl  util/tcloo.tcl	\
+TCL	= acorn.tcl acorn-model.tcl				\
+	  zmx-io/uda.tcl zmx-io/agf.tcl zmx-io/zmx.tcl		\
+	  jbr.tcl/unix.tcl  jbr.tcl/func.tcl  jbr.tcl/tcloo.tcl	\
 	  tcltest.tcl
 
 
@@ -51,8 +51,6 @@ acorn.Linux.x86_64  : lib/acorn/linux-x86_64/acorn.so		arec.Linux.x86_64	$(ACORN
 
 lib/acorn/macosx-ix86/acorn.dylib   :	$(ACORN_SRCS)
 	ARCH=Darwin.i386 critcl -target macosx-x86_32 -pkg acorn 
-	rm -rf lib/acorn/macosx-ix86
-	mv lib/acorn/macosx-x86_32 lib/acorn/macosx-ix86
 
 lib/acorn/macosx-x86_64/acorn.dylib :	$(ACORN_SRCS)
 	ARCH=Darwin.x86_64 critcl -target macosx-x86_64 -pkg acorn 
@@ -67,8 +65,6 @@ nproc.Linux.x86_64  : lib/nproc/linux-x86_64/nproc.so
 
 lib/nproc/macosx-ix86/nproc.dylib   :	nproc.tcl
 	ARCH=Darwin.i386 critcl -target macosx-x86_32 -pkg nproc 
-	rm -rf lib/nproc/macosx-ix86
-	mv lib/nproc/macosx-x86_32 lib/nproc/macosx-ix86
 
 lib/nproc/macosx-x86_64/nproc.dylib :	nproc.tcl
 	ARCH=Darwin.x86_64 critcl -target macosx-x86_64 -pkg nproc 
@@ -136,6 +132,7 @@ clean :
 	$(MAKE) ARCH=Darwin.x86_64	clean-rm
 	$(MAKE) ARCH=Linux.i386		clean-rm
 	$(MAKE) ARCH=Linux.x86_64	clean-rm
+	cd zernike ; $(MAKE) clean
 
 
 clean.Darwin.i386: ARCH = Darwin.i368

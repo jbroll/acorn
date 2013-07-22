@@ -1,3 +1,6 @@
 [submodule "arec"]
 	path = arec
 	url = git@hopper.si.edu:arec
+[submodule "jbr.tcl"]
+	path = jbr.tcl
+	url = git@hopper.si.edu:jbr.tcl

@@ -5,7 +5,8 @@ lappend auto_path ./lib ../lib arec/lib /home/john/lib/tcllib-1.13/modules
 package require tcltest
 package require acorn
 
-source util/starbase.tcl
+source jbr.tcl/starbase.tcl
+
 source util/starbase-acorn.tcl
 
 set siz 300

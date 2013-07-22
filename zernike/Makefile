@@ -1,9 +1,9 @@
 
 OS  =$(shell uname)
 
-#FC=gfortran-mp-4.7
+FC=gfortran-mp-4.7
 #FC=gfortran44
-FC=gfortran-4.6
+#FC=gfortran-4.6
 CFLAGS= -msse -fPIC -O3 $(BITS)
 
 ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
@@ -68,5 +68,11 @@ test: ztest_c ztest_f
 	rm -f gmon.out ; time ./ztest_f #; gprof ztest_f > ztest_f.gmon
 
 
-clean:
-	rm *.o *.a
+clean : 
+	$(MAKE) ARCH=Darwin.i386	clean-rm
+	$(MAKE) ARCH=Darwin.x86_64	clean-rm
+	$(MAKE) ARCH=Linux.i386		clean-rm
+	$(MAKE) ARCH=Linux.x86_64	clean-rm
+
+clean-rm :
+	rm -f lib/$(ARCH)/*.o lib/$(ARCH)/*.a
