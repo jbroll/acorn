@@ -4,9 +4,9 @@ OS  =$(shell uname)
 FC=gfortran-mp-4.7
 #FC=gfortran44
 #FC=gfortran-4.6
-CFLAGS= -msse -fPIC -O3 $(BITS)
+CFLAGS= -msse -fPIC -O3 $(BITS) 
 
-ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
+ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernikx.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
 
 
 zernike.Darwin : 
@@ -45,12 +45,20 @@ lib/$(ARCH)/zernike.o : zernike.c
 
 
 
-ztest_f: ztest.c zernik_std.c zernik.o
+ztest_f: ztest.c lib/$(ARCH)/zernik_std.c lib/$(ARCH)/zernik.o
 	cc -DZERNIKE_STD=zernikf_std $(CFLAGS) -o ztest_f ztest.c zernik_std.c zernik.o
+
+ztest_x: ztest.c zernik_std.c zernik.o
+	cc -DZERNIKE_STD=zernikf_std $(CFLAGS) -o ztest_f ztest.c zernik_std.c zernik.o
+
 
 lib/$(ARCH)/zernik.o : zernik.f
 	@mkdir -p lib/$(ARCH)
 	$(FC) $(CFLAGS) -c zernik.f -o lib/$(ARCH)/zernik.o
+
+lib/$(ARCH)/zernikx.o : zernikx.c
+	@mkdir -p lib/$(ARCH)
+	cc $(CFLAGS) -c zernikx.c -o lib/$(ARCH)/zernikx.o
 
 lib/$(ARCH)/annulr.o : annulr.f
 	@mkdir -p lib/$(ARCH)
@@ -60,8 +68,11 @@ lib/$(ARCH)/zernik_std.o : zernik_std.c
 	@mkdir -p lib/$(ARCH)
 	cc $(CFLAGS) -c zernik_std.c -o lib/$(ARCH)/zernik_std.o
 
-zcmp : zcmp.c zernik_std.c zernik.o zernike.o
-	cc $(CFLAGS) -o zcmp zcmp.c zernike.o zernik_std.c zernik.o -lm
+
+
+
+zcmp : zcmp.c lib/$(ARCH)/zernike.a
+	cc $(CFLAGS) -o zcmp zcmp.c lib/$(ARCH)/zernike.a -lm
 	
 test: ztest_c ztest_f
 	rm -f gmon.out ; time ./ztest_c #; gprof ztest_c > ztest_c.gmon

@@ -11,14 +11,13 @@ source util/starbase-acorn.tcl
 
 set siz 300
 set err 0.0001
-set thread 16
 
 set Data test/GMT-1-AcOWFS-3.zmx.data
 
 set rays rays
 
 
-acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
+source $Data/GMT-1-AcOWFS-3.aco
 
     acorn::mkrays start nx 300 x0 -12700 x1 12700 ny 300 y0 -12700 y1 12700
     set bytes [start getbytes]
@@ -27,7 +26,7 @@ acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
     #rays setbytes $bytes
     arec::copy rays start
 
-    Model trace $rays {} 5000 $thread
+#    Model trace $rays {} 5000 16
 
 
     set n 1
@@ -48,7 +47,7 @@ foreach mirror $mirrors {
 		arec::copy rays start
 
 		Model $mirror$surf set $e $newval
-		Model trace $rays {} 5000 $thread
+		Model trace $rays {} 5000 16
 		Model $mirror$surf set $e $oldval
 
 		incr n
