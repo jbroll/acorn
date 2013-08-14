@@ -5,10 +5,9 @@ lappend auto_path ./lib ../lib arec/lib
 package require acorn
 package require tcltest
 
-source util/starbase.tcl
+source jbr.tcl/starbase.tcl
+
 source util/starbase-acorn.tcl
-
-
 source util/rays.tcl
 
     set Data test/EvenASphere.data

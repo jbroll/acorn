@@ -128,7 +128,7 @@ inline int AcornSimpleIterativeIntersect(Surface &s, Ray &r, double z, Vector3d 
 
 	    r.p += dist * r.k;					// Move along the ray the distance to the normal surface.
 	} else {
-	    return 1;						// BANG!
+	    return 1;						// BANG! - ray passes wo/intersect?
 	}
     }
     if ( i >= ACORN_ITER ) { return 1; }

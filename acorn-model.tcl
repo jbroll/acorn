@@ -188,6 +188,20 @@ oo::class create ::acorn::BaseModel {
 
 	if { $pipe eq ">" } { close $out }
     }
+
+    method foreach-surface { value script } {
+	set i 0
+
+	foreach { type surf } $surfaces {
+	    #slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
+
+	    foreach j [iota 0 [$surf length]-1] {
+		uplevel [list set $value [$surf $j get name]]
+		uplevel $script
+	    }
+	    incr i
+	}
+    }
 }
 
 oo::class create ::acorn::Model {
@@ -295,19 +309,6 @@ oo::class create ::acorn::Model {
     }
     method surface-group-non-sequential { name args } { tailcall surface-group $name grouptype non-sequential {*}$args }
 
-    method foreach-surface { value script } {
-	set i 0
-
-	foreach { type surf } $surfaces {
-	    #slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
-
-	    foreach j [iota 0 [$surf length]-1] {
-		uplevel [list set $value [$surf $j get name]]
-		uplevel $script
-	    }
-	    incr i
-	}
-    }
 }
 
 proc acorn::model { args } { tailcall acorn::Model create {*}$args }

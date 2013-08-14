@@ -5,26 +5,26 @@ acorn::model ::GMT {
     surface 3 { thickness -10000.0 aper_type circular aper_max 12724.0 R -36000.0 }
     surface 5 { type coordbrk comment SkyRotation }
         surface-group-non-sequential X {
-		surface 6-1 { type zernike comment P7 n -1.0 z 10000.0 thickness -8000.0 aper_type circular aper_max 4182.5 R -36000.0 K -0.9982857 nradius 4182.5 nterms 48.0 }
+#		surface 6-1 { type zernike comment P7 n -1.0 z 10000.0 thickness -8000.0 aper_type circular aper_max 4182.5 R -36000.0 K -0.9982857 nradius 4182.5 nterms 48.0 }
 		surface 6-2 { type zernike comment P1 n -1.0 z 10000.0 rz 90.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
-		surface 6-3 { type zernike comment P2 n -1.0 z 10000.0 rz 150.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
-		surface 6-4 { type zernike comment P3 n -1.0 z 10000.0 rz 210.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
-		surface 6-5 { type zernike comment P4 n -1.0 z 10000.0 rz 270.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
-		surface 6-6 { type zernike comment P5 n -1.0 z 10000.0 rz 330.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
-		surface 6-7 { type zernike comment P6 n -1.0 z 10000.0 rz 30.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+#		surface 6-3 { type zernike comment P2 n -1.0 z 10000.0 rz 150.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+#		surface 6-4 { type zernike comment P3 n -1.0 z 10000.0 rz 210.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+#		surface 6-5 { type zernike comment P4 n -1.0 z 10000.0 rz 270.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+#		surface 6-6 { type zernike comment P5 n -1.0 z 10000.0 rz 330.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
+#		surface 6-7 { type zernike comment P6 n -1.0 z 10000.0 rz 30.0 thickness -8000.0 aper_type UDA aper_param m1aper1e.uda aper_max 4182.5 R -36000.0 K -0.9982857 xdecenter 8657.0 nradius 4182.5 nterms 48.0 }
         }
         surface 7 { thickness -0.001 }
         surface 8 { thickness 2.048916313567 }
         surface 9 { thickness -2.048916313567 }
         surface-group-non-sequential X {
-		surface 10-1 { type zernike comment S7 n -1.0 z -2262.47514 thickness 18000.0 aper_type circular aper_max 525.76 R 4163.900922 K -0.71692784 nradius 525.76 nterms 48.0 }
+#		surface 10-1 { type zernike comment S7 n -1.0 z -2262.47514 thickness 18000.0 aper_type circular aper_max 525.76 R 4163.900922 K -0.71692784 nradius 525.76 nterms 48.0 }
 		surface 10-2 { type zernike comment S1 n -1.0 z -2262.47514 rz 90.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
-		surface 10-3 { type zernike comment S2 n -1.0 z -2262.47514 rz 150.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
-		surface 10-4 { type zernike comment S3 n -1.0 z -2262.47514 rz 210.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
-		surface 10-5 { type zernike comment S4 n -1.0 z -2262.47514 rz 270.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
-		surface 10-6 { type zernike comment S5 n -1.0 z -2262.47514 rz 330.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
-		surface 10-7 { type zernike comment S6 n -1.0 z -2262.47514 rz 30.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
-		surface 10-8 { z -2262.475140933 thickness 18000.0 aper_type circular R 1700.0 K 1700.0 }
+#		surface 10-3 { type zernike comment S2 n -1.0 z -2262.47514 rz 150.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+#		surface 10-4 { type zernike comment S3 n -1.0 z -2262.47514 rz 210.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+#		surface 10-5 { type zernike comment S4 n -1.0 z -2262.47514 rz 270.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+#		surface 10-6 { type zernike comment S5 n -1.0 z -2262.47514 rz 330.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+#		surface 10-7 { type zernike comment S6 n -1.0 z -2262.47514 rz 30.0 thickness 18000.0 aper_type UDA aper_param m2aper1e.uda aper_max 525.76 R 4163.900922006 K -0.71692784 xdecenter -1081.39 nradius 525.76 nterms 48.0 }
+#		surface 10-8 { z -2262.475140933 thickness 18000.0 aper_type circular R 1700.0 K 1700.0 }
         }
         surface 11 { comment ADJ thickness 0.001 }
         surface 12 { comment {M1 VERTEX} thickness 4900.0 }

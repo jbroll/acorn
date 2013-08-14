@@ -460,10 +460,10 @@ oo::class create ::acorn::ZMX {
     method XFIE { surf config args } { append mce($config) "my xXFIE $surf $args\n" }
     method THIC { surf config args } { append mce($config) "my xTHIC $surf $args\n" }
 
-    method xIGNR { surf value args }         { my $surf set enable [expr !int($value)] }
-    method xPRAM { surf value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
-    method xTHIC { surf value args }         { my $surf set thickness                                      $value }
-    method xXFIE { surf value args } { 	# X field value }
-    method xWAVE { wave value args } {  dict set wavelength $wave wave $value }
+    private method xIGNR { surf value args }         { my $surf set enable [expr !int($value)] }
+    private method xPRAM { surf value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
+    private method xTHIC { surf value args }         { my $surf set thickness                                      $value }
+    private method xXFIE { surf value args } { 	# X field value }
+    private method xWAVE { wave value args } {  dict set wavelength $wave wave $value }
 }
 

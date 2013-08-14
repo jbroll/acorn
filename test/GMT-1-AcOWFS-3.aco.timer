@@ -1,0 +1,60 @@
+#!/usr/bin/env tclkit8.6
+#
+lappend auto_path ./lib ../lib arec/lib /home/john/lib/tcllib-1.13/modules
+
+package require tcltest
+package require acorn
+
+source jbr.tcl/starbase.tcl
+
+source util/starbase-acorn.tcl
+
+set siz 300
+set err 0.0001
+
+set Data test/GMT-1-AcOWFS-3.zmx.data
+
+set rays rays
+
+
+source $Data/GMT-1-AcOWFS-3.aco
+
+    acorn::mkrays start nx 300 x0 -12700 x1 12700 ny 300 y0 -12700 y1 12700
+    set bytes [start getbytes]
+
+    acorn::Rays create rays [start length]
+    #rays setbytes $bytes
+    arec::copy rays start
+
+#    Model trace $rays {} 5000 16
+
+
+    set n 1
+
+
+set mirrors { P S }
+set surfs { 1 2 3 4 5 6 7 }
+set errors [list x y z rx ry {*}[map z [iota 4 48] { concat z$z }]]
+
+
+foreach mirror $mirrors {
+    foreach surf $surfs {
+	foreach e $errors {
+		set oldval [Model $mirror$surf get $e]
+		set newval [expr $oldval+$err]
+
+		#rays setbytes $bytes
+		arec::copy rays start
+
+		Model $mirror$surf set $e $newval
+		Model trace $rays {} 5000 16
+		Model $mirror$surf set $e $oldval
+
+		incr n
+
+		#puts [acorn::rays-rms rays]
+	}
+    }
+}
+
+puts $n

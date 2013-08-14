@@ -5,7 +5,8 @@ lappend auto_path ./lib ../lib arec/lib
 package require tcltest
 package require acorn
 
-source util/starbase.tcl
+source jbr.tcl/starbase.tcl
+
 source util/starbase-acorn.tcl
 
 set Data test/GMT-0.zmx.data

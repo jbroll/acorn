@@ -5,7 +5,8 @@ lappend auto_path ./lib arec/lib
 package require acorn
 package require tcltest
 
-source util/starbase.tcl
+source jbr.tcl/starbase.tcl
+
 source util/starbase-acorn.tcl
 
 

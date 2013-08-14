@@ -8,7 +8,7 @@
 critcl::cflags -O3
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
-critcl::tsources util/func.tcl util/tcloo.tcl util/unix.tcl 		\
+critcl::tsources jbr.tcl/func.tcl jbr.tcl/tcloo.tcl jbr.tcl/unix.tcl	\
 		 util/rays.tcl						\
 		 zmx-io/uda.tcl zmx-io/agf.tcl				\
 		 acorn-model.tcl acorn.tcl				\
@@ -64,6 +64,7 @@ namespace eval acorn {
 	set ::acorn::SurfaceInfos(coordbrk)	-1
 
 	foreach type [glob $::Surfaces/lib/[arch]/*.so] {
+puts $type
 	    if { ![set ::acorn::SurfaceTypes([file rootname [file tail $type]]) [acorn::getsymbol $type traverse]] } {
 		error "Cannot load traverse from $type"
 	    }

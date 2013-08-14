@@ -1,19 +1,23 @@
-#!/usr/bin/env tclkit8.6
+#!/usr/bin/env tclkit
 #
 lappend auto_path ./lib ../lib arec/lib /home/john/lib/tcllib-1.13/modules
 
 package require tcltest
 package require acorn
 
-source util/starbase.tcl
+source jbr.tcl/starbase.tcl
+source jbr.tcl/unix.tcl
+
 source util/starbase-acorn.tcl
 
 set siz 300
 set err 0.0001
+set thread 16
 
 set Data test/GMT-1-AcOWFS-3.zmx.data
 
 set rays rays
+
 
 
 acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
@@ -25,29 +29,36 @@ acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
     #rays setbytes $bytes
     arec::copy rays start
 
-    Model trace $rays {} 5000 16
+    Model trace $rays {} 5000 $thread
 
 
     set n 1
 
 
-set mirrors { P S } 
-set surfs { 7 1 2 3 4 5 6 }
-set errors [list x y z rx ry {*}[map z [iota 4 45] { concat z$z }]]
+set mirrors { P S }
+set surfs { 1 2 3 4 5 6 7 }
+set errors [list x y z rx ry {*}[map z [iota 4 48] { concat z$z }]]
+
 
 foreach mirror $mirrors {
     foreach surf $surfs {
 	foreach e $errors {
+		set oldval [Model $mirror$surf get $e]
+		set newval [expr $oldval+$err]
+
+#timer A clear
+#timer A start
 
 		#rays setbytes $bytes
 		arec::copy rays start
 
-		Model $mirror$surf set $e $err
-		Model trace $rays {} 5000 16
-
-		Model $mirror$surf set $e 0.0
+		Model $mirror$surf set $e $newval
+		Model trace $rays {} 5000 $thread
+		Model $mirror$surf set $e $oldval
 
 		incr n
+
+#puts [timer A stop]
 
 		#puts [acorn::rays-rms rays]
 	}

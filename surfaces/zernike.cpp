@@ -69,7 +69,7 @@ extern "C" {
 
 	double zdz, zdx, zdy;
 
-	zernikf_std((x - xdecenter)/nradius, (y - ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zdz, &zdx, &zdy);
+	zernikz_std((x - xdecenter)/nradius, (y - ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zdz, &zdx, &zdy);
 
 	zdx /= nradius;
 	zdy /= nradius;

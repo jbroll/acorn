@@ -1,0 +1,68 @@
+#!/usr/bin/env tclkit
+#
+lappend auto_path ./lib ../lib arec/lib /home/john/lib/tcllib-1.15/modules
+
+package require Thread
+
+source jbr.tcl/func.tcl
+
+set tp [tpool::create -minworkers 0 -maxworkers 8 -initcmd {
+    lappend auto_path ./lib ../lib arec/lib /home/john/lib/tcllib-1.15/modules
+
+    package require acorn
+
+    source jbr.tcl/starbase.tcl
+    source jbr.tcl/unix.tcl
+
+    source util/starbase-acorn.tcl
+
+    set siz 300
+    set thr 0
+
+    set Data test/GMT-1-AcOWFS-3.zmx.data
+
+    acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
+
+    acorn::mkrays start nx $siz x0 -12700 x1 12700 ny $siz y0 -12700 y1 12700
+    set bytes [start getbytes]
+    set rays  [acorn::Rays create rays [start length]]
+    arec::copy rays start
+
+    proc trace { mirror surf error size } {
+	try {
+	    set oldval [Model $mirror$surf get $error]
+	    set newval [expr $oldval+$size]
+
+	    arec::copy rays start
+
+	    Model $mirror$surf set $error $newval
+	    Model trace $::rays {} 5000   $::thr
+	    Model $mirror$surf set $error $oldval
+	} on error message {
+	    puts $message
+	}
+
+	return x
+    }
+}]
+
+
+set n 1
+
+set mirrors { P S }
+set surfs { 1 2 3 4 5 6 7 }
+set errors [list x y z rx ry {*}[map z [iota 4 48] { concat z$z }]]
+
+foreach mirror $mirrors {
+    foreach surf $surfs {
+	foreach error $errors {
+
+	    lappend threads [tpool::post $tp "trace $mirror $surf $error 0.0001"]
+	}
+    }
+}
+
+foreach thread $threads {
+    puts "[tpool::wait $tp $thread] [tpool::get  $tp $thread]"
+}
+
