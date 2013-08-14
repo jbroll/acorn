@@ -6,7 +6,7 @@ package require Thread
 
 source jbr.tcl/func.tcl
 
-set tp [tpool::create -minworkers 0 -maxworkers 8 -initcmd {
+set tp [tpool::create -minworkers 0 -maxworkers 32 -initcmd {
     lappend auto_path ./lib ../lib arec/lib /home/john/lib/tcllib-1.15/modules
 
     package require acorn

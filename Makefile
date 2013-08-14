@@ -2,6 +2,8 @@
 
 
 OS  =$(shell uname)
+CC=gcc44
+CPP=g++44
 
 
 INC= -I/Users/john/include -I/home/john/include
@@ -76,35 +78,35 @@ lib/nproc/linux-x86_64/nproc.so :	nproc.tcl
 
 surfaces/lib/$(ARCH)/simple.so : surfaces/simple.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	g++ $(CFLAGS) -shared $(INC) surfaces/simple.cpp -o surfaces/lib/$(ARCH)/simple.so
+	$(CPP) $(CFLAGS) -shared $(INC) surfaces/simple.cpp -o surfaces/lib/$(ARCH)/simple.so
 
 surfaces/lib/$(ARCH)/evenasph.so : surfaces/evenasph.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	g++ $(CFLAGS) -shared $(INC) surfaces/evenasph.cpp -o surfaces/lib/$(ARCH)/evenasph.so
+	$(CPP) $(CFLAGS) -shared $(INC) surfaces/evenasph.cpp -o surfaces/lib/$(ARCH)/evenasph.so
 
 surfaces/lib/$(ARCH)/dgrating.so : surfaces/dgrating.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	g++ $(CFLAGS) -shared $(INC) surfaces/dgrating.cpp -o surfaces/lib/$(ARCH)/dgrating.so
+	$(CPP) $(CFLAGS) -shared $(INC) surfaces/dgrating.cpp -o surfaces/lib/$(ARCH)/dgrating.so
 
 surfaces/lib/$(ARCH)/zernike.so : surfaces/zernike.cpp acorn.h zernike/lib/$(ARCH)/zernike.a $(ACORN_UTIL)
 	@mkdir -p zernike/lib/$(ARCH)
-	g++ $(CFLAGS) -shared $(INC) surfaces/zernike.cpp zernike/lib/$(ARCH)/zernike.a -o surfaces/lib/$(ARCH)/zernike.so
+	$(CPP) $(CFLAGS) -shared $(INC) surfaces/zernike.cpp zernike/lib/$(ARCH)/zernike.a -o surfaces/lib/$(ARCH)/zernike.so
 	
 surfaces/lib/$(ARCH)/lens-array-rect.so : surfaces/lens-array-rect.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	g++ $(CFLAGS) -shared $(INC) surfaces/lens-array-rect.cpp -o surfaces/lib/$(ARCH)/lens-array-rect.so
+	$(CPP) $(CFLAGS) -shared $(INC) surfaces/lens-array-rect.cpp -o surfaces/lib/$(ARCH)/lens-array-rect.so
 	
 surfaces/lib/$(ARCH)/lens-array-hex.so : surfaces/lens-array-hex.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	g++ $(CFLAGS) -shared $(INC) surfaces/lens-array-hex.cpp -o surfaces/lib/$(ARCH)/lens-array-hex.so
+	$(CPP) $(CFLAGS) -shared $(INC) surfaces/lens-array-hex.cpp -o surfaces/lib/$(ARCH)/lens-array-hex.so
 
 tpool/lib/$(ARCH)/tpool.o : tpool/tpool.c
 	@mkdir -p tpool/lib/$(ARCH)
-	cc $(CFLAGS) -c $(INC) tpool/tpool.c -o tpool/lib/$(ARCH)/tpool.o
+	$(CC) $(CFLAGS) -c $(INC) tpool/tpool.c -o tpool/lib/$(ARCH)/tpool.o
 
 glass/lib/$(ARCH)/glass.o : glass/glass.c
 	@mkdir -p glass/lib/$(ARCH)
-	cc $(CFLAGS) -c $(INC) glass/glass.c -o glass/lib/$(ARCH)/glass.o
+	$(CC) $(CFLAGS) -c $(INC) glass/glass.c -o glass/lib/$(ARCH)/glass.o
 
 zernike/lib/$(ARCH)/zernike.a : FORCE
 	cd zernike; $(MAKE) ARCH=$(ARCH) lib/$(ARCH)/zernike.a

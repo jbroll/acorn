@@ -36,7 +36,7 @@ extern "C" {
     void EvenASpSag(Surface &s, double x, double y, double *dz, double *dx, double *dy)
     {
 	int    i;
-	int    nterms = max(s.p[Pm_nterms], 8.0);
+	int    nterms = (int) max(s.p[Pm_nterms], 8.0);
 
 	double adz = 0.0;
 	double adx = 0.0;
@@ -73,7 +73,7 @@ extern "C" {
 
     Vector3d nhat;
 
-    int      nterms = s.p[Pm_nterms];
+    int      nterms = (int) s.p[Pm_nterms];
 
     if ( nterms ) {
 	if ( AcornSimpleIterativeIntersect(s, r, z, nhat, EvenASpSag) ) { return 1; }
