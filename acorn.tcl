@@ -1,14 +1,11 @@
 #!/Users/john/bin/tclkit8.6
 #
-if { 0 && ![critcl::compiled] } {		# Force md5 to be FAST.  Don't use object cache.
-    proc md5 { x } {
-	    return [expr rand()]
-    }
-}
 
 ::critcl::tcl 8.6
 ::critcl::config language c++ 
 
+#critcl::cflags -DTCL_MEM_DEBUG=1
+critcl::cflags -O3
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
 critcl::tsources util/func.tcl util/tcloo.tcl util/unix.tcl 		\
