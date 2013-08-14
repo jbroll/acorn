@@ -72,7 +72,7 @@ C  SY : PARTIAL OF SS WRT Y
 C       WHERE M = N - 1
 C
 */
-int zernikx(int NP, double XN, double YN, double *ZERP, double *ZERX, double *ZERY)
+int zernikz_std(double XN, double YN, int NP, double *c, double *z, double *dx, double *dy)
 {
       
     //IMPLICIT DOUBLE PRECISION (A-H,O-Z)
@@ -120,10 +120,6 @@ int zernikx(int NP, double XN, double YN, double *ZERP, double *ZERX, double *ZE
 
     // Adjust pointers for FORTRAN indexing
     //
-    ZERP--;
-    ZERX--;
-    ZERY--;
-
     double *FACT  = fact - 1;
     double *SQRT  = sqrt - 1;
     double *CX = cx - 1;
@@ -171,19 +167,21 @@ int zernikx(int NP, double XN, double YN, double *ZERP, double *ZERX, double *ZE
 
     //  EVALUATE FIRST THREE POLYNOMIALS
     //
-    ZERP[1] = 1.0;
-    ZERP[2] = 2.0 * XN;
-    ZERP[3] = 2.0 * YN;
+    c--;
+
+    *z  = c[1] * 1.0;
+    *z += c[2] * 2.0 * XN;
+    *z += c[3] * 2.0 * YN;
 
     //  EVALUATE ONE HALF OF THE PARTIAL DERIVATIVES OF THE FIRST
     //  THREE POLYNOMIALS.
     //
-    ZERX[1] = 0.0;
-    ZERX[2] = 1.0;
-    ZERX[3] = 0.0;
-    ZERY[1] = 0.0;
-    ZERY[2] = 0.0;
-    ZERY[3] = 1.0;
+    *dx  = c[1] * 2.0 * 0.0;
+    *dy  = c[1] * 2.0 * 0.0;
+    *dy += c[2] * 2.0 * 0.0;
+    *dx += c[2] * 2.0 * 1.0;
+    *dx += c[3] * 2.0 * 0.0;
+    *dy += c[3] * 2.0 * 1.0;
 
     IP = 3;
     MS = 2;
@@ -233,32 +231,33 @@ int zernikx(int NP, double XN, double YN, double *ZERP, double *ZERX, double *ZE
 
 		//  USE COSINE TERM
 		//
-		ZERP[IP] = SUM * CS[M];
-		ZERX[IP] = DUX * CS[M] + SUM * CX[M];
-		ZERY[IP] = DUY * CS[M] + SUM * CY[M];
+		*z  += c[IP] * SUM * CS[M];
+		*dx += c[IP] * 2.0 * ( DUX * CS[M] + SUM * CX[M] );
+		*dy += c[IP] * 2.0 * ( DUY * CS[M] + SUM * CY[M] );
 	    } else {
+		IP = IP + 1;
+		if ( IP > NP ) { goto done; }
+
 		SUM = SUM * SQRT[2];
 		DUX = DUX * SQRT[2];
 		DUY = DUY * SQRT[2];
 
-		IP = IP + 1;
-		if ( IP > NP ) { goto done; }
 
 		//  USE SINE TERM
 		//
-		ZERP[IP] = SUM * SS[M];
-		ZERX[IP] = DUX * SS[M] + SUM * SX[M];
-		ZERY[IP] = DUY * SS[M] + SUM * SY[M];
-
+		*z  += c[IP] * SUM * SS[M];
+		*dx += c[IP] * 2.0 * ( DUX * SS[M] + SUM * SX[M] );
+		*dy += c[IP] * 2.0 * ( DUY * SS[M] + SUM * SY[M] );
 
 		IP = IP + 1;
 		if ( IP > NP ) { goto done; }
 
+
 		//  USE COSINE TERM
 		//
-		ZERP[IP] = SUM * CS[M];
-		ZERX[IP] = DUX * CS[M] + SUM * CX[M];
-		ZERY[IP] = DUY * CS[M] + SUM * CY[M];
+		*z  += c[IP] * SUM * CS[M];
+		*dx += c[IP] * 2.0 * ( DUX * CS[M] + SUM * CX[M] );
+		*dy += c[IP] * 2.0 * ( DUY * CS[M] + SUM * CY[M] );
 	    }
         }
 
@@ -268,38 +267,3 @@ int zernikx(int NP, double XN, double YN, double *ZERP, double *ZERX, double *ZE
 
    return IER;
 }
-
-
-void zernikx_std(double x, double y, int n, double *c, double *z, double *dx, double *dy)
-{
-	double Z[325];
-	double X[325];
-	double Y[325];
-	int    err = 0;
-	int    i;
-
-	//    printf("	%.3f %.3f\n", x, y);
-
-	*z  = 0;
-	*dx = 0;
-	*dy = 0;
-
-	if ( !n ) { return; };
-
-	zernikx(n, x, y, Z, X, Y);
-
-//	for ( i = 0; i < n; i++ ) {
-//	    printf("	% 3d: %.3f %.3f %.3f\n", i+1, Z[i], X[i]*2, Y[i]*2);
-//	}
-
-
-// 	if ( err != 0 ) { printf("ier %d\n", err); }
-
-	for ( i = 0; i < n; i++ ) {
-	    *z  += Z[i]*c[i];
-	    *dx += X[i]*c[i] * 2.0;
-	    *dy += Y[i]*c[i] * 2.0;
-	    //printf("%d %f %f %f\n",i+1, c[i], *dx, *dy);
-	}
-}
-

@@ -6,7 +6,7 @@ FC=gfortran-mp-4.7
 #FC=gfortran-4.6
 CFLAGS= -msse -fPIC -O3 $(BITS) 
 
-ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernikx.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
+ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernikx.o lib/$(ARCH)/zernikz.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
 
 
 zernike.Darwin : 
@@ -59,6 +59,10 @@ lib/$(ARCH)/zernik.o : zernik.f
 lib/$(ARCH)/zernikx.o : zernikx.c
 	@mkdir -p lib/$(ARCH)
 	cc $(CFLAGS) -c zernikx.c -o lib/$(ARCH)/zernikx.o
+
+lib/$(ARCH)/zernikz.o : zernikz.c
+	@mkdir -p lib/$(ARCH)
+	cc $(CFLAGS) -c zernikz.c -o lib/$(ARCH)/zernikz.o
 
 lib/$(ARCH)/annulr.o : annulr.f
 	@mkdir -p lib/$(ARCH)

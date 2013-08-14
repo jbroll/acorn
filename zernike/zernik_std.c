@@ -23,7 +23,7 @@ void zernikf_std(double x, double y, int n, double *c, double *z, double *dx, do
 	zernik_(&n, &x, &y, Z, X, Y, &err);
 
 //	for ( i = 0; i < n; i++ ) {
-//	    printf("	% 3d: %.3f %.3f %.3f\n", i+1, Z[i], X[i]*2, Y[i]*2);
+//	    printf("	% 3d: %.3f %.3f %.3f\n", i+1, Z[i], X[i]*c[i]*2, Y[i]*c[i]*2);
 //	}
 
 
@@ -33,6 +33,7 @@ void zernikf_std(double x, double y, int n, double *c, double *z, double *dx, do
 	    *z  += Z[i]*c[i];
 	    *dx += X[i]*c[i] * 2.0;
 	    *dy += Y[i]*c[i] * 2.0;
+//	    printf("%d %f %f\n",i+1, *dx, *dy);
 	}
 }
 

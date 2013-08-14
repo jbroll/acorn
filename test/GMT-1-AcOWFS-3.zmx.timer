@@ -1,4 +1,4 @@
-#!/usr/bin/env tclkit8.6
+#!/usr/bin/env tclkit
 #
 lappend auto_path ./lib ../lib arec/lib /home/john/lib/tcllib-1.13/modules
 
@@ -6,6 +6,7 @@ package require tcltest
 package require acorn
 
 source jbr.tcl/starbase.tcl
+source jbr.tcl/unix.tcl
 
 source util/starbase-acorn.tcl
 
@@ -16,6 +17,7 @@ set thread 16
 set Data test/GMT-1-AcOWFS-3.zmx.data
 
 set rays rays
+
 
 
 acorn::ZMX create Model source $Data/GMT-1-AcOWFS-3.zmx
@@ -44,6 +46,9 @@ foreach mirror $mirrors {
 		set oldval [Model $mirror$surf get $e]
 		set newval [expr $oldval+$err]
 
+#timer A clear
+#timer A start
+
 		#rays setbytes $bytes
 		arec::copy rays start
 
@@ -52,6 +57,8 @@ foreach mirror $mirrors {
 		Model $mirror$surf set $e $oldval
 
 		incr n
+
+#puts [timer A stop]
 
 		#puts [acorn::rays-rms rays]
 	}
