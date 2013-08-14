@@ -4,6 +4,8 @@
 ::critcl::tcl 8.6
 ::critcl::config language c++ 
 
+#critcl::cflags -DTCL_MEM_DEBUG=1
+critcl::cflags -O3
 critcl::cheaders -I/Users/john/include -I/home/john/include
 
 critcl::tsources jbr.tcl/func.tcl jbr.tcl/tcloo.tcl jbr.tcl/unix.tcl	\
@@ -62,6 +64,7 @@ namespace eval acorn {
 	set ::acorn::SurfaceInfos(coordbrk)	-1
 
 	foreach type [glob $::Surfaces/lib/[arch]/*.so] {
+puts $type
 	    if { ![set ::acorn::SurfaceTypes([file rootname [file tail $type]]) [acorn::getsymbol $type traverse]] } {
 		error "Cannot load traverse from $type"
 	    }

@@ -44,4 +44,6 @@ acorn::rays-wfs-bin [rays getptr] [rays type size] [ARays offsets cx]
 
 #puts [rays-select rays { !$vignetted } { vignetted cx cy }]
 
+GMT destroy
+
 
