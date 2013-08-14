@@ -3,10 +3,6 @@ OS  =$(shell uname)
 
 CFLAGS= -msse -fPIC -O3 $(BITS) 
 
-#FC=gfortran-mp-4.7
-FC=gfortran44
-#FC=gfortran-4.6
-
 ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernikx.o lib/$(ARCH)/zernikz.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
 
 

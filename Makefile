@@ -2,8 +2,6 @@
 
 
 OS  =$(shell uname)
-CC=gcc44
-CPP=g++44
 
 
 INC= -I/Users/john/include -I/home/john/include
