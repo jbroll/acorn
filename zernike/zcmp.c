@@ -9,8 +9,8 @@ double drand48();
 
 int main() {
 	int i;
-	int n = 5;
-	double c[48];
+	int n = 45;
+	double c[50];
 
 	double x;
 	double y;

@@ -1,4 +1,4 @@
-
+iprofiler -timeprofiler -T 10000 `which tclsh8.6` test/GMT-thead.timer
 
 arec array  type
 arec struct type
