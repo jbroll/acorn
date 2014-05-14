@@ -59,22 +59,22 @@ oo::class create AGF {
 
     method NM { name formula MIL Nd Vd exclude status args } {
 	set current [$glass length]
-	$glass $current set name $name formula $formula MIL $MIL Nd $Nd Vd $Vd exclude $exclude status $status
+	$glass set $current name $name formula $formula MIL $MIL Nd $Nd Vd $Vd exclude $exclude status $status
     }
-    method GC { args } { $glass $current set comment [join $args] }
+    method GC { args } { $glass set $current comment [join $args] }
     method ED { TCE TCE100300 density dPgF ignthermal args } {
-	$glass $current set TCE $TCE TCE100300 $TCE100300 density $density dPgF $dPgF ignthermal $ignthermal
+	$glass set $current TCE $TCE TCE100300 $TCE100300 density $density dPgF $dPgF ignthermal $ignthermal
     }
     method CD { args } {
 	set i 0
-	foreach c $args { $glass $current set c$i $c; incr i }
+	foreach c $args { $glass set $current c$i $c; incr i }
     }
     method TD { D0 D1 D2 E0 E1 Ltk temp  } {
-	$glass $current set D0 $D0 D1 $D1 D2 $D2 E0 $E0 E1 $E1 Ltk $Ltk temp $temp
+	$glass set $current D0 $D0 D1 $D1 D2 $D2 E0 $E0 E1 $E1 Ltk $Ltk temp $temp
     }
     method OD { args } {}
     method LD { ymin ymax  } {
-	$glass $current set ymin $ymin ymax $ymax
+	$glass set $current ymin $ymin ymax $ymax
     }
     method IT { args } {}
 }
@@ -87,7 +87,7 @@ proc glass-loader { pathlist } {
 	foreach catalog [glob $pathlist/*.agf] {
 	    set agf [AGF create agf[incr ::AGF] source $catalog]
 
-	    GlassCats [GlassCats length] set name [file rootname $catalog] catalog $catalog glass $agf
+	    GlassCats set end+1 name [file rootname $catalog] catalog $catalog glass $agf
 	}
      }
 
@@ -99,10 +99,11 @@ proc glass-loader { pathlist } {
 
      set ::Glass(MIRROR) -1
 
-     foreach cat [GlassCats 0 end get glass] {
+     foreach cat [GlassCats get glass] {
+
          set i -1
-         foreach name [[$cat glass] 0 end get name] {
-	     set ::Glass([lindex $name 0]) [[$cat glass] [incr i] getptr]
+         foreach name [[$cat glass] get name] {
+	     set ::Glass([lindex $name 0]) [[$cat glass] getptr [incr i]]
 	 }
      }
 }
