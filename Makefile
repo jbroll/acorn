@@ -76,27 +76,27 @@ lib/nproc/linux-x86_64/nproc.so :	nproc.tcl
 
 surfaces/lib/$(ARCH)/simple.so : surfaces/simple.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	$(CPP) $(CFLAGS) -shared $(INC) surfaces/simple.cpp -o surfaces/lib/$(ARCH)/simple.so
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/simple.cpp -o surfaces/lib/$(ARCH)/simple.so
 
 surfaces/lib/$(ARCH)/evenasph.so : surfaces/evenasph.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	$(CPP) $(CFLAGS) -shared $(INC) surfaces/evenasph.cpp -o surfaces/lib/$(ARCH)/evenasph.so
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/evenasph.cpp -o surfaces/lib/$(ARCH)/evenasph.so
 
 surfaces/lib/$(ARCH)/dgrating.so : surfaces/dgrating.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	$(CPP) $(CFLAGS) -shared $(INC) surfaces/dgrating.cpp -o surfaces/lib/$(ARCH)/dgrating.so
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/dgrating.cpp -o surfaces/lib/$(ARCH)/dgrating.so
 
 surfaces/lib/$(ARCH)/zernike.so : surfaces/zernike.cpp acorn.h zernike/lib/$(ARCH)/zernike.a $(ACORN_UTIL)
 	@mkdir -p zernike/lib/$(ARCH)
-	$(CPP) $(CFLAGS) -shared $(INC) surfaces/zernike.cpp zernike/lib/$(ARCH)/zernike.a -o surfaces/lib/$(ARCH)/zernike.so
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/zernike.cpp zernike/lib/$(ARCH)/zernike.a -o surfaces/lib/$(ARCH)/zernike.so
 	
 surfaces/lib/$(ARCH)/lens-array-rect.so : surfaces/lens-array-rect.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	$(CPP) $(CFLAGS) -shared $(INC) surfaces/lens-array-rect.cpp -o surfaces/lib/$(ARCH)/lens-array-rect.so
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/lens-array-rect.cpp -o surfaces/lib/$(ARCH)/lens-array-rect.so
 	
 surfaces/lib/$(ARCH)/lens-array-hex.so : surfaces/lens-array-hex.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	$(CPP) $(CFLAGS) -shared $(INC) surfaces/lens-array-hex.cpp -o surfaces/lib/$(ARCH)/lens-array-hex.so
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/lens-array-hex.cpp -o surfaces/lib/$(ARCH)/lens-array-hex.so
 
 tpool/lib/$(ARCH)/tpool.o : tpool/tpool.c
 	@mkdir -p tpool/lib/$(ARCH)
