@@ -20,7 +20,7 @@ proc acorn::mkrays { name args } {
 	    foreach y [jot $ny $y0 $y1 $yi] {
 		if { $circle && $x*$x+$y*$y > $x0*$x0+$y0+$y0 } { continue }
 
-		$name [$name length] set px $x py $y pz $pz kx 0.0 ky 0.0 kz 1.0 vignetted 0
+		$name set end+1 px $x py $y pz $pz kx 0.0 ky 0.0 kz 1.0 vignetted 0
 		incr i
 	    }
 	}
@@ -99,7 +99,7 @@ proc acorn::rays-stat { rays { v 0 } } {
 
 proc rays-foreach { rays body } {
     set cmd [subst { foreach _i \[iota 0 [$rays length]-1] {
-	lassign \[$rays \$_i get] [$rays type names] 
+	lassign \[$rays get \$_i] [$rays type name] 
 	$body
     }}]
 

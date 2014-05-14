@@ -71,13 +71,13 @@ oo::class create ::acorn::BaseModel {
     }
     method surfset1 { obj surf parmap cmd args } {
 	switch $cmd {
-	    length  { $obj $surf $cmd }
-	    set     { $obj $surf $cmd {*}[mappair $parmap $args] }
-	    setdict { $obj $surf $cmd {*}[mappair $parmap $args] }
-	    setlist { $obj $surf $cmd {*}$args] }
-	    get     { $obj $surf $cmd {*}[maplist $parmap $args] }
-	    getdict { revpair $parmap [$obj $surf $cmd {*}[maplist $parmap $args]] }
-	    getlist { $obj $surf $cmd {*}[maplist $parmap $args] }
+	    length  { $obj $cmd $surf }
+	    set     { $obj $cmd $surf {*}[mappair $parmap $args] }
+	    setdict { $obj $cmd $surf {*}[mappair $parmap $args] }
+	    setlist { $obj $cmd $surf {*}$args] }
+	    get     { $obj $cmd $surf {*}[maplist $parmap $args] }
+	    getdict { revpair $parmap [$obj $cmd $surf {*}[maplist $parmap $args]] }
+	    getlist { $obj $cmd $surf {*}[maplist $parmap $args] }
 
 	    params { lmap { name par } $parmap { set name } }
 	    map    { return $parmap }
@@ -95,37 +95,37 @@ oo::class create ::acorn::BaseModel {
 	::acorn::SurfaceList create slist 0
 	::acorn::ModelData   create mdata 1
 
-	mdata 0 set z 0
-	mdata 0 set n 1
-	mdata 0 set w $wave
+	mdata set 0 z 0
+	mdata set 0 n 1
+	mdata set 0 w $wave
 
 	set i 0
 
 	foreach { type surf } $surfaces {
 
-	    slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
+	    slist set $i surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
 
 	    foreach j [iota 0 [$surf length]-1] {
 		if { !$ok && $start eq [$surf $j get name] } { set ok 1 }
 		if { !$ok } { continue } 
 
-		set aper [$surf $j get aperture]
+		set aper [$surf get $j aperture]
 
 		if { $aper ne {} && $aper ne "(null)" } {
-		    $surf $j set aper_data [$aper getptr]
-		    $surf $j set aper_leng [$aper length]
+		    $surf set $j aper_data [$aper getptr]
+		    $surf set $j aper_leng [$aper length]
 		}
 
-		if { [$surf $j get glass] ne {} && [$surf $j get glass] ne "(null)" } {
+		if { [$surf get $j glass] ne {} && [$surf $j get glass] ne "(null)" } {
 		    if { [$surf $j get glass_ptr] == -1 } {
-			my [$surf $j get name] set n -1
+			my [$surf get $j name] set n -1
 		    } else {
-			my [$surf $j get name] set n [acorn::glass_indx [$surf $j get glass_ptr] $wave]
+			my [$surf get $j name] set n [acorn::glass_indx [$surf get $j glass_ptr] $wave]
 		    }
 		}
 
 
-		if { $end eq [$surf $j get name] } {
+		if { $end eq [$surf get $j name] } {
 		    slist $i set nsurf [expr $j+1]
 		    break
 		}
@@ -135,6 +135,7 @@ oo::class create ::acorn::BaseModel {
 	    incr i
 	}
 
+	puts "acorn::trace_rays [mdata getptr] [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] $thread $xray"
 	acorn::trace_rays [mdata getptr] [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] $thread $xray
 
 	rename slist {}
@@ -241,12 +242,12 @@ oo::class create ::acorn::Model {
 	set params [dict merge $basedef $default [join $args]]
 	set type   [dict get   $params type]
 
-	$current $i set traverse $::acorn::SurfaceTypes($type)		; # Get the surface traverse and infos functions
-	$current $i set infos    $::acorn::SurfaceInfos($type)
+	$current set $i traverse $::acorn::SurfaceTypes($type)		; # Get the surface traverse and infos functions
+	$current set $i infos    $::acorn::SurfaceInfos($type)
 
-	if { [$current $i get infos] != -1 } {
-	    lassign [::acorn::infos 1 [$current $i get infos]] dparams dvalues
-	    lassign [::acorn::infos 2 [$current $i get infos]] sparams svalues
+	if { [$current get $i infos] != -1 } {
+	    lassign [::acorn::infos 1 [$current get $i infos]] dparams dvalues
+	    lassign [::acorn::infos 2 [$current get $i infos]] sparams svalues
 	} else {
 	    set dparams {}
 	    set dvalues {}
@@ -265,12 +266,12 @@ oo::class create ::acorn::Model {
 	set parmap [dict merge $basemap $parmap]
 	if { ![info exists surfdefs($type,pmap)] } { set surfdefs($type,pmap) $parmap }
 
-	$current $i set {*}[mappair $parmap [dict merge $surfdefs($type,pdef) $default [join $args] [list name $name]]]
+	$current set $i {*}[mappair $parmap [dict merge $surfdefs($type,pdef) $default [join $args] [list name $name]]]
 
-	lappend objects {*}[set aper [::acorn::Aperture [$current $i get aper_type] [$current $i get aper_param]]]
-	if { $aper ne {} } { $current $i set aperture [$aper polygon] }
+	lappend objects {*}[set aper [::acorn::Aperture [$current get $i aper_type] [$current get $i aper_param]]]
+	if { $aper ne {} } { $current set $i aperture [$aper polygon] }
 
-	$current $i set glass_ptr [glass-lookup [$current $i get glass]]
+	$current set $i glass_ptr [glass-lookup [$current get $i glass]]
 
 	if { $name eq "." } {
 	    set name anon[incr anonsurf]
@@ -280,9 +281,9 @@ oo::class create ::acorn::Model {
 	::oo::objdefine [self] [list forward $name [self] surfset1 $current $i $parmap]
 	::oo::objdefine [self] [list export  $name]
 
-	if { [$current $i get comment] ne {} } {
-	    ::oo::objdefine [self] [list forward [$current $i get comment] [self] surfset1 $current $i $parmap]
-	    ::oo::objdefine [self] [list export  [$current $i get comment]]
+	if { [$current get $i comment] ne {} } {
+	    ::oo::objdefine [self] [list forward [$current get $i comment] [self] surfset1 $current $i $parmap]
+	    ::oo::objdefine [self] [list export  [$current get $i comment]]
 	}
     }
     method surface-group { name args } {
