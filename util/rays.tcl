@@ -99,9 +99,11 @@ proc acorn::rays-stat { rays { v 0 } } {
 
 proc rays-foreach { rays body } {
     set cmd [subst { foreach _i \[iota 0 [$rays length]-1] {
-	lassign \[$rays get \$_i] [$rays type name] 
+	lassign \[$rays get \$_i] [$rays type names]
 	$body
     }}]
+
+    puts $cmd
 
     uplevel 1 $cmd
 }
@@ -113,7 +115,7 @@ proc rays-select { rays expr { cols {} } } {
 
     uplevel [subst {
 	set _1 {}
-	rays-foreach $rays { if { !($expr) } { continue } ; lappend _1 $[join $cols " $"] }
+	rays-foreach $rays { puts "\[$rays get \$_i] \$_i \$vignetted" ; if { !($expr) } { continue } ; lappend _1 $[join $cols " $"] }
 	return \$_1
     }]
 }

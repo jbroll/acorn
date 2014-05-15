@@ -48,7 +48,7 @@ typedef struct _Surface {
     InfosFunc   info;
 
     char*	aper_type;
-    string	aper_param;
+    char*	aper_param;
 
     char*	aperture;
     long	aper_data;

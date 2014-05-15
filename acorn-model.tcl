@@ -135,7 +135,6 @@ oo::class create ::acorn::BaseModel {
 	    incr i
 	}
 
-	puts "acorn::trace_rays [mdata getptr] [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] $thread $xray"
 	acorn::trace_rays [mdata getptr] [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] $thread $xray
 
 	rename slist {}

@@ -5,7 +5,6 @@ using namespace Eigen;
 
 #include "acorn.h"
 
-
 extern "C" {
 #include <stdio.h>
 #include "tcl.h"
