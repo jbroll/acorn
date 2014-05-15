@@ -103,8 +103,6 @@ proc rays-foreach { rays body } {
 	$body
     }}]
 
-    puts $cmd
-
     uplevel 1 $cmd
 }
 

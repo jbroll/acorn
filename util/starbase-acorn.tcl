@@ -8,7 +8,7 @@ proc starbase2ray { table { rays {} } } {
     }
 
     starbase_foreachrow T -colvars row {
-	$rays [expr $row-1] set px $x py $y pz $z kx $l ky $m kz $n
+	$rays set [expr $row-1] px $x py $y pz $z kx $l ky $m kz $n
     }
 
     set rays
@@ -29,7 +29,7 @@ proc starbase_raycompare { rays file zoff { big 10000 } } {
     set pz 0
 
     starbase_foreachrow ARay -colvars row {
-	$rays [expr $row-1] get vignetted
+	$rays get [expr $row-1] vignetted
 
 	    continue
 

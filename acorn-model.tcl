@@ -106,7 +106,7 @@ oo::class create ::acorn::BaseModel {
 	    slist set $i surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
 
 	    foreach j [iota 0 [$surf length]-1] {
-		if { !$ok && $start eq [$surf $j get name] } { set ok 1 }
+		if { !$ok && $start eq [$surf get $j name] } { set ok 1 }
 		if { !$ok } { continue } 
 
 		set aper [$surf get $j aperture]
@@ -116,8 +116,8 @@ oo::class create ::acorn::BaseModel {
 		    $surf set $j aper_leng [$aper length]
 		}
 
-		if { [$surf get $j glass] ne {} && [$surf $j get glass] ne "(null)" } {
-		    if { [$surf $j get glass_ptr] == -1 } {
+		if { [$surf get $j glass] ne {} && [$surf get $j glass] ne "(null)" } {
+		    if { [$surf get $j glass_ptr] == -1 } {
 			my [$surf get $j name] set n -1
 		    } else {
 			my [$surf get $j name] set n [acorn::glass_indx [$surf get $j glass_ptr] $wave]
@@ -126,7 +126,7 @@ oo::class create ::acorn::BaseModel {
 
 
 		if { $end eq [$surf get $j name] } {
-		    slist $i set nsurf [expr $j+1]
+		    slist set $i nsurf [expr $j+1]
 		    break
 		}
 	    }
@@ -274,7 +274,7 @@ oo::class create ::acorn::Model {
 
 	if { $name eq "." } {
 	    set name anon[incr anonsurf]
-	    $current $i set name $name
+	    $current set $i name $name
 	}
 
 	::oo::objdefine [self] [list forward $name [self] surfset1 $current $i $parmap]

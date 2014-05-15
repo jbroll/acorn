@@ -46,7 +46,7 @@ oo::class create UDA {
     method rpoly { cx cy radius n } {
 	BRK
 	foreach { x y } [rp cx cy radius n] {
-	    $polygon [$polygon length] set x $x y $y
+	    $polygon set end+1 x $x y $y
 	}
     }
 
@@ -61,12 +61,12 @@ oo::class create UDA {
     method LIN { x y { n {} } } 		{
 	if { $inpath == -1 } { set inpath [$polygon length] }
 
-	$polygon [$polygon length] set x $x y $y 
+	$polygon set end+1 x $x y $y 
     }
     method BRK {} 				{
-	if { $inpath != -1 } { LIN {*}[$polygon $inpath get x y] }
+	if { $inpath != -1 } { LIN {*}[$polygon get $inpath x y] }
 
-	if { $break } { $polygon [$polygon length]  set x 0  y 0 }
+	if { $break } { $polygon set end+1 x 0  y 0 }
 	set inpath -1
 	set break   0
     }
@@ -80,7 +80,7 @@ oo::class create UDA {
 		set x [lindex $args 0]
 		set y [lindex $args 1]
 
-		if { $inpath != -1 } { lassign [$polygon $inpath get x y] x0 y0 }
+		if { $inpath != -1 } { lassign [$polygon get $inpath x y] x0 y0 }
 
 		if { ( $x == 0 && $y == 0 ) || ( $inpath >= 0 && $x == $x0 && $y == $y0 ) } {
 		    BRK

@@ -115,11 +115,11 @@ oo::class create ::acorn::ZMX {
     method simple { args } {}
     method zernike { n value a b c d e f } {
 	if { $n == 3 } {
-	    my [$current $surf get name] set aper_max $value
-	    my [$current $surf get name] set nradius  $value
+	    my [$current get $surf name] set aper_max $value
+	    my [$current get $surf name] set nradius  $value
 	}
 	if { $n > 15 } {
-	    my [$current $surf get name] set z[expr $n-15] $value
+	    my [$current get $surf name] set z[expr $n-15] $value
 	}
     }
 
@@ -206,13 +206,13 @@ oo::class create ::acorn::ZMX {
 
 	# Get the surface traverse and infos functions
 	#
-	$current $surf set type     $type
-	$current $surf set traverse $::acorn::SurfaceTypes($type)
-	$current $surf set infos    $::acorn::SurfaceInfos($type)
+	$current set $surf type     $type
+	$current set $surf traverse $::acorn::SurfaceTypes($type)
+	$current set $surf infos    $::acorn::SurfaceInfos($type)
 
-	if { [$current $surf get infos] != -1 } {
-	    lassign [::acorn::infos 1 [$current $surf get infos]] dparams dvalues
-	    lassign [::acorn::infos 2 [$current $surf get infos]] sparams svalues
+	if { [$current get $surf infos] != -1 } {
+	    lassign [::acorn::infos 1 [$current get $surf infos]] dparams dvalues
+	    lassign [::acorn::infos 2 [$current get $surf infos]] sparams svalues
 	} else {
 	    set dparams {}
 	    set dvalues {}
@@ -236,7 +236,7 @@ oo::class create ::acorn::ZMX {
 	set surfdefs($surftype,pmap) $parmap
 	set surfdefs($surftype,smap) {}
 
-	$current $surf set {*}[mappair $parmap [dict merge $basedef $default [join $args] [list name $Id type $surftype comment $comm]]]
+	$current set $surf {*}[mappair $parmap [dict merge $basedef $default [join $args] [list name $Id type $surftype comment $comm]]]
 
 	::oo::objdefine [self] [list forward $Id [self] surfset1 $current $surf $parmap]
 	::oo::objdefine [self] [list export  $Id]
@@ -255,7 +255,7 @@ oo::class create ::acorn::ZMX {
      method CURV { curv  args } {
 	 if { $grouptype ne "non-sequential" } {
 	     if { $curv } {
-		 my [$current $surf get name] set R [expr { 1.0/$curv }]
+		 my [$current get $surf name] set R [expr { 1.0/$curv }]
 	     } 
 	 }
      }
@@ -269,44 +269,44 @@ oo::class create ::acorn::ZMX {
 		 if { $debug } { puts stderr "PARM $surftype $n $value : $message" }
 	     }
 	 } else {
-	     $current $surf set p$n $value
+	     $current set $surf p$n $value
 	 }
      }
      method DISZ { thick } { 
-	 if { $grouptype ne "non-sequential" } { $current $surf set {*}[mappair $basemap [list thickness $thick]] }
+	 if { $grouptype ne "non-sequential" } { $current set $surf {*}[mappair $basemap [list thickness $thick]] }
      }
      method DIAM { diam args } {	# This is Zemax computed semi-diameter, not the aperture size.  }
      method SQOB { args } { # aperture obscuration is true }
      method OBSC { args } { # aperture obscuration is true }
      method ELOB { args } { # aperture obscuration is true }
      method SQAP { w h args  } { 
-     	$current $surf set aper_type rectangular 
-     	my [$current $surf get name] set aper_max  [expr $w/2.0] 
-     	my [$current $surf get name] set aper_min  [expr $h/2.0] 
+     	$current set $surf aper_type rectangular 
+     	my [$current get $surf name] set aper_max  [expr $w/2.0] 
+     	my [$current get $surf name] set aper_min  [expr $h/2.0] 
      }
      method ELAP { w h  } {
-     	$current $surf set aper_type eliptical 
-	my [$current $surf get name] set aper_max  [expr $w/2.0] 
-	my [$current $surf get name] set aper_min  [expr $h/2.0] 
+     	$current set $surf aper_type eliptical 
+	my [$current get $surf name] set aper_max  [expr $w/2.0] 
+	my [$current get $surf name] set aper_min  [expr $h/2.0] 
      }
      method CLAP { n rad args  } {
-	$current $surf set aper_type circular 
-	my [$current $surf get name] set aper_max  $rad 
+	$current set $surf aper_type circular 
+	my [$current get $surf name] set aper_max  $rad 
      }
      method FLAP { n rad args  } {
-     	$current $surf set aper_type circular 
-	my [$current $surf get name] set aper_max  $rad 
+     	$current set $surf aper_type circular 
+	my [$current get $surf name] set aper_max  $rad 
      }
      method OBSC { x rad args } {
-     	$current $surf set aper_type obstruction 
-	my [$current $surf get name] set aper_min  $rad 
+     	$current set $surf aper_type obstruction 
+	my [$current get $surf name] set aper_min  $rad 
      }
      method OBDC { x y  } { # aperture decenter }
 
      method GLAS { name args } {
-	 $current $surf set glass $name
+	 $current set $surf glass $name
 	 try {
-	     $current $surf set glass_ptr [glass-lookup $name]
+	     $current set $surf glass_ptr [glass-lookup $name]
 	 } on error message {
 	     puts "missing glass : $name"
 	 }
@@ -326,8 +326,8 @@ oo::class create ::acorn::ZMX {
 	switch $type {
 	 default {
 	    if { $nonseq == 0 } {
-		set nsoexit [$current 0 get p0 p1 p2 p3 p4 p5 p6]
-		$current 0 set p0 0 p1 0 p2 0 p3 0 p4 0 p5 0 p6 0
+		set nsoexit [$current get 0 p0 p1 p2 p3 p4 p5 p6]
+		$current set 0 p0 0 p1 0 p2 0 p3 0 p4 0 p5 0 p6 0
 	    }
 
 	    $current length $nonseq
@@ -338,35 +338,35 @@ oo::class create ::acorn::ZMX {
 
 	    my Process-Type $type $comment
 
-	    my [$current $surf get name] set thickness [lindex $nsoexit 3]
+	    my [$current get $surf name] set thickness [lindex $nsoexit 3]
 	 }
 	}
      }
      method NSOA { n aperture } {
 
 	if { $aperture eq  {}  } {
-	    $current $surf set aper_type  circular
+	    $current set $surf aper_type  circular
 	    return
 	}
 
-	$current $surf set aper_type  UDA
-	$current $surf set aper_param [string map { {"} {} } $aperture]
+	$current set $surf aper_type  UDA
+	$current set $surf aper_param [string map { {"} {} } $aperture]
 
-	lappend objects [set aper [::acorn::Aperture [$current $surf get aper_type] [$current $surf get aper_param]]]
-	$current $surf set aperture [$aper polygon]
+	lappend objects [set aper [::acorn::Aperture [$current get $surf aper_type] [$current get $surf aper_param]]]
+	$current set $surf aperture [$aper polygon]
      }
      method NSCS { args } {}
      method NSOD { n value a b c d e f } {
-	 try { my [$current $surf get name] set $::acorn::ZMXNSODMap($surftype,$n) $value 
+	 try { my [$current get $surf name] set $::acorn::ZMXNSODMap($surftype,$n) $value 
 	 } on error message {
-	     my [$current $surf get type] $n $value $a $b $c $d $e $f
+	     my [$current get $surf type] $n $value $a $b $c $d $e $f
 	 }
      }
      method NSOP { dx dy dz rx ry rz args } {
-	 my [$current $surf get name] set x $dx y $dy z $dz rx $rx ry $ry rz $rz
+	 my [$current get $surf name] set x $dx y $dy z $dz rx $rx ry $ry rz $rz
 
 	 if { [lindex $args 0] eq "MIRROR" } {
-	     my [$current $surf get name] set n -1 
+	     my [$current get $surf name] set n -1 
 	 }
      }
      method NSCD { args } {}

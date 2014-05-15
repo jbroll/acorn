@@ -64,7 +64,7 @@ foreach mirror $mirrors {
 
 		Model $mirror$surf set $e 0.0
 
-		#puts "[incr i] $mirror $surf $e [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]"
+		puts "	[incr i] $mirror $surf $e [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]"
 
 		list [expr { sqrt($sumx) }]	[expr { sqrt($sumy) }] ; # [expr { sqrt($sumz) }]
 	    } -cleanup {

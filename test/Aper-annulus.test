@@ -19,7 +19,7 @@ source util/rays.tcl
 
     Flat trace rays
 
-    acorn::prays rays
+#    acorn::prays rays
 
     rays-select rays { !$vignetted } _i
 

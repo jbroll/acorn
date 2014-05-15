@@ -21,12 +21,6 @@ source util/rays.tcl
 
     acorn::mkrays rays nx 3 ny 3 box 25
 
-    puts [rays get 1]
-    puts [rays get 2]
-    puts [rays get 3]
-
-    exit
-
     #Parabolic print
     Parabolic trace rays
 

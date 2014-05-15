@@ -53,11 +53,12 @@ foreach surf { 7 1 2 3 4 5 6 } {
 
 	    acorn::prays $rays > $Data/S$surf-$r.acorn
 
+	    puts "	$surf $r [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
+
 	    #list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
 	    list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }]
 
 
-	    #puts "$surf $r [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }] [expr { sqrt($sumz) }]"
 	    #list 1 1
 	} -cleanup {
 	    Model destroy
