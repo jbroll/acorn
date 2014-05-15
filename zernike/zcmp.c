@@ -9,7 +9,7 @@ double drand48();
 
 int main() {
 	int i;
-	int n = 45;
+	int n = 104;
 	double c[50];
 
 	double x;
@@ -22,15 +22,24 @@ int main() {
 
         //for ( i = 0; i < n; i++ ) { c[i] = 0.0; }
 
-        for ( i = 0; i < n; i++ ) { c[i] = 1; //drand48()*2;
+
+
+    for ( int z = 0; z < n; z++ ) {
+
+        for ( i = 0; i < n; i++ ) {
+	    if ( i == z ) {
+		c[i] = 0.25;
+	    } else {
+		c[i] = 0.0;
+	    }
 	}
 
-
-	for ( i = 0; i < 2; i++ ) {
+	
+	for ( i = 0; i < 100; i++ ) {
 	    x = drand48()*0.707;
 	    y = drand48()*0.707;
 
-	    zernike_std( x,  y, n, c, &c_z, &c_dx, &c_dy);
+	    //zernike_std( x,  y, n, c, &c_z, &c_dx, &c_dy);
 	    
 	    zernikf_std( x,  y, n, c, &f_z, &f_dx, &f_dy);
 
@@ -38,16 +47,17 @@ int main() {
 
 	    zernikz_std( x,  y, n, c, &z_z, &z_dx, &z_dy);
 
-	    printf("%d	: %5.3f, %5.3f", i, x, y);
-	    printf("\n : %10.7f %10.7f %10.7f", c_z, c_dx, c_dy);	
-	    printf("\n : %10.7f %10.7f %10.7f", f_z, f_dx, f_dy);	
-	    printf("\n : %10.7f %10.7f %10.7f", x_z, x_dx, x_dy);	
-	    printf("\n : %10.7f %10.7f %10.7f", z_z, z_dx, z_dy);	
+	    printf("%d	: %5.3f, %5.3f", z, x, y);
+	    printf(" : %10.5f %10.5f %10.5f", f_z, f_dx, f_dy);	
+	    printf(" : %10.5f %10.5f %10.5f", x_z-f_z, x_dx-f_dx, x_dy-f_dy);	
+	    printf(" : %10.5f %10.5f %10.5f", z_z-f_z, z_dx-f_dx, z_dy-f_dy);	
+	    //printf(" : %10.5f %10.5f %10.5f", c_z, c_dx, c_dy);	
 	    printf("\n");
 
 
 	}
+    }
 
-	return 0;
+    exit(0);
 }
 
