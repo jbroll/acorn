@@ -30,7 +30,7 @@ typedef char *string;
 #define ACORN_ANNOTE		3
 
 typedef int (*TraceFunc)(struct _MData *m, struct _Surface *s, struct _Ray *r);
-typedef int (*InfosFunc)(int info, char **str, double **val);
+typedef int (*InfosFunc)(int info, char ***str, double **val);
 
 enum PX_Param {
     Px_px, Px_py, Px_pz, Px_rx, Px_ry, Px_rz
