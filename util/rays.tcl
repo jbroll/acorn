@@ -115,7 +115,7 @@ proc rays-select { rays expr { cols {} } } {
 
     uplevel [subst {
 	set _1 {}
-	rays-foreach $rays { puts "\[$rays get \$_i] \$_i \$vignetted" ; if { !($expr) } { continue } ; lappend _1 $[join $cols " $"] }
+	rays-foreach $rays { if { !($expr) } { continue } ; lappend _1 $[join $cols " $"] }
 	return \$_1
     }]
 }
