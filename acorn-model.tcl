@@ -26,7 +26,7 @@
 	foreach { name par } $map { lappend rev $par $name }
 
 	set reply {}
-	foreach { name value } [join $params] { lappend reply [dict get $rev $name] $value }
+	foreach { name value } $params { lappend reply [dict get $rev $name] $value }
 	set reply
     }
     proc maplist { map params } {
@@ -176,10 +176,11 @@ oo::class create ::acorn::BaseModel {
 	foreach { type surf } $surfaces {
 	    if { $type eq "non-sequential" } { puts $out "${tab}surface-group-non-sequential X \{" ; set tab "		" }
 	    foreach i [iota 0 [$surf length]-1] {
-		#puts "	[[self] [$surf $i get name] getdict name type] : [[self] [$surf $i get name] get type]"
-		set stype [[self] [$surf $i get name] get type]
-		set values [[self] [$surf $i get name] getdict {*}[map { name value } $surfdefs($stype,pmap) { set name }]]
-		puts $out "${tab}surface [$surf $i get name] \{ [dict remove [dltpair $surfdefs($stype,pdef) $values] name] \}"
+		#puts "	[[self] [$surf get $i name] getdict name type] : [[self] [$surf get $i name] get type]"
+		set stype [[self] [$surf get $i name] get type]
+		set values [[self] [$surf get $i name] getdict {*}[map { name value } $surfdefs($stype,pmap) { set name }]]
+
+		puts $out "${tab}surface [$surf get $i name] \{ [dict remove [dltpair $surfdefs($stype,pdef) $values] name] \}"
 	    }
 	    set tab "        "
 	    if { $type eq "non-sequential" } { puts $out "${tab}\}" }

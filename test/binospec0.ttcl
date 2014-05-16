@@ -7,7 +7,6 @@ package require acorn
 
 source util/rays.tcl
 
-
 acorn::ZMX create B source zmx-models/p8_110912af_072512ac.zmx
 
 puts [B config 1]
@@ -44,6 +43,4 @@ B print
 
 acorn::prays rays
 #acorn::prays trak
-
-
 

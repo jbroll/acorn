@@ -259,12 +259,12 @@ oo::class create ::acorn::ZMX {
 	     } 
 	 }
      }
-     method CONI { conic args } {                my [$current $surf get name] set K $conic 	 }
+     method CONI { conic args } {                my [$current get $surf name] set K $conic 	 }
      method COMM { args }  { set comment $args }
 
      method PARM { n value } {
 	 if { $grouptype ne "non-sequential" } {
-	     try { my [$current $surf get name] set $::acorn::ZMXParmMap($surftype,$n) $value
+	     try { my [$current get $surf name] set $::acorn::ZMXParmMap($surftype,$n) $value
 	     } on error message {
 		 if { $debug } { puts stderr "PARM $surftype $n $value : $message" }
 	     }
