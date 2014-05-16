@@ -130,6 +130,16 @@ oo::class create ::acorn::ZMX {
 	}
     }
 
+    method print {} {
+	next
+
+	#puts "wavelengths $wavelength"
+	#puts "mce {"
+	#puts [array get mce]
+	#puts "}"
+
+    }
+
     method pickup { } { eval $pup }
 
     method config { { config {} } } {
