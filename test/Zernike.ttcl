@@ -17,8 +17,8 @@ set rays {}
 
 acorn::model Model {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernike nradius 36 nterms 10 }
-    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernike nradius 36 nterms 10 }
+    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernike nradius 36 nterms 100 }
+    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernike nradius 36 nterms 100 }
     surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
@@ -31,9 +31,9 @@ acorn::model Model {
     lassign [starbase_raycompare $rays $Data/image.rays 370] sumx sumy sumz
 
 
+
     list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
 
-    #puts "[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
     #list 1 1 1
 } -result {1 1 1}
 
@@ -41,8 +41,11 @@ acorn::model Model {
 set Zamount 0.05
 
 foreach surf { B C } {
-    foreach zz { 1 2 3 4 5 6 7 8 9 10 } {
+    foreach zz [iota 103] {
+	incr zz
+
  	::tcltest::test zernike-rays-$surf-$zz { Zernike raytrace } -body {
+
 	    set rays [starbase2ray Start $rays]
 
 	    Model $surf set z$zz $Zamount
@@ -54,10 +57,10 @@ foreach surf { B C } {
 
 	    Model $surf set z$zz 0.0
 
-	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+puts "$surf $zz [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
 
-	    #puts "$surf z$zz [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
-	    #list 1 1 1
+	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+	    list 1 1 1
 	} -result {1 1 1}
     }
 }

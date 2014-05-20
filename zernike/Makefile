@@ -5,20 +5,20 @@ CFLAGS= -msse -fPIC -O3 $(BITS)
 
 ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernikx.o lib/$(ARCH)/zernikz.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
 
+all: zernike.$(OS)
 
 zernike.Darwin : 
 	@$(MAKE) ARCH=Darwin.i386   BITS=-m32 lib/Darwin.i386/zernike.a
 	@$(MAKE) ARCH=Darwin.x86_64 BITS=     lib/Darwin.x86_64/zernike.a
 
 zernike.Linux :
-	@$(MAKE) ARCH=Linux.x86_64 BITS=    
+	@$(MAKE) ARCH=Linux.x86_64 BITS=    zernike.a
 
-zernike.a : lib/$(ARCH)/zernike.a
+zernike.a : $(ZOBJ) lib/$(ARCH)/zernike.a
 
 
 lib/$(ARCH)/zernike.a : $(ZOBJ)
 	ar cr lib/$(ARCH)/zernike.a $(ZOBJ)
-
 
 
 zerniketable : zerniketable.c
