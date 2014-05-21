@@ -17,8 +17,8 @@ set rays {}
 
 acorn::model Model {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernike nradius 100 nterms 100 }
-    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernike nradius 100 nterms 100 }
+    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernike nradius 36 nterms 100 }
+    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernike nradius 36 nterms 100 }
     surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
