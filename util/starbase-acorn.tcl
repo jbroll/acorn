@@ -34,11 +34,13 @@ proc starbase_raycompare { rays file zoff { big 10000 } } {
 
 	   lassign [$rays get [expr $row-1] px py pz] px py pz
 
+
 	    if { abs($x - $px) > $big || abs($y - $py) > $big } { 
 		lappend bigs $row [expr { $x - $px }] [expr { $y - $py }]
 		continue
 	    }
 
+		   
 	    set pz [expr { $pz-$zoff }]
 
 	    set sumx [expr { $sumx + ($x - $px)*($x - $px) } ]

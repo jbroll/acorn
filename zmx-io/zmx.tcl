@@ -340,7 +340,7 @@ oo::class create ::acorn::ZMX {
 		$current set 0 p0 0 p1 0 p2 0 p3 0 p4 0 p5 0 p6 0
 	    }
 
-	    $current length $nonseq
+	    $current length = $nonseq
 
 	    my SURF $nonseqid-[incr nonseq]
 
