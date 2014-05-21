@@ -48,7 +48,7 @@ void CalcZern(int n, int m, double **f, double scaling) {
 }
 
 
-#define MAXZERN 100
+#define MAXZERN 103
 
 void printformula(double ***y, int i, int n, int m)
 {

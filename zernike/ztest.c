@@ -11,9 +11,11 @@ int main() {
 	int n = 48;
 	double c[48];
 
+	for ( i = 0; i < 48; i++ ) { c[i] = drand48()*0.07; }
+
 	double z, dx, dy;
 
-	for ( i = 0; i < 1000000; i++ ) {
+	for ( i = 0; i < 100000; i++ ) {
 	   ZERNIKE_STD(drand48()*0.707, drand48()*0.707, n, c, &z, &dx, &dy);
 	}
 

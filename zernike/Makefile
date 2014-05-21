@@ -1,7 +1,8 @@
 
 OS  =$(shell uname)
 
-CFLAGS= -msse -fPIC -O3 $(BITS) 
+CFLAGS= -fPIC -O3 $(BITS) 
+
 
 ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernikx.o lib/$(ARCH)/zernikz.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
 
@@ -30,23 +31,20 @@ zernike.tab : zerniketable nollorder.sh Makefile
 zernike.c : zernike.tab mkzernike
 	./mkzernike > zernike.c 
 
-
-
-ztest_c: ztest.c zernike.o
-	$(CC) -DZERNIKE_STD=zernike_std $(CFLAGS) -o ztest_c ztest.c zernike.o -lm
-
 lib/$(ARCH)/zernike.o : zernike.c
 	@mkdir -p lib/$(ARCH)
 	$(CC) $(CFLAGS) -c zernike.c -o lib/$(ARCH)/zernike.o
 
 
 
+ztest: ztest_c ztest_z
+	echo OK
 
-ztest_f: ztest.c lib/$(ARCH)/zernik_std.c lib/$(ARCH)/zernik.o
-	$(CC) -DZERNIKE_STD=zernikf_std $(CFLAGS) -o ztest_f ztest.c zernik_std.c zernik.o
+ztest_c: ztest.c 
+	$(CC) -DZERNIKE_STD=zernike_std $(CFLAGS) -o ztest_c ztest.c lib/$(ARCH)/zernike.a -lm
 
-ztest_x: ztest.c zernik_std.c zernik.o
-	$(CC) -DZERNIKE_STD=zernikf_std $(CFLAGS) -o ztest_f ztest.c zernik_std.c zernik.o
+ztest_z: ztest.c 
+	$(CC) -DZERNIKE_STD=zernikz_std $(CFLAGS) -o ztest_z ztest.c lib/$(ARCH)/zernike.a -lm
 
 
 lib/$(ARCH)/zernik.o : zernik.f

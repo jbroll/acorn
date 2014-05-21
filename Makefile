@@ -18,6 +18,7 @@ TCL	= acorn.tcl acorn-model.tcl				\
 
 SURFS	= surfaces/lib/$(ARCH)/simple.so		\
 	  surfaces/lib/$(ARCH)/zernike.so		\
+	  surfaces/lib/$(ARCH)/zernikz.so		\
 	  surfaces/lib/$(ARCH)/lens-array-rect.so	\
 	  surfaces/lib/$(ARCH)/lens-array-hex.so	\
 	  surfaces/lib/$(ARCH)/evenasph.so		\
@@ -88,8 +89,12 @@ surfaces/lib/$(ARCH)/dgrating.so : surfaces/dgrating.cpp acorn.h $(ACORN_UTIL)
 	$(CXX) $(CFLAGS) -shared $(INC) surfaces/dgrating.cpp -o surfaces/lib/$(ARCH)/dgrating.so
 
 surfaces/lib/$(ARCH)/zernike.so : surfaces/zernike.cpp acorn.h zernike/lib/$(ARCH)/zernike.a $(ACORN_UTIL)
-	@mkdir -p zernike/lib/$(ARCH)
+	@mkdir -p surfaces/lib/$(ARCH)
 	$(CXX) $(CFLAGS) -shared $(INC) surfaces/zernike.cpp zernike/lib/$(ARCH)/zernike.a -o surfaces/lib/$(ARCH)/zernike.so
+	
+surfaces/lib/$(ARCH)/zernikz.so : surfaces/zernikz.cpp acorn.h zernike/lib/$(ARCH)/zernike.a $(ACORN_UTIL)
+	@mkdir -p surfaces/lib/$(ARCH)
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/zernikz.cpp zernike/lib/$(ARCH)/zernike.a -o surfaces/lib/$(ARCH)/zernikz.so
 	
 surfaces/lib/$(ARCH)/lens-array-rect.so : surfaces/lens-array-rect.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)

@@ -28,7 +28,7 @@ extern "C" {
       , "z70", "z71", "z72", "z73", "z74", "z75", "z76", "z77", "z78", "z79"
       , "z80", "z81", "z82", "z83", "z84", "z85", "z86", "z87", "z88", "z89"
       , "z90", "z91", "z92", "z93", "z94", "z95", "z96", "z97", "z98", "z99"
-      , "z100", "z101", "z102", "z103"
+      , "z100", "z101", "z102", "z103", "z104"
   };
   static const double MyParamValue[] = {  0.0, 0.0
            , 0.0, 0.0, 0.0, 1.0
@@ -42,7 +42,7 @@ extern "C" {
       , 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
       , 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
       , 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-      , 0.0, 0.0, 0.0, 0.0
+      , 0.0, 0.0, 0.0, 0.0, 0.0
   };
 
 
@@ -69,7 +69,7 @@ extern "C" {
 
 	double zdz, zdx, zdy;
 
-	zernikz_std((x - xdecenter)/nradius, (y - ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zdz, &zdx, &zdy);
+	zernike_std((x - xdecenter)/nradius, (y - ydecenter)/nradius, nzterms, &s.p[Pm_z1], &zdz, &zdx, &zdy);
 
 	zdx /= nradius;
 	zdy /= nradius;
