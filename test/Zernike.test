@@ -1,0 +1,63 @@
+#!/usr/bin/env tclkit8.6
+#
+lappend auto_path ./lib arec/lib
+
+package require acorn
+package require tcltest
+
+source jbr.tcl/starbase.tcl
+
+source util/starbase-acorn.tcl
+
+
+set Data test/Zernike.data
+
+starbase_read Start $Data/start.rays
+set rays {}
+
+acorn::model Model {
+    surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
+    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernike nradius 100 nterms 100 }
+    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernike nradius 100 nterms 100 }
+    surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
+}
+
+::tcltest::test evenasph-rays-image { EvenASphere raytrace } -body {
+    set rays [starbase2ray Start $rays]
+    Model trace $rays
+
+    acorn::prays $rays > $Data/image.acorn
+
+    lassign [starbase_raycompare $rays $Data/image.rays 370] sumx sumy sumz
+
+
+    puts "	[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+    #list 1 1 1
+
+} -result {1 1 1}
+
+
+set Zamount 0.05
+
+foreach surf { B C } {
+    foreach zz [iota 1 100] {
+ 	::tcltest::test zernike-rays-$surf-$zz { Zernike raytrace } -body {
+	    set rays [starbase2ray Start $rays]
+
+	    Model $surf set z$zz $Zamount
+	    Model trace $rays
+
+	    acorn::prays $rays > $Data/z[format %02d $zz]-$surf.acorn
+
+	    lassign [starbase_raycompare $rays $Data/z[format %02d $zz]-$surf.rays 370] sumx sumy sumz
+
+	    Model $surf set z$zz 0.0
+
+	    puts "	$surf z$zz [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+	    #list 1 1 1
+	} -result {1 1 1}
+    }
+}
+
