@@ -26,9 +26,10 @@ set rays {}
 
     acorn::prays $rays > $Data/image.acorn
 
+    puts "XX x [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
+
     list [expr { sqrt($sumx) < 1e-6 }]	[expr { sqrt($sumy) < 1e-6 }]
 
-    #puts "XX x [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
     #list 1 1
 } -cleanup {
     Model destroy
