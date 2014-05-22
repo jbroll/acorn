@@ -17,8 +17,8 @@ set rays {}
 
 acorn::model Model {
     surface A	{ R    0.0	K  0.0	n  1.00	thickness 	 200 }
-    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernike nradius 36 nterms 100 }
-    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernike nradius 36 nterms 100 }
+    surface B	{ R -400.0	K -1.0	n -1.00	thickness	 -10 type zernikz nradius 36 nterms 100 }
+    surface C	{ R    0.0	K  0.0	n -1.00	thickness	 180 type zernikz nradius 36 nterms 100 }
     surface D	{ R    0.0	K  0.0	n  1.00	thickness	   0 }
 }
 
@@ -32,7 +32,7 @@ acorn::model Model {
 
 
     puts "	[expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
-    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+    list [expr { sqrt($sumx) < 1e-5 }]	[expr { sqrt($sumy) < 1e-5 }]	[expr { sqrt($sumz) < 1e-5 }]
     #list 1 1 1
 
 } -result {1 1 1}
@@ -55,7 +55,7 @@ foreach surf { B C } {
 	    Model $surf set z$zz 0.0
 
 	    puts "	$surf z$zz [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
-	    list [expr { sqrt($sumx) < 1e-9 }]	[expr { sqrt($sumy) < 1e-9 }]	[expr { sqrt($sumz) < 1e-9 }]
+	    list [expr { sqrt($sumx) < 1e-5 }]	[expr { sqrt($sumy) < 1e-5 }]	[expr { sqrt($sumz) < 1e-5 }]
 	    #list 1 1 1
 	} -result {1 1 1}
     }
