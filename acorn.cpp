@@ -49,7 +49,7 @@ extern "C" {
 		Affine3d rtforward  ;
 		Affine3d rtreverse  ;
 
-		txforward   = 
+		txforward   = 						// Ray position transform
 			    Affine3d::Identity()
 			    * Translation3d(0.0, 0.0,  m->z)
 				* AngleAxisd(d2r( surf[i].p[Px_rz]), Vector3d(0.0, 0.0, -1.0))
@@ -59,7 +59,7 @@ extern "C" {
 			    * Translation3d(-surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz])
 			;
 
-		rtforward   =
+		rtforward   =						// Ray direction transform
 			    Affine3d::Identity()
 				* AngleAxisd(d2r( surf[i].p[Px_rz]), Vector3d(0.0, 0.0, -1.0))
 				* AngleAxisd(d2r(-surf[i].p[Px_ry]), Vector3d(0.0, 1.0,  0.0))

@@ -1,9 +1,7 @@
 
-typedef char *string;
+#include "rays.h"
 
-#define X	0
-#define Y	1
-#define Z	2
+typedef char *string;
 
 #define X__PI	3.14159265358979323846
 #define X_2PI	( 2 * X__PI )
@@ -72,12 +70,6 @@ typedef struct _SurfaceList {
     int		 type;
 } SurfaceList;
 
-typedef struct _Ray {
-    Vector3d	p;
-    Vector3d	k;
-    int		vignetted;
-} Ray;
-
 typedef struct _MData {
     double n;
     double z;
@@ -85,7 +77,7 @@ typedef struct _MData {
 } MData;
 
 void aper_init(Surface *s, Affine3d transform);
-int  aper_clip(Surface *s, Ray *r);
+int  aper_clip(Surface *s, struct _Ray *r);
 
 typedef void (*SagittaFunc)(Surface &s, double x, double y, double *dz, double *dx, double *dy);
 

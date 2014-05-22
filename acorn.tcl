@@ -1,16 +1,13 @@
 #!/Users/john/bin/tclkit8.6
 #
-
 ::critcl::tcl 8.6
 ::critcl::config language c++ 
 
-#critcl::cflags -DTCL_MEM_DEBUG=1
 critcl::cflags -O3
 critcl::cheaders -I/Users/john/include -I/home/john/include
-critcl::cheaders arec/arec.h acorn.h
+critcl::cheaders arec/arec.h acorn.h rays.h
 
 critcl::tsources jbr.tcl/func.tcl jbr.tcl/tcloo.tcl jbr.tcl/unix.tcl	\
-		 util/rays.tcl						\
 		 zmx-io/uda.tcl zmx-io/agf.tcl				\
 		 acorn-model.tcl acorn.tcl				\
 		 zmx-io/zmx.tcl						\
@@ -31,7 +28,6 @@ namespace eval acorn {
     variable SurfaceTypes
     variable SurfaceInfos
 
-
     critcl::ccode {
 	#include <dlfcn.h>
 	#include <Eigen/Dense>
@@ -39,11 +35,10 @@ namespace eval acorn {
 	using namespace std;
 	using namespace Eigen;
 
+	#include "arec.h"
 	#include "acorn.h"
 
-
 	extern "C" {
-	    #include "arec.h"
 
 	    int  SurfSize(void);
 	    int  RaysSize(void);
@@ -85,11 +80,6 @@ namespace eval acorn {
 	    double	n, z, w;
 	}
 
-	arec::typedef ::acorn::Rays {
-	    double	px, py, pz, kx, ky, kz;
-	    int		vignetted;
-	}
-
 	arec::typedef ::acorn::Surfs {
 	    string	name
 	    string	type
@@ -125,66 +115,6 @@ namespace eval acorn {
 
 	glass-loader $::GlassDir
     }
-
-    critcl::cproc ::acorn::Rays::stat { Tcl_Interp* ip int v } ok {
-	ARecPath *path = (ARecPath *) clientdata;
-
-	Ray *rays = (Ray *)path->recs;
-
-	int     n = 0;
-
-	double x  = 0;
-	double y  = 0;
-	double r  = 0;
-	double cx = 0;
-	double cy = 0;
-
-	double rx, ry, rr;
-
-	for ( int i = path->first; i <= path->last; i++ ) {
-	    if ( rays[i].p[X] != rays[i].p[X]
-	      || rays[i].p[Y] != rays[i].p[Y] 
-	      || rays[i].p[Z] != rays[i].p[Z] ) { continue; }
-	    if ( v && rays[i].vignetted   )     { continue; }
-
-	    cx += rays[i].p[X];
-	    cy += rays[i].p[Y];
-
-	    rr = sqrt((rays[i].p[X]-cx) * (rays[i].p[X]-cx) + (rays[i].p[Y]-cy) * (rays[i].p[Y]-cy));
-
-	    x += (rays[i].p[X]-cx) * (rays[i].p[X]-cx);
-	    y += (rays[i].p[Y]-cy) * (rays[i].p[Y]-cy);
-	    r +=  rr*r;
-
-	    n++;
-	}
-
-	if ( n ) {
-	    cx /= n;
-	    cy /= n;
-
-	    rx = x != 0.0 ? sqrt(x/n) : 0.0;
-	    ry = x != 0.0 ? sqrt(x/n) : 0.0;
-	    rr = r != 0.0 ? sqrt(r/n) : 0.0;
-	} else {
-	    cx = 0;
-	    cy = 0;
-	    rx = 0;
-	    ry = 0;
-	    rr = 0;
-	}
-
-	Tcl_Obj *result = Tcl_GetObjResult(ip);
-
-	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(cx));
-	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(cy));
-	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(rx));
-	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(ry));
-	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(rr));
-	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj( n));
-
-	return TCL_OK;
-    } -pass-cdata true
 
     critcl::cproc RaysSize {} int { return RaysSize(); }
     critcl::cproc SurfSize {} int { return SurfSize(); }
@@ -250,5 +180,6 @@ proc ::acorn::Aperture { type param } {
 package provide acorn 1.0
 
 if { [::critcl::compiled] } {
+    package require rays
     acorn::init
 }

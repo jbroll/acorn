@@ -32,13 +32,8 @@ ACORN_UTIL = surfaces/acorn-utils.h
 all: acorn.$(OS)
 
 acorn.Darwin :
-	@$(MAKE) ARCH=Darwin.i386	BITS=-m32	acorn.Darwin.i386 
-	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	acorn.Darwin.x86_64 
-	@$(MAKE) ARCH=Darwin.i386	BITS=-m32	nproc.Darwin.i386 
-	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	nproc.Darwin.x86_64 
-	@$(MAKE) ARCH=Darwin.i386	BITS=-m32	arec.Darwin.i386 
-	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	arec.Darwin.x86_64 
-	#@$(MAKE) test.Darwin
+	@$(MAKE) ARCH=Darwin.i386	BITS=-m32	acorn.Darwin.i386   rays.Darwin.i386   nproc.Darwin.i386   arec.Darwin.i386
+	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	acorn.Darwin.x86_64 rays.Darwin.x86_64 nproc.Darwin.x86_64 arec.Darwin.x86_64
 
 acorn.Linux  :
 	@$(MAKE) ARCH=Linux.x86_64	acorn.Linux.x86_64
@@ -47,9 +42,13 @@ acorn.Linux  :
 	#@$(MAKE) ARCH=Linux.x86_64	test.Linux
 
 
-acorn.Darwin.i386   : lib/acorn/macosx-ix86/acorn.dylib		arec.Darwin.i386	$(ACORN_OBJS)
-acorn.Darwin.x86_64 : lib/acorn/macosx-x86_64/acorn.dylib	arec.Darwin.x86_64	$(ACORN_OBJS)
-acorn.Linux.x86_64  : lib/acorn/linux-x86_64/acorn.so		arec.Linux.x86_64	$(ACORN_OBJS)
+acorn.Darwin.i386   : lib/acorn/macosx-ix86/acorn.dylib		$(ACORN_OBJS)
+acorn.Darwin.x86_64 : lib/acorn/macosx-x86_64/acorn.dylib	$(ACORN_OBJS)
+acorn.Linux.x86_64  : lib/acorn/linux-x86_64/acorn.so		$(ACORN_OBJS)
+
+rays.Darwin.i386   : lib/acorn/macosx-ix86/rays.dylib
+rays.Darwin.x86_64 : lib/acorn/macosx-x86_64/rays.dylib
+rays.Linux.x86_64  : lib/acorn/linux-x86_64/rays.so
 
 lib/acorn/macosx-ix86/acorn.dylib   :	$(ACORN_SRCS)
 	ARCH=Darwin.i386 critcl -target macosx-x86_32 -pkg acorn 
@@ -60,6 +59,12 @@ lib/acorn/macosx-x86_64/acorn.dylib :	$(ACORN_SRCS)
 lib/acorn/linux-x86_64/acorn.so :	$(ACORN_SRCS)
 	ARCH=$(ARCH) critcl -pkg acorn 
 
+
+lib/acorn/macosx-ix86/rays.dylib   :	rays.tcl rays.h
+	ARCH=Darwin.i386 critcl -target macosx-x86_32 -pkg rays 
+
+lib/acorn/macosx-x86_64/rays.dylib :	rays.tcl rays.h
+	ARCH=Darwin.x86_64 critcl -target macosx-x86_64 -pkg rays 
 
 nproc.Darwin.i386   : lib/nproc/macosx-ix86/nproc.dylib	
 nproc.Darwin.x86_64 : lib/nproc/macosx-x86_64/nproc.dylib
