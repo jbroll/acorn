@@ -107,15 +107,12 @@ inline int AcornSimpleIterativeIntersect(Surface &s, Ray &r, double z, Vector3d 
 	    nhat = Vector3d(-zdx, -zdy, -Dsign*1.0);
 	} else {
 	    double cdz = sqrt(R * R - (K+1)*(P(X) * P(X) + P(Y) * P(Y)));
-	    double cdx = P(X)/cdz;				// These must be slopes to add with zernike slopes.
+	    double cdx = P(X)/cdz;				// These must be slopes to add with curve slopes.
 	    double cdy = P(Y)/cdz;
 
 	    nhat = Vector3d(Dsign*(Rsign*cdx + zdx), Dsign*(Rsign*cdy + zdy), -Dsign*1);
 	}
 	nhat /= nhat.norm();
-
-	//printf("%d %.20f %.20f\n", i, sag, zdz);
-	//fflush(stdout);
 
 	if ( fabs(sag - zdz) < tol ) { break; }
 	sag = zdz;

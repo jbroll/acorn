@@ -93,7 +93,8 @@ oo::class create ::acorn::ZMX {
 
 	procs TRAC BLNK CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD ENPD FLAP FLOA FTYP FWGN FWGT GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
 	      NSCD NSCS NSOA NSOD NSOH NSOO NSOP NSOQ NSOS NSOU NSOV NSOW PARM PPAR PRAM PFIL PICB POLS POPS PUSH PUPD PWAV PZUP RAIM ROPD SCOL SDMA SLAB STOP SURF		\
-	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVL WAVN WAVM WWGT WWGN XDAT XFLD XFLN YFLD YFLN XFIE RSCE RWRE MOFF OBSC SQAP ELOB WAVE THIC ZVDX ZVDY ZVCX ZVCY ZVAN
+	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVL WAVN WAVM WWGT WWGN XDAT XFLD XFLN YFLD YFLN XFIE RSCE RWRE MOFF OBSC SQAP ELOB WAVE THIC ZVDX ZVDY ZVCX ZVCY ZVAN \
+	      OBDC PRIM
 
 	switch $type {
 	    source { eval [string map { $ \\$ ; \\; [ \\[ } [cat [lindex $args 0]]] }
@@ -162,6 +163,8 @@ oo::class create ::acorn::ZMX {
     method ENVD { temp pres args }	{ set Temp $temp; set Pres $pres }
     method ENPD { args }	{ }
     method GCAT { args }	{}
+
+    method PRIM { args } {}
 
     method NAME { args } { set     Name $args }
     method NOTE { args } { lappend Notes $args }
@@ -448,11 +451,15 @@ oo::class create ::acorn::ZMX {
 
     # Pickups
     #
-    method PZUP {       from scale offset column } { append pup "my xPZUP $Id [expr int($from)] $scale $offset $column\n" }
-    method PPAR { param from scale offset column } { append pup "my xPPAR $Id [expr int($from)] $scale $offset $column $param\n" }
+    method PZUP {       from scale offset { column 0 } } { append pup "my xPZUP $Id [expr int($from)] $scale $offset $column\n" }
+    method PPAR { param from scale offset { column 0 } } { append pup "my xPPAR $Id [expr int($from)] $scale $offset $column $param\n" }
 
     method xPZUP { surf from scale offset column } { my $surf thickness set [expr [my $from get thickness]*$scale] }
     method xPPAR { surf from scale offset column param } {
+	if { $from <= 0 } { 
+	    puts "Pickup from $from??"
+	    return
+	}
 	set value [my $from get $acorn::ZMXParmMap([my $surf get type],$param)]*$scale+$offset]
 
 	my     $surf set $acorn::ZMXParmMap([my $surf get type],$param) 	\

@@ -36,9 +36,7 @@ acorn.Darwin :
 	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	acorn.Darwin.x86_64 rays.Darwin.x86_64 nproc.Darwin.x86_64 arec.Darwin.x86_64
 
 acorn.Linux  :
-	@$(MAKE) ARCH=Linux.x86_64	acorn.Linux.x86_64
-	@$(MAKE) ARCH=Linux.x86_64	nproc.Linux.x86_64
-	@$(MAKE) ARCH=Linux.x86_64	arec.Linux.x86_64
+	@$(MAKE) ARCH=Linux.x86_64	acorn.Linux.x86_64 rays.Linux.x86_64 nproc.Linux.x86_64 arec.Linux.x86_64 
 	#@$(MAKE) ARCH=Linux.x86_64	test.Linux
 
 
@@ -65,6 +63,11 @@ lib/acorn/macosx-ix86/rays.dylib   :	rays.tcl rays.h
 
 lib/acorn/macosx-x86_64/rays.dylib :	rays.tcl rays.h
 	ARCH=Darwin.x86_64 critcl -target macosx-x86_64 -pkg rays 
+
+lib/acorn/linux-x86_64/rays.so :	rays.tcl rays.h
+	ARCH=linux.x86_64 critcl -pkg rays 
+
+
 
 nproc.Darwin.i386   : lib/nproc/macosx-ix86/nproc.dylib	
 nproc.Darwin.x86_64 : lib/nproc/macosx-x86_64/nproc.dylib

@@ -25,7 +25,7 @@ set rays {}
 
 
     acorn::prays $rays > $Data/image.acorn
-    puts [$rays stat]
+#    puts [$rays stat]
 
     puts "XX x [expr { sqrt($sumx) }]  [expr { sqrt($sumy) }]   [expr { sqrt($sumz) }]"
 

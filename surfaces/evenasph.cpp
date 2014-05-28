@@ -52,9 +52,6 @@ extern "C" {
 	    adz = adz +           s.p[Pm_a2+i] * rr;		// Make us the function.
 	}
 
-	    //printf("%.21f %.21f\n", adz, adx);
-	    //fflush(stdout);
-
 	*dz = adz;
 	*dx = adx/ r * x;					// Split slope on x,y.
 	*dy = adx/ r * y;
