@@ -139,7 +139,7 @@ test.Darwin : FORCE
 	arch -x86_64 /usr/local/bin/tclsh8.6 ./acorn-test.tcl
 
 test.Linux : FORCE
-	tclsh8.6 ./acorn-test.tcl
+	tclkit8.6 ./acorn-test.tcl
 
 clean : 
 	$(MAKE) ARCH=Darwin.i386	clean-rm
