@@ -71,18 +71,25 @@ namespace eval acorn {
 oo::class create ::acorn::ZMX {
     superclass ::acorn::BaseModel
 
-    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs 	\
-	pup mce mce_current											\
-	objects													\
-	Id Name Notes Temp Pres											\
-	params comment nonseqid nonseq nsoexit									\
-	debug													\
-	wavelength
+    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs 
+    variable pup     
+    variable mce mce_current
+    variable objects
+
+    variable Id Name Notes Temp Pres								\
+	params comment nonseqid nonseq nsoexit							\
+	debug 
+
+    variable wavelength 
+    variable field nfield fieldx fieldy
+    variable aray
 
     accessor grouptype current surfaces default debug
 
     constructor { type args } {
 	next
+
+	set aray [acorn::Rays create aray]
 
 	set objects     {}
 	set pup         {}
@@ -108,6 +115,12 @@ oo::class create ::acorn::ZMX {
 	    rename $current {}
 	}
 
+	set i 1
+	foreach x $fieldx y $fieldy {
+	    dict set field $i [list $x $y]
+	    incr i
+	}
+
 
 	eval $pup
 	eval $mce($mce_current)
@@ -121,6 +134,13 @@ oo::class create ::acorn::ZMX {
 	}
 	if { $n > 15 } {
 	    my [$current get $surf name] set z[expr $n-15] $value
+	}
+    }
+
+    method field { op args } {
+	switch $op {
+	    set { dict set  field {*}$args }
+	    get { dict get $field {*}$args }
 	}
     }
 
@@ -397,7 +417,7 @@ oo::class create ::acorn::ZMX {
     method CONF { args } {}
     method DMFS { args } {}
     method FLOA { args } {}
-    method FTYP { args } {}
+    method FTYP { args } { set nfield [lindex $args 2] }
     method FWGT { args } {}
     method FWGN { args } {}
     method GFAC { args } {}
@@ -444,9 +464,9 @@ oo::class create ::acorn::ZMX {
     }
 
     method XDAT { args } {}
+    method XFLN { args } { set fieldx $args }
+    method YFLN { args } { set fieldy $args }
     method XFLD { args } {}
-    method XFLN { args } {}
-    method YFLN { args } {}
     method YFLD { args } {}
 
     # Pickups
@@ -457,13 +477,25 @@ oo::class create ::acorn::ZMX {
     method xPZUP { surf from scale offset column } { my $surf thickness set [expr [my $from get thickness]*$scale] }
     method xPPAR { surf from scale offset column param } {
 	if { $from <= 0 } { 
-	    puts "Pickup from $from??"
-	    return
-	}
-	set value [my $from get $acorn::ZMXParmMap([my $surf get type],$param)]*$scale+$offset]
+	    puts "Pickup from $surf $from??"
 
-	my     $surf set $acorn::ZMXParmMap([my $surf get type],$param) 	\
-	  [expr [my $from get $acorn::ZMXParmMap([my $surf get type],$param)]*$scale+$offset]
+	    lassign [dict get $field 1] fx fy
+	    aray set px 0 py 0 pz 0 kx [expr sin($fx/3600.0/57.0)] ky [expr sin($fy/3600.0/57.0)] kz .97
+
+	    puts [aray get]
+
+	    [self] trace aray [list 1 [expr $surf-1]] 
+	    puts [aray get]
+
+	    set value [aray get p$acorn::ZMXParmMap([my $surf get type],$param)]
+
+	    puts $value
+
+	} else {
+	    set value [my $from get $acorn::ZMXParmMap([my $surf get type],$param)]
+	}
+
+	my     $surf set $acorn::ZMXParmMap([my $surf get type],$param) [expr { $value*$scale+$offset }]
     }
 
 

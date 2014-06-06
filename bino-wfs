@@ -1,0 +1,14 @@
+#!/usr/bin/env tclkit8.6.1
+#
+lappend auto_path lib
+
+set Data zmx-models
+
+package require acorn
+
+    acorn::ZMX create Model source $Data/bino_wfs.ZMX
+
+Model print
+
+
+
