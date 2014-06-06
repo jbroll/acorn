@@ -4,6 +4,9 @@
  * Tcl driven configuration and execution language.
  * Fully threaded C++ optimized raytracing.
  * Reads Zemax optical models.
+  * ZMX model files
+  * AGF glass files
+  * UDA aperture files.
  
 Supported surface types
 
