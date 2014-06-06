@@ -89,7 +89,7 @@ oo::class create ::acorn::ZMX {
     constructor { type args } {
 	next
 
-	set aray [acorn::Rays create aray]
+	set aray [acorn::Rays create [namespace current]::aray]
 
 	set objects     {}
 	set pup         {}
@@ -117,10 +117,13 @@ oo::class create ::acorn::ZMX {
 
 	set i 1
 	foreach x $fieldx y $fieldy {
-	    dict set field $i [list $x $y]
+	    dict set field $i [list x $x y $y]
 	    incr i
 	}
 
+	if { ![dict exists $wavelength current] } {
+	    dict set wavelength current [dict get $wavelength 1]
+	}
 
 	eval $pup
 	eval $mce($mce_current)
@@ -161,7 +164,11 @@ oo::class create ::acorn::ZMX {
 
     }
 
-    method pickup { } { eval $pup }
+    method update {} {
+	my config $mce_current
+    }
+
+    method pickup {} { eval $pup }
 
     method config { { config {} } } {
 	if { $config eq {} } { 
@@ -169,7 +176,7 @@ oo::class create ::acorn::ZMX {
 	} else {
 	    set mce_current $config
 	    eval $mce($config)
-	    eval $pup
+	    my pickup
 	}
     }
 
@@ -477,25 +484,24 @@ oo::class create ::acorn::ZMX {
     method xPZUP { surf from scale offset column } { my $surf thickness set [expr [my $from get thickness]*$scale] }
     method xPPAR { surf from scale offset column param } {
 	if { $from <= 0 } { 
-	    puts "Pickup from $surf $from??"
+	    
+	    # Try a chief ray solve
+	    #
+	    lassign [dict get $field 1] x fx y fy		; # Get the current field angles
+	    $aray set px 0 py 0 pz 0 vignetted 0		; # Set up aray.
+	    $aray angles : $fx $fy
 
-	    lassign [dict get $field 1] fx fy
-	    aray set px 0 py 0 pz 0 kx [expr sin($fx/3600.0/57.0)] ky [expr sin($fy/3600.0/57.0)] kz .97
+	    #puts [$aray get]
 
-	    puts [aray get]
+	    [self] trace $aray [list 1 [expr $surf-1]] [expr { [dict get $wavelength current wave]*10000 }] 		; # Trace to just before this surface.
+	    $aray advance : [my [expr $surf-1] get thickness]
 
-	    [self] trace aray [list 1 [expr $surf-1]] 
-	    puts [aray get]
-
-	    set value [aray get p$acorn::ZMXParmMap([my $surf get type],$param)]
-
-	    puts $value
-
+	    set value [$aray get p$acorn::ZMXParmMap([my $surf get type],$param)]
 	} else {
-	    set value [my $from get $acorn::ZMXParmMap([my $surf get type],$param)]
+	    set value [expr { [my $from get $acorn::ZMXParmMap([my $surf get type],$param)]*$scale+$offset }]
 	}
 
-	my     $surf set $acorn::ZMXParmMap([my $surf get type],$param) [expr { $value*$scale+$offset }]
+	my     $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value
     }
 
 

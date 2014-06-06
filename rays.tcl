@@ -99,6 +99,34 @@ if { [::critcl::compiled] } {
 	#include "arec.h"
     }
 
+    critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay } ok {
+	ARecPath *path = (ARecPath *) clientdata;
+
+	Ray *rays = (Ray *)path->recs;
+	for ( int i = path->first; i <= path->last; i++ ) {
+	    rays[i].k[X] = sin(ax/57.2957795);
+	    rays[i].k[Y] = sin(ay/57.2957795);
+	    rays[i].k[Z] = 1.0;
+
+	    rays[i].k.normalize();
+	    
+	}
+
+	return TCL_OK;
+    } -pass-cdata true
+
+    critcl::cproc ::acorn::Rays::advance { Tcl_Interp* ip double dist } ok {
+	ARecPath *path = (ARecPath *) clientdata;
+
+	Ray *rays = (Ray *)path->recs;
+	for ( int i = path->first; i <= path->last; i++ ) {
+	    rays[i].p += dist * rays[i].k;					// Move along the ray the distance requested.
+	}
+
+	return TCL_OK;
+    } -pass-cdata true
+
+
     critcl::cproc ::acorn::Rays::stat { Tcl_Interp* ip int { v 0 } } ok {
 	ARecPath *path = (ARecPath *) clientdata;
 
@@ -148,7 +176,6 @@ if { [::critcl::compiled] } {
 	    ry = 0;
 	    rr = 0;
 	}
-
 
 	Tcl_Obj *result = Tcl_NewObj();
 
