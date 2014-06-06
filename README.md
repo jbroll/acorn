@@ -15,4 +15,5 @@ Supported surface types
  * Zernike.
  * Lens array (rectangular and hex grids).
  * Diffraction grating.
+ * Limited non-sequential surface groups
 
