@@ -44,9 +44,9 @@ acorn.Darwin.i386   : lib/acorn/macosx-ix86/acorn.dylib		$(ACORN_OBJS)
 acorn.Darwin.x86_64 : lib/acorn/macosx-x86_64/acorn.dylib	$(ACORN_OBJS)
 acorn.Linux.x86_64  : lib/acorn/linux-x86_64/acorn.so		$(ACORN_OBJS)
 
-rays.Darwin.i386   : lib/acorn/macosx-ix86/rays.dylib
-rays.Darwin.x86_64 : lib/acorn/macosx-x86_64/rays.dylib
-rays.Linux.x86_64  : lib/acorn/linux-x86_64/rays.so
+rays.Darwin.i386   : lib/rays/macosx-ix86/rays.dylib
+rays.Darwin.x86_64 : lib/rays/macosx-x86_64/rays.dylib
+rays.Linux.x86_64  : lib/rays/linux-x86_64/rays.so
 
 lib/acorn/macosx-ix86/acorn.dylib   :	$(ACORN_SRCS)
 	ARCH=Darwin.i386 critcl -target macosx-x86_32 -pkg acorn 
@@ -58,13 +58,13 @@ lib/acorn/linux-x86_64/acorn.so :	$(ACORN_SRCS)
 	ARCH=$(ARCH) critcl -pkg acorn 
 
 
-lib/acorn/macosx-ix86/rays.dylib   :	rays.tcl rays.h
+lib/rays/macosx-ix86/rays.dylib   :	rays.tcl rays.h
 	ARCH=Darwin.i386 critcl -target macosx-x86_32 -pkg rays 
 
-lib/acorn/macosx-x86_64/rays.dylib :	rays.tcl rays.h
+lib/rays/macosx-x86_64/rays.dylib :	rays.tcl rays.h
 	ARCH=Darwin.x86_64 critcl -target macosx-x86_64 -pkg rays 
 
-lib/acorn/linux-x86_64/rays.so :	rays.tcl rays.h
+lib/rays/linux-x86_64/rays.so :	rays.tcl rays.h
 	ARCH=linux.x86_64 critcl -pkg rays 
 
 
