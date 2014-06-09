@@ -64,9 +64,6 @@ namespace eval acorn {
 	    }
 	}
 
-	set ::acorn::SurfaceTypes(coordbrk)	-1
-	set ::acorn::SurfaceInfos(coordbrk)	-1
-
 	foreach type [glob $::Surfaces/lib/[arch]/*.so] {
 	    if { ![set ::acorn::SurfaceTypes([file rootname [file tail $type]]) [acorn::getsymbol $type traverse]] } {
 		error "Cannot load traverse from $type"

@@ -56,8 +56,6 @@ oo::class create ::acorn::BaseModel {
 	foreach par $basepar i [iota 0 [llength $basepar]-1] { lappend basemap $par p$i }
 	set anonsurf 0
 
-	set surfdefs(coordbrk,pdef) $basedef
-
 	set surftype {}
 	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
 	set surf 0
@@ -228,10 +226,13 @@ oo::class create ::acorn::Model {
     superclass ::acorn::BaseModel
 
     variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs objects
+    variable wavelength
     accessor grouptype current surfaces default basepar
 
     constructor { args } {
 	next 
+
+puts $basedef
 
 	procs surface coordbrk surface-group surface-group-non-sequential
 
@@ -252,7 +253,7 @@ oo::class create ::acorn::Model {
 
 	set current Surface-Add-Error
     }
-    method coordbrk { name args } { surface name [list {*}[join $args] type coordbrk] }
+    method coordbrk { name args } { my surface name [list {*}[join $args] type coordbrk] }
 
     method surface { name args } {
 

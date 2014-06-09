@@ -86,18 +86,19 @@ extern "C" {
 
 			//printf("Conv ");
 			//prays(ray, 1);
+		        //printf("traverse %f %f\n", n, z);
 
-		    if ( (long) surf[i].traverse == COORDBK ) {
+		    ray->vignetted = surf[i].traverse(m, &surf[i], ray);
+
+		    if ( ray->vignetted == 2 ) {
+			ray->vignetted = 0;
+
 			if ( xray ) {
 			    memcpy(xray, ray, rsize);
 			    xray += rsize;
 			}
 			continue; 
 		    }
-
-
-		    //printf("traverse %f %f\n", n, z);
-		    ray->vignetted = surf[i].traverse(m, &surf[i], ray);
 
 		    if ( ray->vignetted || (!ray->vignetted && aper_clip(&surf[i], ray)) ) {
 		        ray->vignetted = i ? i : -1;

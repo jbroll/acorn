@@ -17,6 +17,7 @@ TCL	= acorn.tcl acorn-model.tcl				\
 
 
 SURFS	= surfaces/lib/$(ARCH)/simple.so		\
+	  surfaces/lib/$(ARCH)/coordbrk.so		\
 	  surfaces/lib/$(ARCH)/zernike.so		\
 	  surfaces/lib/$(ARCH)/zernikz.so		\
 	  surfaces/lib/$(ARCH)/lens-array-rect.so	\
@@ -87,6 +88,11 @@ lib/nproc/linux-x86_64/nproc.so :	nproc.tcl
 surfaces/lib/$(ARCH)/simple.so : surfaces/simple.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
 	$(CXX) $(CFLAGS) -shared $(INC) surfaces/simple.cpp -o surfaces/lib/$(ARCH)/simple.so
+
+surfaces/lib/$(ARCH)/coordbrk.so : surfaces/coordbrk.cpp acorn.h $(ACORN_UTIL)
+	@mkdir -p surfaces/lib/$(ARCH)
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/coordbrk.cpp -o surfaces/lib/$(ARCH)/coordbrk.so
+
 
 surfaces/lib/$(ARCH)/evenasph.so : surfaces/evenasph.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)

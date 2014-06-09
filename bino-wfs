@@ -14,12 +14,12 @@ Model field set 1 y  0
 Model update
 
 acorn::Rays create trak 32
-acorn::Rays create 1ray 1
+acorn::Rays create ray1 1
 
-    1ray set px 0 py 0 pz 0 vignetted 0		; # Set up aray.
-    1ray angles : 0.25 0
+    ray1 set px 0 py 0 pz 0 vignetted 0		; # Set up aray.
+    ray1 angles : 0.25 0
 
-Model trace 1ray {} current 0 trak
+Model trace ray1 {} current 0 trak
 
 puts [Model 20 get x y]
 puts ""

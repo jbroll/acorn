@@ -485,10 +485,11 @@ oo::class create ::acorn::ZMX {
 	    $aray set px 0 py 0 pz 0 vignetted 0		; # Set up aray.
 	    $aray angles : $fx $fy
 
-	    [self] trace $aray [list 1 [expr $surf-1]] [dict get $wavelength current wave] 		; # Trace to just before this surface.
-	    $aray advance : [my [expr $surf-1] get thickness]
+	    my  $surf set $acorn::ZMXParmMap([my $surf get type],$param) 0.0			; # Set the parameter to be solved to 0
 
-	    set value [$aray get p$acorn::ZMXParmMap([my $surf get type],$param)]
+	    [self] trace $aray [list 1 $surf] [dict get $wavelength current wave] 		; # Trace to the surface.
+
+	    set value [$aray get p$acorn::ZMXParmMap([my $surf get type],$param)]		; # Copy the parameter from the ray to the surface.
 	} else {
 	    set value [expr { [my $from get $acorn::ZMXParmMap([my $surf get type],$param)]*$scale+$offset }]
 	}
