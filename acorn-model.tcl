@@ -42,6 +42,8 @@ oo::class create ::acorn::BaseModel {
     variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce objects
     accessor surfaces basepar
 
+    variable wavelength 
+
     constructor {} {
 	set grouptype sequential
 	set basedef { name {} type simple comment {} n 1.00 glass {} x 0.0 y 0.0 z 0.0 rx 0.0 ry 0.0 rz 0.0 thickness 0.0 aper_type {} aper_param {} aper_min 0.0 aper_max 0.0 enable 1 annot 0 }
@@ -59,6 +61,9 @@ oo::class create ::acorn::BaseModel {
 	set surftype {}
 	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
 	set surf 0
+
+	#dict set wavelength current { wave 5000 weight 1 }
+	#dict set wavelength 1 	    { wave 5000 weight 1 }
     }
     destructor {
 	foreach { type surf } $surfaces {
@@ -69,6 +74,14 @@ oo::class create ::acorn::BaseModel {
 	}
 
     }
+
+    method wavelength { op args } { 
+	switch $op {
+	    set { dict set  wavelength {*}$args }
+	    get { dict get $wavelength {*}$args }
+	}
+    }
+
     method surfset1 { obj surf parmap cmd args } {
 	switch $cmd {
 	    length  { $obj $cmd $surf }
@@ -84,7 +97,7 @@ oo::class create ::acorn::BaseModel {
 	}
     }
 
-    method trace { rays { surfs {} } { wave 5000 } { thread 0 } { xray 0 } } {		# Assemble the surfaces to be traced.
+    method trace { rays { surfs {} } { wave current } { thread 0 } { xray 0 } } {		# Assemble the surfaces to be traced.
 	set ok 0
 	if { $surfs eq {} || $surfs == -1 } { set ok 1 }
 
@@ -95,6 +108,9 @@ oo::class create ::acorn::BaseModel {
 	::acorn::SurfaceList create slist 0
 	::acorn::ModelData   create mdata 1
 
+	if { $wave eq "current" } {
+	    set wave [my wavelength get current wave]
+	}
 	mdata set 0 z 0
 	mdata set 0 n 1
 	mdata set 0 w $wave

@@ -147,12 +147,6 @@ oo::class create ::acorn::ZMX {
 	}
     }
 
-    method wavelength { op args } { 
-	switch $op {
-	    set { dict set  wavelength {*}$args }
-	    get { dict get $wavelength {*}$args }
-	}
-    }
 
     method print {} {
 	next
@@ -459,12 +453,12 @@ oo::class create ::acorn::ZMX {
 
     method WAVL { wave }          { dict set wavelength current $wave }
     method WAVM { n wave weight } {
-				    dict set wavelength $n wave    $wave
+				    dict set wavelength $n wave    [expr $wave*10000]
 				    dict set wavelength $n weight  $weight
     }
     method WWGT { weight } {	    dict set wavelength weight  $weight }
     method WAVN { args } {
-	foreach wave   $args {	    dict set wavelength [incr n] wave    $wave }
+	foreach wave   $args {	    dict set wavelength [incr n] wave    [expr $wave*1000] }
     }
     method WWGN { args } {
 	foreach weight $args {      dict set wavelength [incr n] weight  $weight }
@@ -491,7 +485,7 @@ oo::class create ::acorn::ZMX {
 	    $aray set px 0 py 0 pz 0 vignetted 0		; # Set up aray.
 	    $aray angles : $fx $fy
 
-	    [self] trace $aray [list 1 [expr $surf-1]] [expr { [dict get $wavelength current wave]*10000 }] 		; # Trace to just before this surface.
+	    [self] trace $aray [list 1 [expr $surf-1]] [dict get $wavelength current wave] 		; # Trace to just before this surface.
 	    $aray advance : [my [expr $surf-1] get thickness]
 
 	    set value [$aray get p$acorn::ZMXParmMap([my $surf get type],$param)]
