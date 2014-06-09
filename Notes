@@ -4,28 +4,24 @@ arec array  type
 arec struct type
 arec C and tcl parse alike
 
-	x 1 5 k 5 set 4 t 6
-
-arec minimize list nesting.
-
+	x set 1 5 k 5 4 t 6
 
 add merit functions
 add plots
 
+add Tilted		- Done - Needs Test
+
 add Para-axial
 
-add coord break		- Need test data
-add verbose debug
-
 add lenslets		- Done/
+add coord break		- Done/Tested
 
 add EvenAsphere		- Done/Tested	- Broken in Binospec?
 add Zernike		- Done/Tested
 add glass		- Done
 add ZMX parser		- Done
 
-
 Testing GMT-0 		- Done
 Testing GMT-1 Zernike	- Done
-Testing GMT-1-AoCWFS-1	- Testing - primary rotations fail.
+Testing GMT-1-AoCWFS-1	- Done
 
