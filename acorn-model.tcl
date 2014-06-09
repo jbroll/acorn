@@ -39,10 +39,8 @@
 
 
 oo::class create ::acorn::BaseModel {
-    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce objects
+    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce objects wavelength
     accessor surfaces basepar
-
-    variable wavelength 
 
     constructor {} {
 	set grouptype sequential
@@ -60,8 +58,8 @@ oo::class create ::acorn::BaseModel {
 	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
 	set surf 0
 
-	#dict set wavelength current { wave 5000 weight 1 }
-	#dict set wavelength 1 	    { wave 5000 weight 1 }
+	dict set wavelength current 5000
+	dict set wavelength 1 	    { wave 5000 weight 1 }
     }
     destructor {
 	foreach { type surf } $surfaces {
@@ -107,7 +105,7 @@ oo::class create ::acorn::BaseModel {
 	::acorn::ModelData   create mdata 1
 
 	if { $wave eq "current" } {
-	    set wave [my wavelength get current wave]
+	    set wave [my wavelength get current]
 	}
 	mdata set 0 z 0
 	mdata set 0 n 1
@@ -225,14 +223,11 @@ oo::class create ::acorn::BaseModel {
 oo::class create ::acorn::Model {
     superclass ::acorn::BaseModel
 
-    variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs objects
-    variable wavelength
+    variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs objects wavelength
     accessor grouptype current surfaces default basepar
 
     constructor { args } {
 	next 
-
-puts $basedef
 
 	procs surface coordbrk surface-group surface-group-non-sequential
 

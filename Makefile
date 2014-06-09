@@ -1,6 +1,5 @@
 
 
-
 OS  =$(shell uname)
 
 
@@ -18,6 +17,7 @@ TCL	= acorn.tcl acorn-model.tcl				\
 
 SURFS	= surfaces/lib/$(ARCH)/simple.so		\
 	  surfaces/lib/$(ARCH)/coordbrk.so		\
+	  surfaces/lib/$(ARCH)/tilted.so		\
 	  surfaces/lib/$(ARCH)/zernike.so		\
 	  surfaces/lib/$(ARCH)/zernikz.so		\
 	  surfaces/lib/$(ARCH)/lens-array-rect.so	\
@@ -93,6 +93,10 @@ surfaces/lib/$(ARCH)/coordbrk.so : surfaces/coordbrk.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
 	$(CXX) $(CFLAGS) -shared $(INC) surfaces/coordbrk.cpp -o surfaces/lib/$(ARCH)/coordbrk.so
 
+surfaces/lib/$(ARCH)/tilted.so : surfaces/tilted.cpp acorn.h $(ACORN_UTIL)
+	@mkdir -p surfaces/lib/$(ARCH)
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/tilted.cpp -o surfaces/lib/$(ARCH)/tilted.so
+
 
 surfaces/lib/$(ARCH)/evenasph.so : surfaces/evenasph.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
@@ -145,7 +149,7 @@ test.Darwin : FORCE
 	arch -x86_64 /usr/local/bin/tclsh8.6 ./acorn-test.tcl
 
 test.Linux : FORCE
-	tclkit8.6 ./acorn-test.tcl
+	tclkit8.6.1 ./acorn-test.tcl
 
 clean : 
 	$(MAKE) ARCH=Darwin.i386	clean-rm

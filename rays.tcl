@@ -51,8 +51,13 @@ if { [::critcl::compiled] } {
     }
 
     proc ::acorn::prays { rays { pipe {} } { out stdout } } {
+	set format {}
 
-	if { $pipe eq ">" } { set out [open $out w] }
+	switch $pipe {
+	  ">" { set out [open $out w] }
+	  {} {}
+	  default { set format $pipe }
+	}
 
 	set i 1
 
@@ -60,7 +65,13 @@ if { [::critcl::compiled] } {
 	puts $out "-	-	-	-	--	--	--	-"
 
 	foreach row [$rays get px py pz kx ky kz vignetted] {
-	    puts $out "$i	[join $row \t]"
+	    if { $format eq {} } {
+		set line $row
+	    } else {
+		set line [lmap x $row { format $format $x }]
+	    }
+
+	    puts $out "$i	[join $line \t]"
 	    incr i
 	}
 

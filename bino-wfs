@@ -23,10 +23,10 @@ Model trace ray1 {} current 0 trak
 
 puts [Model 20 get x y]
 puts ""
-acorn::prays trak
+acorn::prays trak %.3f
 
 
-exit
+#exit
 
 
 puts ""
@@ -37,14 +37,16 @@ puts ""
 puts "n	a	x	y"
 puts "-	-	-	-"
 
-foreach a [iota 1 12] {
+foreach n [iota 1 12] {
 
-    Model field set 1 x [expr $a/12.0]
+    set a [expr ($n/12.0/2.0)]
+
+    Model field set 1 x  $a
     Model field set 1 y  0
 
     Model update
 
-    puts "$a	[expr $a/12.0]	[join [Model 20 get x y] \t]"
+    puts "$n	[format %.4f $a]	[join [lmap x [Model 20 get x y] { format %.4f $x }]  \t]"
 }
 
 #Model print

@@ -1,4 +1,4 @@
-#!/usr/bin/env tclkit8.6
+#!/usr/bin/env tclkit8.6.1
 #
 lappend auto_path ./lib ../lib
 
@@ -24,9 +24,10 @@ set rays {}
 
 ::tcltest::test CoordBrk { CoordBrk } -match tol -body {
     acorn::ZMX create Model source test/CoordBrk.data/galvanometer.zmx
+
     Model config 1
 
-    set wave [expr [Model wavelength get current]*10000]
+    set wave [Model wavelength get current]
 
     #acorn::ZMX create Model source test/CoordBrk.data/polygon.zmx
 

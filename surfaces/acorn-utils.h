@@ -1,4 +1,5 @@
 
+
 inline double AcornSimpleSurfaceDistance(Ray &r, double z, double R, double K)
 {
     double d;
@@ -76,13 +77,9 @@ inline void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
     }
 }
 
-inline int AcornSimpleIterativeIntersect(Surface &s, Ray &r, double z, Vector3d &nhat, SagittaFunc sagitta) 
+inline int AcornSimpleIterativeIntersect(double R, double K, double n, Surface &s, Ray &r, double z, Vector3d &nhat, SagittaFunc sagitta) 
 {
     int i;
-
-    double R = s.p[Pm_R];
-    double K = s.p[Pm_K];
-    double n = s.p[Px_n];
 
     double Dsign = r.k(Z)/fabs(r.k(Z));
     double Rsign = R/fabs(R);
@@ -132,4 +129,3 @@ inline int AcornSimpleIterativeIntersect(Surface &s, Ray &r, double z, Vector3d 
 
     return 0;
 }
-

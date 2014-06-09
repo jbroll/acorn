@@ -73,7 +73,7 @@ extern "C" {
     int      nterms = (int) s.p[Pm_nterms];
 
     if ( nterms ) {
-	if ( AcornSimpleIterativeIntersect(s, r, z, nhat, EvenASpSag) ) { return 1; }
+	if ( AcornSimpleIterativeIntersect(R, K, n, s, r, z, nhat, EvenASpSag) ) { return 1; }
     } else {
 	d = AcornSimpleSurfaceDistance(r, z, R, K); 		// Ray/Surface intersection position
 	r.p += d * r.k;

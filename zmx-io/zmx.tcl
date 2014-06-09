@@ -122,7 +122,7 @@ oo::class create ::acorn::ZMX {
 	}
 
 	if { ![dict exists $wavelength current] } {
-	    dict set wavelength current [dict get $wavelength 1]
+	    dict set wavelength current [dict get $wavelength 1 wave]
 	}
 
 	eval $pup
@@ -451,14 +451,14 @@ oo::class create ::acorn::ZMX {
     method VDXN { args } {}
     method VDYN { args } {}
 
-    method WAVL { wave }          { dict set wavelength current $wave }
+    method WAVL { wave }          { dict set wavelength current [expr $wave*10000] }
     method WAVM { n wave weight } {
 				    dict set wavelength $n wave    [expr $wave*10000]
 				    dict set wavelength $n weight  $weight
     }
     method WWGT { weight } {	    dict set wavelength weight  $weight }
     method WAVN { args } {
-	foreach wave   $args {	    dict set wavelength [incr n] wave    [expr $wave*1000] }
+	foreach wave   $args {	    dict set wavelength [incr n] wave    [expr $wave*10000] }
     }
     method WWGN { args } {
 	foreach weight $args {      dict set wavelength [incr n] weight  $weight }
@@ -487,7 +487,7 @@ oo::class create ::acorn::ZMX {
 
 	    my  $surf set $acorn::ZMXParmMap([my $surf get type],$param) 0.0			; # Set the parameter to be solved to 0
 
-	    [self] trace $aray [list 1 $surf] [dict get $wavelength current wave] 		; # Trace to the surface.
+	    [self] trace $aray [list 1 $surf] [dict get $wavelength current] 			; # Trace to the surface.
 
 	    set value [$aray get p$acorn::ZMXParmMap([my $surf get type],$param)]		; # Copy the parameter from the ray to the surface.
 	} else {
