@@ -11,6 +11,8 @@
 Supported surface types
 
  * Simple (Zemax standard surface).
+ * Coordinate Break.
+ * Tilted
  * Even Asphere.
  * Zernike.
  * Lens array (rectangular and hex grids).
