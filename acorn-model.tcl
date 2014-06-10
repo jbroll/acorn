@@ -39,8 +39,9 @@
 
 
 oo::class create ::acorn::BaseModel {
-    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce objects wavelength
-    accessor surfaces basepar
+    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce objects
+    variable wavelength pupilDiameter
+    accessor surfaces basepar pupilDiameter
 
     constructor {} {
 	set grouptype sequential

@@ -33,7 +33,7 @@ ACORN_UTIL = surfaces/acorn-utils.h
 all: acorn.$(OS)
 
 acorn.Darwin :
-	@$(MAKE) ARCH=Darwin.i386	BITS=-m32	acorn.Darwin.i386   rays.Darwin.i386   nproc.Darwin.i386   arec.Darwin.i386
+	#@$(MAKE) ARCH=Darwin.i386	BITS=-m32	acorn.Darwin.i386   rays.Darwin.i386   nproc.Darwin.i386   arec.Darwin.i386
 	@$(MAKE) ARCH=Darwin.x86_64	BITS=-m64	acorn.Darwin.x86_64 rays.Darwin.x86_64 nproc.Darwin.x86_64 arec.Darwin.x86_64
 
 acorn.Linux  :

@@ -22,13 +22,23 @@ if { [::critcl::compiled] } {
     }
 
     proc ::acorn::mkrays { name args } {
-	if { $name eq "-" } { set name rays[incr ::acorn::RAYS] }
+	set args [dict merge { type acorn::Rays circle 0 nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - intensity 1 } $args]
+	dict with args {}
+
+	if { $name eq "-" } 		   { set name [$type new] }
+	if { [info commands $name] eq {} } { $type create $name 0 }
 	set pz 0
-	set args [dict merge { type acorn::Rays circle 0 nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - } $args]
 
 
-	dict with args {
-	    if { [info commands $name] eq {} } { $type create $name 0 }
+
+	    if { [info exists diameter] } {
+		set radius [expr $diameter/2.0]
+	    }
+
+	    if { [info exists radius] } {
+		set circle 1
+		set box $radius
+	    }
 
 	    if { [info exists box] } {
 		set x0 [expr -$box]
@@ -42,11 +52,10 @@ if { [::critcl::compiled] } {
 		foreach y [jot $ny $y0 $y1 $yi] {
 		    if { $circle && $x*$x+$y*$y > $x0*$x0+$y0+$y0 } { continue }
 
-		    $name set end+1 px $x py $y pz $pz kx 0.0 ky 0.0 kz 1.0 vignetted 0
+		    $name set end+1 px $x py $y pz $pz kx 0.0 ky 0.0 kz 1.0 vignetted 0 intensity $intensity
 		    incr i
 		}
 	    }
-	}
 
 	return $name
     }
@@ -62,10 +71,10 @@ if { [::critcl::compiled] } {
 
 	set i 1
 
-	puts $out "id	x	y	z	l	m	n	v"
-	puts $out "-	-	-	-	--	--	--	-"
+	puts $out "id	x	y	z	l	m	n	v	i"
+	puts $out "-	-	-	-	--	--	--	-	-"
 
-	foreach row [$rays get px py pz kx ky kz vignetted] {
+	foreach row [$rays get px py pz kx ky kz vignetted intensity] {
 	    if { $format eq {} } {
 		set line $row
 	    } else {
@@ -158,7 +167,7 @@ if { [::critcl::compiled] } {
 
 
 
-    critcl::cproc ::acorn::Rays::bin { Tcl_Interp* ip char* Type int nx int ny double sx double sy double sigma double bias double noise int poison } ok {
+    critcl::cproc ::acorn::Rays::bin { Tcl_Interp* ip char* Type int nx int ny double sx double sy int radius double sigma double bias double noise int poison } ok {
 #define TY_USHORT	1
 	ARecPath *path = (ARecPath *) clientdata;
 
@@ -167,9 +176,7 @@ if { [::critcl::compiled] } {
 	void    *data;
 
         float    cx, cy, h;
-        int      x, y, r;
-
-
+        int      x, y, r = radius;
 
 	Ray *rays = (Ray *)path->recs;
 
@@ -200,23 +207,22 @@ if { [::critcl::compiled] } {
 	for ( y = 0; y < ny; y++ ) {
 	    for ( x = 0; x < nx; x++ ) {
 		switch ( type ) {
-		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] = gennor(bias, noise);        break;
+		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] = gennor(bias, noise); break;
 		}
 	    }
 	}
 
 	for ( int i = path->first; i <= path->last; i++ ) {
 
+	    cx = rays[i].p[X]/sx;
+	    cy = rays[i].p[Y]/sy;
+	     h = rays[i].intensity;
+
+	    cx += nx/2;
+	    cy += ny/2;
+
 	    for ( y = -r/2; y < r/2; y++ ) {
 		for ( x = -r/2; x < r/2; x++ ) {
-
-		    cx = rays[i].p[X];
-		    cy = rays[i].p[Y];
-		     h = rays[i].intensity;
-
-		    cx += nx/2;
-		    cy += ny/2;
-
 		    if ( cx+r < 0 || cx-r >= nx ) { continue; }
 		    if ( cy+r < 0 || cy-r >= ny ) { continue; }
 
@@ -226,18 +232,13 @@ if { [::critcl::compiled] } {
 		    int xi = (int)cx + x;
 		    int yi = (int)cy + y;
 
-		    if ( xi < 0 || X >= nx ) { continue; }
-		    if ( yi < 0 || Y >= ny ) { continue; }
+		    if ( xi < 0 || xi >= nx ) { continue; }
+		    if ( yi < 0 || yi >= ny ) { continue; }
 
 		    double squ = (x+fx)*(x+fx) + (y+fy)*(y+fy);
 
 		    switch ( type ) {
-		     case TY_USHORT :
-
-			    ((unsigned short *) data)[yi*nx + xi] += h*exp(-squ/sigma);
-			    ((unsigned short *) data)[yi*nx + xi] = ignpoi(((unsigned short *) data)[yi*nx + xi]);
-
-			    break;
+		     case TY_USHORT : ((unsigned short *) data)[yi*nx + xi] += h*exp(-squ/sigma); break;
 		    }
 		}
 	    }
@@ -247,12 +248,16 @@ if { [::critcl::compiled] } {
 	    for ( x = 0; x < nx; x++ ) {
 		
 		switch ( type ) {
-		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] -= 32768;     break;
+		 case TY_USHORT :
+		     if ( poison ) { ((unsigned short *) data)[y*nx + x] = ignpoi(((unsigned short *) data)[y*nx + x]); }
+		     ((unsigned short *) data)[y*nx + x] -= 32768;     break;
 		}
 	    }
 	}
 
 	swap2((char*) data, (char *)data, nx*ny*size);
+
+	Tcl_SetObjResult(ip, Tcl_NewByteArrayObj((const unsigned char *) data, nx*ny*size));
 
 	return TCL_OK;
 	

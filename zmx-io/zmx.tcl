@@ -76,6 +76,8 @@ oo::class create ::acorn::ZMX {
     variable mce mce_current
     variable objects
 
+    variable pupilDiameter
+
     variable Id Name Notes Temp Pres								\
 	params comment nonseqid nonseq nsoexit							\
 	debug 
@@ -182,7 +184,7 @@ oo::class create ::acorn::ZMX {
     method VERS { args } {}
     method UNIT { lens_unit src_prefix src_unit anal_prefix anal_unit args }	{}
     method ENVD { temp pres args }	{ set Temp $temp; set Pres $pres }
-    method ENPD { args }	{ }
+    method ENPD { size args }		{ set pupilDiameter $size }
     method GCAT { args }	{}
 
     method PRIM { args } {}

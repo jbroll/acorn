@@ -2,9 +2,13 @@
 #
 lappend auto_path lib
 
+source jbr.tcl/unix.tcl
+
 set Data zmx-models
 
 package require acorn
+
+source jbr.tcl/fits.tcl
 
     acorn::ZMX create Model source $Data/bino_wfs.ZMX
 
@@ -13,26 +17,28 @@ Model field set 1 y  0
 
 Model update
 
-acorn::Rays create trak 32
-acorn::Rays create ray1 1
+set trak [acorn::Rays new 32]
+set ray1 [acorn::mkrays . nx 200 ny 200 diameter [Model pupilDiameter] intensity 10]
 
-    ray1 set px 0 py 0 pz 0 vignetted 0		; # Set up aray.
-    ray1 angles : 0.25 0
+    $ray1 angles : 0.25 0
 
-Model trace ray1 {} current 0 trak
+#acorn::prays $ray1
+
+Model trace $ray1 {} current 0 
+
+#acorn::prays $ray1
+
+echo [fits 16 { 1000 1000 } { 1 1 } { 0 0 } [$ray1 bin ushort 1000 1000 .008 .008 15 5 100 5 0] {}] > /Users/john/ds9.fits b
+
+exit
 
 puts [Model 20 get x y]
 puts ""
-acorn::prays trak %.3f
-
-
-#exit
-
+#acorn::prays trak %.3f
 
 puts ""
 puts ""
-
-
+Model print
 
 puts "n	a	x	y"
 puts "-	-	-	-"
@@ -49,7 +55,6 @@ foreach n [iota 1 12] {
     puts "$n	[format %.4f $a]	[join [lmap x [Model 20 get x y] { format %.4f $x }]  \t]"
 }
 
-#Model print
-
+exit
 
 
