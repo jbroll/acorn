@@ -76,14 +76,11 @@ oo::class create ::acorn::ZMX {
     variable mce mce_current
     variable objects
 
-    variable pupilDiameter
-
     variable Id Name Notes Temp Pres								\
 	params comment nonseqid nonseq nsoexit							\
 	debug 
 
-    variable wavelength 
-    variable field nfield fieldx fieldy
+    variable nfield fieldx fieldy
     variable aray
 
     accessor grouptype current surfaces default debug
@@ -119,12 +116,13 @@ oo::class create ::acorn::ZMX {
 
 	set i 1
 	foreach x $fieldx y $fieldy {
-	    dict set field $i [list x $x y $y]
+	    my set field $i [list x $x y $y]
 	    incr i
 	}
 
-	if { ![dict exists $wavelength current] } {
-	    dict set wavelength current [dict get $wavelength 1 wave]
+	try { my get wavelength current 
+	} on error message {
+	    my set wavelength current [my get wavelength 1 wave]
 	}
 
 	eval $pup
@@ -141,14 +139,6 @@ oo::class create ::acorn::ZMX {
 	    my [$current get $surf name] set z[expr $n-15] $value
 	}
     }
-
-    method field { op args } {
-	switch $op {
-	    set { dict set  field {*}$args }
-	    get { dict get $field {*}$args }
-	}
-    }
-
 
     method print {} {
 	next
@@ -183,8 +173,8 @@ oo::class create ::acorn::ZMX {
     method ZVDY { args } {}
     method VERS { args } {}
     method UNIT { lens_unit src_prefix src_unit anal_prefix anal_unit args }	{}
-    method ENVD { temp pres args }	{ set Temp $temp; set Pres $pres }
-    method ENPD { size args }		{ set pupilDiameter $size }
+    method ENVD { temp pres args }	{ my set Temp $temp; set Pres $pres }
+    method ENPD { size args }		{ my set pupilDiameter $size }
     method GCAT { args }	{}
 
     method PRIM { args } {}
@@ -453,17 +443,17 @@ oo::class create ::acorn::ZMX {
     method VDXN { args } {}
     method VDYN { args } {}
 
-    method WAVL { wave }          { dict set wavelength current [expr $wave*10000] }
+    method WAVL { wave }          { my set wavelength current [expr $wave*10000] }
     method WAVM { n wave weight } {
-				    dict set wavelength $n wave    [expr $wave*10000]
-				    dict set wavelength $n weight  $weight
+				    my set wavelength $n wave    [expr $wave*10000]
+				    my set wavelength $n weight  $weight
     }
-    method WWGT { weight } {	    dict set wavelength weight  $weight }
+    method WWGT { weight } {	    my set wavelength weight  $weight }
     method WAVN { args } {
-	foreach wave   $args {	    dict set wavelength [incr n] wave    [expr $wave*10000] }
+	foreach wave   $args {	    my set wavelength [incr n] wave    [expr $wave*10000] }
     }
     method WWGN { args } {
-	foreach weight $args {      dict set wavelength [incr n] weight  $weight }
+	foreach weight $args {      my set wavelength [incr n] weight  $weight }
     }
 
     method XDAT { args } {}
@@ -483,13 +473,13 @@ oo::class create ::acorn::ZMX {
 	    
 	    # Try a chief ray solve
 	    #
-	    lassign [dict get $field 1] x fx y fy		; # Get the current field angles
+	    lassign [my get field 1] x fx y fy		; # Get the current field angles
 	    $aray set px 0 py 0 pz 0 vignetted 0		; # Set up aray.
 	    $aray angles : $fx $fy
 
 	    my  $surf set $acorn::ZMXParmMap([my $surf get type],$param) 0.0			; # Set the parameter to be solved to 0
 
-	    [self] trace $aray [list 1 $surf] [dict get $wavelength current] 			; # Trace to the surface.
+	    [self] trace $aray [list 1 $surf] [my get wavelength current] 			; # Trace to the surface.
 
 	    set value [$aray get p$acorn::ZMXParmMap([my $surf get type],$param)]		; # Copy the parameter from the ray to the surface.
 	} else {
@@ -514,6 +504,6 @@ oo::class create ::acorn::ZMX {
     private method xPRAM { surf value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
     private method xTHIC { surf value args }         { my $surf set thickness                                      $value }
     private method xXFIE { surf value args } 	     { 	# X field value }
-    private method xWAVE { wave value args } 	     {  dict set wavelength $wave wave $value }
+    private method xWAVE { wave value args } 	     {  my set wavelength $wave wave $value }
 }
 

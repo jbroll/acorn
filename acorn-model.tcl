@@ -39,8 +39,7 @@
 
 
 oo::class create ::acorn::BaseModel {
-    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce objects
-    variable wavelength pupilDiameter
+    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce objects parameters
 
     accessor surfaces basepar
 
@@ -60,8 +59,10 @@ oo::class create ::acorn::BaseModel {
 	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
 	set surf 0
 
-	dict set wavelength current 5000
-	dict set wavelength 1 	    { wave 5000 weight 1 }
+	my set wavelength current 5000
+	my set wavelength 1 	  { wave 5000 weight 1 }
+
+	set parameters {}
     }
     destructor {
 	foreach { type surf } $surfaces {
@@ -73,15 +74,8 @@ oo::class create ::acorn::BaseModel {
 
     }
 
-    method set { dict set  parameters {*}$args }
-    method det { dict get $parameters {*}$args }
-
-    method wavelength { op args } { 
-	switch $op {
-	    set { dict set  wavelength {*}$args }
-	    get { dict get $wavelength {*}$args }
-	}
-    }
+    method set { args } { dict set  parameters {*}$args }
+    method get { args } { dict get $parameters {*}$args }
 
     method surfset1 { obj surf parmap cmd args } {
 	switch $cmd {
@@ -116,7 +110,7 @@ oo::class create ::acorn::BaseModel {
 	::acorn::ModelData   create mdata 1
 
 	if { $wave eq "current" } {
-	    set wave [my wavelength get current]
+	    set wave [my get wavelength current]
 	}
 	mdata set 0 z 0
 	mdata set 0 n 1
@@ -240,7 +234,7 @@ oo::class create ::acorn::BaseModel {
 oo::class create ::acorn::Model {
     superclass ::acorn::BaseModel
 
-    variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs objects wavelength
+    variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs objects
     accessor grouptype current surfaces default basepar
 
     constructor { args } {
