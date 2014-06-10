@@ -7,7 +7,8 @@ critcl::cflags -O3
 critcl::cheaders -I/Users/john/include -I/home/john/include
 critcl::cheaders arec/arec.h acorn.h rays.h
 
-critcl::tsources jbr.tcl/func.tcl jbr.tcl/tcloo.tcl jbr.tcl/unix.tcl	\
+critcl::tsources jbr.tcl/func.tcl jbr.tcl/tcloo.tcl			\
+		 jbr.tcl/fits.tcl jbr.tcl/unix.tcl			\
 		 zmx-io/uda.tcl zmx-io/agf.tcl				\
 		 acorn-model.tcl acorn.tcl				\
 		 zmx-io/zmx.tcl						\

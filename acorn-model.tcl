@@ -41,7 +41,8 @@
 oo::class create ::acorn::BaseModel {
     variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs mce objects
     variable wavelength pupilDiameter
-    accessor surfaces basepar pupilDiameter
+
+    accessor surfaces basepar
 
     constructor {} {
 	set grouptype sequential
@@ -72,6 +73,9 @@ oo::class create ::acorn::BaseModel {
 
     }
 
+    method set { dict set  parameters {*}$args }
+    method det { dict get $parameters {*}$args }
+
     method wavelength { op args } { 
 	switch $op {
 	    set { dict set  wavelength {*}$args }
@@ -94,8 +98,14 @@ oo::class create ::acorn::BaseModel {
 	}
     }
 
-    method trace { rays { surfs {} } { wave current } { thread 0 } { xray 0 } } {		# Assemble the surfaces to be traced.
+    method trace { { rays {} } { surfs {} } { wave current } { thread 0 } { xray 0 } } {		# Assemble the surfaces to be traced.
 	set ok 0
+
+	if { $rays  eq {} } {
+	    set rays [acorn::mkrays - nx 200 ny 200 diameter $pupilDiameter intensity 10]
+	    $rays angles : [my field get 1 x] [my field get 1 y]
+	}
+
 	if { $surfs eq {} || $surfs == -1 } { set ok 1 }
 
 	lassign $surfs start end
@@ -151,6 +161,12 @@ oo::class create ::acorn::BaseModel {
 	acorn::trace_rays [mdata getptr] [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] $thread $xray
 
 	rename slist {}
+
+	return $rays
+    }
+
+    method image { image args } {
+	my bin [my trace] 
     }
 
     method trace1 { surface rays { z 0 } } {

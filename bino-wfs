@@ -2,13 +2,9 @@
 #
 lappend auto_path lib
 
-source jbr.tcl/unix.tcl
-
 set Data zmx-models
 
 package require acorn
-
-source jbr.tcl/fits.tcl
 
     acorn::ZMX create Model source $Data/bino_wfs.ZMX
 
@@ -28,7 +24,7 @@ Model trace $ray1 {} current 0
 
 #acorn::prays $ray1
 
-echo [fits 16 { 1000 1000 } { 1 1 } { 0 0 } [$ray1 bin ushort 1000 1000 .008 .008 15 5 100 5 0] {}] > /Users/john/ds9.fits b
+echo [fits 16 { 1000 1000 } { 1 1 } { 0 0 } [$ray1 bin ushort 1000 1000 .008 .008 15 5 100 5 0] {}] > /home/john/ds9.fits b
 
 exit
 
