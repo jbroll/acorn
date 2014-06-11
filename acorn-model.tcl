@@ -195,6 +195,8 @@ oo::class create ::acorn::BaseModel {
 
 	puts $out "acorn::model [self] \{"
 
+	puts "\tparameters { \n\t\t[join [lmap { name value } $parameters { I "$name [list $value]" }] \n\t\t] \n\t}"
+
 	set tab "	"
 	foreach { type surf } $surfaces {
 	    if { $type eq "non-sequential" } { puts $out "${tab}surface-group-non-sequential X \{" ; set tab "		" }

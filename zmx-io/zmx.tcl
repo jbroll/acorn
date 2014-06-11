@@ -76,10 +76,11 @@ oo::class create ::acorn::ZMX {
     variable mce mce_current
     variable objects
 
-    variable Id Name Notes Temp Pres								\
-	params comment nonseqid nonseq nsoexit							\
+    variable Id Name Notes 			 					\
+	comment nonseqid nonseq nsoexit							\
 	debug 
 
+    variable float
     variable nfield fieldx fieldy
     variable aray
 
@@ -94,6 +95,8 @@ oo::class create ::acorn::ZMX {
 	set pup         {}
 	set mce(1)      {}
 	set mce_current 1
+	set semi 	{}
+	set float	0
 
 	set debug 0
 
@@ -123,6 +126,10 @@ oo::class create ::acorn::ZMX {
 	try { my get wavelength current 
 	} on error message {
 	    my set wavelength current [my get wavelength 1 wave]
+	}
+
+	if { $float } {
+	    my set pupilDiameter [expr { [dict get $semi [my get stop]] * 2.0 }]
 	}
 
 	eval $pup
@@ -173,7 +180,7 @@ oo::class create ::acorn::ZMX {
     method ZVDY { args } {}
     method VERS { args } {}
     method UNIT { lens_unit src_prefix src_unit anal_prefix anal_unit args }	{}
-    method ENVD { temp pres args }	{ my set Temp $temp; set Pres $pres }
+    method ENVD { temp pres args }	{ my set temperature $temp; my set presure $pres }
     method ENPD { size args }		{ my set pupilDiameter $size }
     method GCAT { args }	{}
 
@@ -301,7 +308,7 @@ oo::class create ::acorn::ZMX {
      method DISZ { thick } { 
 	 if { $grouptype ne "non-sequential" } { $current set $surf {*}[mappair $basemap [list thickness $thick]] }
      }
-     method DIAM { diam args } {	# This is Zemax computed semi-diameter, not the aperture size.  }
+     method DIAM { diam args } { dict set semi $Id $diam	; # This is Zemax computed semi-diameter, not the aperture size.  }
      method SQOB { args } { # aperture obscuration is true }
      method OBSC { args } { # aperture obscuration is true }
      method ELOB { args } { # aperture obscuration is true }
@@ -409,7 +416,7 @@ oo::class create ::acorn::ZMX {
     method COFN { args } {}
     method CONF { args } {}
     method DMFS { args } {}
-    method FLOA { args } {}
+    method FLOA { args } { set float 1 }
     method FTYP { args } { set nfield [lindex $args 2] }
     method FWGT { args } {}
     method FWGN { args } {}
@@ -433,7 +440,7 @@ oo::class create ::acorn::ZMX {
     method SCOL { args } {}
     method SDMA { args } {}
     method SLAB { args } {}
-    method STOP { args } {}
+    method STOP { args } { my set stop $Id }
     method TOL  { args } {}
     method TOLE { args } {}
     method VANN { args } {}

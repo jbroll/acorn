@@ -18,15 +18,11 @@ set ray1 [acorn::mkrays . nx 200 ny 200 diameter [Model get pupilDiameter] inten
 
     $ray1 angles : 0.25 0
 
-#acorn::prays $ray1
-
 Model trace $ray1 {} current 0 
 
 #acorn::prays $ray1
 
-echo [fits 16 { 1000 1000 } { 1 1 } { 0 0 } [$ray1 bin ushort 1000 1000 .008 .008 15 5 100 5 0] {}] > /home/john/ds9.fits b
-
-exit
+echo [fits 16 { 1000 1000 } { 1 1 } { 0 0 } [$ray1 bin ushort 1000 1000 .008 .008 15 5 100 5 0] {}] > /Users/john/ds9.fits b
 
 puts [Model 20 get x y]
 puts ""
@@ -43,14 +39,14 @@ foreach n [iota 1 12] {
 
     set a [expr ($n/12.0/2.0)]
 
-    Model field set 1 x  $a
-    Model field set 1 y  0
+    Model set field 1 x  $a
+    Model set field 1 y  0
 
     Model update
 
     puts "$n	[format %.4f $a]	[join [lmap x [Model 20 get x y] { format %.4f $x }]  \t]"
 }
 
-exit
+Model print
 
 
