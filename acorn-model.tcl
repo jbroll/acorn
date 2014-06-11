@@ -59,10 +59,11 @@ oo::class create ::acorn::BaseModel {
 	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
 	set surf 0
 
+	set parameters {}
+
 	my set wavelength current 5000
 	my set wavelength 1 	  { wave 5000 weight 1 }
 
-	set parameters {}
     }
     destructor {
 	foreach { type surf } $surfaces {

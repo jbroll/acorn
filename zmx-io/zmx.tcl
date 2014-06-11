@@ -80,7 +80,7 @@ oo::class create ::acorn::ZMX {
 	comment nonseqid nonseq nsoexit							\
 	debug 
 
-    variable float
+    variable float semi
     variable nfield fieldx fieldy
     variable aray
 

@@ -16,4 +16,4 @@ package require tcltest
     #acorn::prays rays
 
 } -cleanup { GMT destroy
-} -result {}
+} -result {rays}

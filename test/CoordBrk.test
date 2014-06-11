@@ -27,7 +27,7 @@ set rays {}
 
     Model config 1
 
-    set wave [Model wavelength get current]
+    set wave [Model get wavelength current]
 
     #acorn::ZMX create Model source test/CoordBrk.data/polygon.zmx
 
