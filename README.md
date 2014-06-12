@@ -3,7 +3,7 @@
 
  * Tcl driven configuration and execution language.
  * Fully threaded C++ [Eigen](http://eigen.tuxfamily.org) optimized raytracing.
- * Reads Zemax optical models.
+ * Reads [Zemax](http://www.zemax.com) optical models.
   * ZMX model files
   * AGF glass files
   * UDA aperture files.
