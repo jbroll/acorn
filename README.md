@@ -2,7 +2,7 @@
  Acorn is an optical systems raytracer.
 
  * Tcl driven configuration and execution language.
- * Fully threaded C++ optimized raytracing.
+ * Fully threaded C++ [Eigen](http://eigen.tuxfamily.org) optimized raytracing.
  * Reads Zemax optical models.
   * ZMX model files
   * AGF glass files
