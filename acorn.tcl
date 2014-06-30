@@ -19,11 +19,9 @@ critcl::csources acorn.cpp aperture.cpp glass/acorn-glass.cpp glass/glass.c tpoo
 critcl::clibraries -lstdc++
 
 
-try { 			set ::Surfaces $env(ACORN_SURFACES)
-} on error message { 	set ::Surfaces surfaces }
-
-try { 			set ::GlassDir $env(ACORN_GLASS)
-} on error message { 	set ::GlassDir glass }
+try { set ::ACORN    $env(ACORN)/ 		} on error message { 	set ::ACORN 	.			}
+try { set ::Surfaces $env(ACORN_SURFACES)	} on error message { 	set ::Surfaces ${::ACORN}/surfaces 	}
+try { set ::GlassDir $env(ACORN_GLASS)		} on error message { 	set ::GlassDir ${::ACORN}/glass		}
 
 namespace eval acorn {
     variable SurfaceTypes

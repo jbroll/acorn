@@ -73,8 +73,8 @@ oo::class create ::acorn::BaseModel {
 
     }
 
-    method set { dict set  parameters {*}$args }
-    method det { dict get $parameters {*}$args }
+    method set { args } { dict set  parameters {*}$args }
+    method get { args } { dict get $parameters {*}$args }
 
     method wavelength { op args } { 
 	switch $op {
@@ -158,6 +158,7 @@ oo::class create ::acorn::BaseModel {
 	    incr i
 	}
 
+puts $thread
 	acorn::trace_rays [mdata getptr] [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] $thread $xray
 
 	rename slist {}

@@ -14,13 +14,13 @@ Model field set 1 y  0
 Model update
 
 set trak [acorn::Rays new 32]
-set ray1 [acorn::mkrays . nx 200 ny 200 diameter [Model pupilDiameter] intensity 10]
+set ray1 [acorn::mkrays . nx 5000 ny 1000 diameter [Model get pupilDiameter] intensity 10]
 
     $ray1 angles : 0.25 0
 
 #acorn::prays $ray1
 
-Model trace $ray1 {} current 0 
+Model trace $ray1 {} current 4 
 
 #acorn::prays $ray1
 
