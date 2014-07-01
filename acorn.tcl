@@ -23,6 +23,39 @@ try { set ::ACORN    $env(ACORN)/ 		} on error message { 	set ::ACORN 	.			}
 try { set ::Surfaces $env(ACORN_SURFACES)	} on error message { 	set ::Surfaces ${::ACORN}/surfaces 	}
 try { set ::GlassDir $env(ACORN_GLASS)		} on error message { 	set ::GlassDir ${::ACORN}/glass		}
 
+if { ![::critcl::compiled] } {
+    ::critcl::argtype doubleList {
+	    if ( getDoubleList(interp, @@, &@A) != TCL_OK ) { { return TCL_ERROR; } }
+    } 
+
+    ::critcl::argtypesupport doubleList {
+	    typedef struct _doubleList {
+		    double *list;
+		    int	length;
+	    } doubleList;
+
+	    int getDoubleList(Tcl_Interp *interp, Tcl_Obj *obj, doubleList *list) {
+		    int i, objc;
+		    Tcl_Obj **objv;
+
+		if ( Tcl_ListObjGetElements(interp, obj, &objc, &objv) != TCL_OK ) { return TCL_ERROR; }
+
+		list->list   = (double *) malloc(objc*sizeof(double));
+		list->length = objc;
+
+		for ( i = 0; i < objc; i++ ) {
+		    if ( Tcl_GetDoubleFromObj(interp, objv[i], &list->list[i]) != TCL_OK ) {
+			free(list->list);
+			return TCL_ERROR;
+		    }
+		}
+
+		return TCL_OK;
+	    }
+
+    }
+}
+
 namespace eval acorn {
     variable SurfaceTypes
     variable SurfaceInfos
@@ -73,7 +106,8 @@ namespace eval acorn {
 	}
 
 	arec::typedef ::acorn::ModelData {
-	    double	n, z, w;
+	    double	z
+	    long        indicies, wavelengths;
 	}
 
 	arec::typedef ::acorn::Surfs {
@@ -95,6 +129,7 @@ namespace eval acorn {
 
 	    string	glass
 	    long	glass_ptr
+	    long	indicies
 
 	    long	enable
 	    long	annot
@@ -149,6 +184,22 @@ namespace eval acorn {
     }
     critcl::cproc glass_indx { long glass double wave } double {
                   return glass_indx((void*)glass, wave); 
+    }
+    critcl::cproc glass_indicies { long glass doubleList waves } long {
+	int i;
+
+	for ( i = 0; i < waves.length; i++ ) {
+	    waves.list[i] = glass_indx((void*)glass, waves.list[i]); 
+	}
+
+	return (long) waves.list;
+    }
+
+    critcl::cproc doubleList { doubleList doubles } long {
+	return (long) doubles.list;
+    }
+    critcl::cproc free { long pointer } void {
+	free((void *) pointer);
     }
 
     critcl::cproc _prays { long r int nray } void { prays((void *) r, nray); }

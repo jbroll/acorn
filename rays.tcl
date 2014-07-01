@@ -17,6 +17,7 @@ if { [::critcl::compiled] } {
 
     arec::typedef ::acorn::Rays {
 	double	px, py, pz, kx, ky, kz;
+	int	wave;
 	int	vignetted;
 	float	intensity;
     }
@@ -30,25 +31,25 @@ if { [::critcl::compiled] } {
 	if { [info commands $name] eq {} } { $type create $name  [expr { $nx*$ny }]  }
 
 
-	    if { [info exists diameter] } {
-		set radius [expr $diameter/2.0]
-	    }
+	if { [info exists diameter] } {
+	    set radius [expr $diameter/2.0]
+	}
 
-	    if { [info exists radius] } {
-		set circle 1
-		set box $radius
-	    }
+	if { [info exists radius] } {
+	    set circle 1
+	    set box $radius
+	}
 
-	    if { [info exists box] } {
-		set x0 [expr -$box]
-		set x1 [expr  $box]
-		set y0 [expr -$box]
-		set y1 [expr  $box]
-	    }
+	if { [info exists box] } {
+	    set x0 [expr -$box]
+	    set x1 [expr  $box]
+	    set y0 [expr -$box]
+	    set y1 [expr  $box]
+	}
+	if { $xi eq "-" } { set xi [expr { ($x1-$x0)/($nx-1.0) }] }
+	if { $yi eq "-" } { set yi [expr { ($y1-$y0)/($ny-1.0) }] }
 
-puts HERE
-	    $name mkrays : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle
-puts HERE
+	$name mkrays : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle
 
 	return $name
     }
@@ -139,14 +140,12 @@ puts HERE
 	int          i = path->first;
 
 	double x, y;
+	int   xth, yth;
 
 
-	for ( y = y0; y <= y1; y += yi ) {
-	for ( x = x0; x <= x1; x += xi ) {
+	for ( xth = nx, x = x0; xth--; x += xi ) {
+	for ( yth = nx, y = y0; yth--; y += yi ) {
 	    if ( circle && x*x+y*y > x0*x0+y0+y0 ) { continue; }
-
-fprintf(stderr, "%d\n", i);
-fflush(stderr);
 
 	    rays[i].p[X] =   x;
 	    rays[i].p[Y] =   y;
@@ -161,6 +160,8 @@ fflush(stderr);
 	    if ( ++i > path->last ) { break; }
 	}
 	}
+
+	return TCL_OK;
     } -pass-cdata true
 
     critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay } ok {

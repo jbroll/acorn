@@ -18,6 +18,7 @@ starbase_read image2 $Data/image2.rays  ; set ray2 [starbase2ray image2]
 starbase_read image3 $Data/image3.rays  ; set ray3 [starbase2ray image3]
 set rays {}
 
+
     lappend zemax {*}[acorn::rays-stat $ray1]
     lappend zemax {*}[acorn::rays-stat $ray2]
     lappend zemax {*}[acorn::rays-stat $ray3]
@@ -31,8 +32,12 @@ set rays {}
 
     #acorn::ZMX create Model source test/CoordBrk.data/polygon.zmx
 
+
     set rays [starbase2ray Start $rays]
+
+
      Model trace $rays { 0 7 }
+
      acorn::prays $rays > $Data/image1-7.acorn
 
     set rays [starbase2ray Start $rays]

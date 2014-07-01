@@ -33,14 +33,12 @@ extern "C" {
 
   int traverse(MData *m, Surface &s, Ray &r)
   {
-	double n0 = m->n;
 	double  z = m->z;
 
     double d;
 
     double R = s.p[Pm_R];
     double K = s.p[Pm_K];
-    double n = s.p[Px_n];
 
     d = AcornSimpleSurfaceDistance(r, z, R, K);
     r.p += d * r.k; 				// Ray/Surface Intersection position

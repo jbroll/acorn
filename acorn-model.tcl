@@ -47,7 +47,7 @@ oo::class create ::acorn::BaseModel {
 	set grouptype sequential
 	set basedef { name {} type simple comment {} n 1.00 glass {} x 0.0 y 0.0 z 0.0 rx 0.0 ry 0.0 rz 0.0 thickness 0.0 aper_type {} aper_param {} aper_min 0.0 aper_max 0.0 enable 1 annot 0 }
 	set default {}
-	set basemap { 	name name type type comment comment glass glass
+	set basemap { 	name name type type comment comment glass glass indicies indicies 
 	    		aperture aperture aper_type aper_type aper_param aper_param aper_data aper_data aper_leng aper_leng 
 			traverse traverse infos infos thickness thickness enable enable annot annot
 	}
@@ -113,9 +113,12 @@ oo::class create ::acorn::BaseModel {
 	if { $wave eq "current" } {
 	    set wave [my get wavelength current]
 	}
+	set plusone  [string repeat  1 [llength $wave]]
+	set minusone [string repeat -1 [llength $wave]]
+
 	mdata set 0 z 0
-	mdata set 0 n 1
-	mdata set 0 w $wave
+	mdata set 0 indicies    [acorn::doubleList $plusone]
+	mdata set 0 wavelengths [acorn::doubleList $wave]
 
 	set i 0
 
@@ -136,12 +139,14 @@ oo::class create ::acorn::BaseModel {
 
 		if { [$surf get $j glass] ne {} && [$surf get $j glass] ne "(null)" } {
 		    if { [$surf get $j glass_ptr] == -1 } {
-			my [$surf get $j name] set n -1
+			my [$surf get $j name] set indicies [acorn::doubleList $minusone]
 		    } else {
-			my [$surf get $j name] set n [acorn::glass_indx [$surf get $j glass_ptr] $wave]
+			my [$surf get $j name] set indicies [acorn::glass_indicies [$surf get $j glass_ptr] $wave]
 		    }
+		} else {
+		    my [$surf get $j name] set indicies [acorn::doubleList $plusone]
 		}
-
+		    
 
 		if { $end eq [$surf get $j name] } {
 		    slist set $i nsurf [expr $j+1]
@@ -164,13 +169,16 @@ oo::class create ::acorn::BaseModel {
 	my bin [my trace] 
     }
 
-    method trace1 { surface rays { z 0 } } {
+    method trace1 { surface rays { z 0 } { wave current } } {
 	::acorn::SurfaceList create slist 0
 	::acorn::ModelData   create mdata 1
 
+	if { $wave eq "current" } {
+	    set wave [my get wavelength current]
+	}
 	mdata set n 1
 	mdata set z $z
-	mdata set w 5000
+	mdata set wavelengths [acorn::doubleList $wave]
 
 	foreach { type surf } $surfaces {			# Find the surface to trace
 	    foreach j [iota 0 [$surf length]-1] {

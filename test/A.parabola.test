@@ -7,7 +7,6 @@ package require acorn
 
 source util/rays.tcl
 
-
 ::tcltest::test A.parabola { A.parabola } -match tol -body {
     set ::MatchTol 0.0000005
 

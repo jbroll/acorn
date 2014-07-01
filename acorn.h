@@ -59,6 +59,7 @@ typedef struct _Surface {
 
     char*	glass;
     void*	glass_ptr;
+    double*	indicies;
 
     long	enable;
     long	annote;
@@ -71,9 +72,9 @@ typedef struct _SurfaceList {
 } SurfaceList;
 
 typedef struct _MData {
-    double n;
     double z;
-    double w;
+    double *indicies;
+    double *wavelength;
 } MData;
 
 void aper_init(Surface *s, Affine3d transform);

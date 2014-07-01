@@ -59,14 +59,14 @@ extern "C" {
 
   int traverse(MData *m, Surface &s, Ray &r)
   {
-	double n0 = m->n;
+	double n0 = m->indicies[r.wave];
 	double  z = m->z;
 
     double d;
 
     double R = s.p[Pm_R];
     double K = s.p[Pm_K];
-    double n = s.p[Px_n];
+    double n = s.indicies[r.wave];
 
     Vector3d nhat;
 
