@@ -176,6 +176,7 @@ extern "C" {
     {
 	TraceWork data[64];
 
+
 	if ( nthread == 0 ) {
 	    trace_rays0(m, surflist, nsurfs, ray, nray, rsize, xray);
 	} else {
