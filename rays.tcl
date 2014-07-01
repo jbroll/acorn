@@ -27,7 +27,7 @@ if { [::critcl::compiled] } {
 	dict with args {}
 
 	if { $name eq "-" } 		   { set name [$type new [expr { $nx*$ny }]] }
-	if { [info commands $name] eq {} } { $type create $name  [expr { $nx*$ny }] }
+	if { [info commands $name] eq {} } { $type create $name  [expr { $nx*$ny }]  }
 	set pz 0
 
 
@@ -52,7 +52,7 @@ if { [::critcl::compiled] } {
 		foreach y [jot $ny $y0 $y1 $yi] {
 		    if { $circle && $x*$x+$y*$y > $x0*$x0+$y0+$y0 } { continue }
 
-		    $name set end+1 px $x py $y pz $pz kx 0.0 ky 0.0 kz 1.0 vignetted 0 intensity $intensity
+		    $name set $i px $x py $y pz $pz kx 0.0 ky 0.0 kz 1.0 vignetted 0 intensity $intensity
 		    incr i
 		}
 	    }
