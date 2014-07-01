@@ -1,5 +1,5 @@
 
-proc acorn::mkrays { name args } {
+proc acorn::xmkrays { name args } {
     if { $name eq "-" } { set name rays[incr ::acorn::RAYS] }
     set pz 0
     set args [dict merge { type acorn::Rays circle 0 nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - } $args]

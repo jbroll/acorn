@@ -23,12 +23,12 @@ if { [::critcl::compiled] } {
 
     proc ::acorn::mkrays { name args } {
 	set args [dict merge { type acorn::Rays circle 0 nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - intensity 1 } $args]
+
 	dict with args {}
 
-	if { $name eq "-" } 		   { set name [$type new] }
-	if { [info commands $name] eq {} } { $type create $name 0 }
+	if { $name eq "-" } 		   { set name [$type new [expr { $nx*$ny }]] }
+	if { [info commands $name] eq {} } { $type create $name  [expr { $nx*$ny }] }
 	set pz 0
-
 
 
 	    if { [info exists diameter] } {
