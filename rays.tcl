@@ -28,7 +28,6 @@ if { [::critcl::compiled] } {
 
 	if { $name eq "-" } 		   { set name [$type new [expr { $nx*$ny }]] }
 	if { [info commands $name] eq {} } { $type create $name  [expr { $nx*$ny }]  }
-	set pz 0
 
 
 	    if { [info exists diameter] } {
@@ -47,15 +46,9 @@ if { [::critcl::compiled] } {
 		set y1 [expr  $box]
 	    }
 
-	    set i 0
-	    foreach x [jot $nx $x0 $x1 $xi] {
-		foreach y [jot $ny $y0 $y1 $yi] {
-		    if { $circle && $x*$x+$y*$y > $x0*$x0+$y0+$y0 } { continue }
-
-		    $name set $i px $x py $y pz $pz kx 0.0 ky 0.0 kz 1.0 vignetted 0 intensity $intensity
-		    incr i
-		}
-	    }
+puts HERE
+	    $name mkrays : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle
+puts HERE
 
 	return $name
     }
@@ -138,10 +131,42 @@ if { [::critcl::compiled] } {
 
     }
 
+    critcl::cproc ::acorn::Rays::mkrays { Tcl_Interp* ip double nx double x0 double x1 double xi
+							 double ny double y0 double y1 double yi
+						double intensity int circle } ok {
+	ARecPath *path = (ARecPath *) clientdata;
+	Ray      *rays = (Ray *)path->recs;
+	int          i = path->first;
+
+	double x, y;
+
+
+	for ( y = y0; y <= y1; y += yi ) {
+	for ( x = x0; x <= x1; x += xi ) {
+	    if ( circle && x*x+y*y > x0*x0+y0+y0 ) { continue; }
+
+fprintf(stderr, "%d\n", i);
+fflush(stderr);
+
+	    rays[i].p[X] =   x;
+	    rays[i].p[Y] =   y;
+	    rays[i].p[Z] = 0.0;
+	    rays[i].k[X] = 0.0;
+	    rays[i].k[Y] = 0.0;
+	    rays[i].k[Z] = 1.0;
+
+	    rays[i].intensity = intensity;
+	    rays[i].vignetted = 0;
+
+	    if ( ++i > path->last ) { break; }
+	}
+	}
+    } -pass-cdata true
+
     critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay } ok {
 	ARecPath *path = (ARecPath *) clientdata;
+	Ray      *rays = (Ray *)path->recs;
 
-	Ray *rays = (Ray *)path->recs;
 	for ( int i = path->first; i <= path->last; i++ ) {
 	    rays[i].k[X] = sin(ax/57.2957795);
 	    rays[i].k[Y] = sin(ay/57.2957795);

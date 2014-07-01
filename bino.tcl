@@ -22,7 +22,7 @@ set w $w1
 
 puts MkRays
 
-acorn::mkrays rays nx 5000 x0 -128 x1 128 ny 5000 y0 -128 y1 128 circle 1
+acorn::mkrays rays nx 3000 x0 -128 x1 128 ny 3000 y0 -128 y1 128 circle 1
 
 #acorn::Rays create rays  1
 #rays set py 128 kz 1
@@ -32,7 +32,9 @@ acorn::mkrays rays nx 5000 x0 -128 x1 128 ny 5000 y0 -128 y1 128 circle 1
 
 puts Trace
 
-B trace rays {} [expr $w*10000] 6
+timer 1 start
+B trace rays {} [expr $w*10000] 16
+puts [timer 1 stop]
 
 #puts [acorn::rays-rms rays 1]
 
