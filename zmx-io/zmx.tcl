@@ -159,6 +159,7 @@ oo::class create ::acorn::ZMX {
 
     method update {} {
 	my config $mce_current
+	next
     }
 
     method pickup {} { eval $pup }

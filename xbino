@@ -1,0 +1,68 @@
+#!/usr/bin/env tclkit8.6
+#
+lappend auto_path ./lib arec/lib
+
+package require tcltest
+package require acorn
+
+acorn::ZMX create B source zmx-models/p8_110912af_072512ac.zmx
+B config 1
+
+acorn::mkrays rays nx 50 x0 -128 x1 128 ny 50 y0 -128 y1 128 circle 1
+
+set argv [lassign $argv action]
+
+if { $action eq "plot" } {
+    set pipe [list | "row !v | plottable size 8 8 x,y marker circle"]
+} else {
+    set pipe {}
+}
+
+
+switch $action {
+ print { B print }
+ prays {
+    acorn::prays rays
+ }
+ index {
+    B update
+    B print
+ }
+ trak {
+    acorn::Rays create aray 1
+    aray set kz 1.0
+    aray set px 20 py 20 pz 0 kx 0 ky 0 kz 1
+
+
+    acorn::Rays create trak 71
+
+    
+    set w1 [B get wavelength 1 wave]
+    set w  $w1
+
+    B trace aray {} [expr $w*10000] 0 trak
+
+    acorn::prays aray
+    puts ""
+    acorn::prays trak
+ }
+ plot  -
+ trace { 
+
+    set w1 [B get wavelength 1 wave]
+    set w2 [B get wavelength 2 wave]
+    set w3 [B get wavelength 3 wave]
+
+    set w $w1
+
+    puts stderr "wave : $w1 $w2 $w3"
+
+
+    timer 1 start
+    B trace rays {} [expr $w*10000] 16
+    puts [timer 1 stop]
+
+    acorn::prays rays {*}$pipe
+ }
+}
+

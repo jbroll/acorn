@@ -49,7 +49,7 @@ if { [::critcl::compiled] } {
 	if { $xi eq "-" } { set xi [expr { ($x1-$x0)/($nx-1.0) }] }
 	if { $yi eq "-" } { set yi [expr { ($y1-$y0)/($ny-1.0) }] }
 
-	$name mkrays : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle
+	$name length = [$name mkrays : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle]
 
 	return $name
     }
@@ -59,16 +59,17 @@ if { [::critcl::compiled] } {
 
 	switch $pipe {
 	  ">" { set out [open $out w] }
+	  "|" { set out [open |$out w] }
 	  {} {}
 	  default { set format $pipe }
 	}
 
 	set i 1
 
-	puts $out "id	x	y	z	l	m	n	v	i"
-	puts $out "-	-	-	-	--	--	--	-	-"
+	puts $out "id	x	y	z	l	m	n	v	i	w"
+	puts $out "-	-	-	-	--	--	--	-	-	-"
 
-	foreach row [$rays get px py pz kx ky kz vignetted intensity] {
+	foreach row [$rays get px py pz kx ky kz vignetted intensity wave] {
 	    if { $format eq {} } {
 		set line $row
 	    } else {
@@ -134,7 +135,7 @@ if { [::critcl::compiled] } {
 
     critcl::cproc ::acorn::Rays::mkrays { Tcl_Interp* ip double nx double x0 double x1 double xi
 							 double ny double y0 double y1 double yi
-						double intensity int circle } ok {
+						double intensity int circle } int {
 	ARecPath *path = (ARecPath *) clientdata;
 	Ray      *rays = (Ray *)path->recs;
 	int          i = path->first;
@@ -156,12 +157,13 @@ if { [::critcl::compiled] } {
 
 	    rays[i].intensity = intensity;
 	    rays[i].vignetted = 0;
+	    rays[i].wave      = 0;
 
 	    if ( ++i > path->last ) { break; }
 	}
 	}
 
-	return TCL_OK;
+	return i;
     } -pass-cdata true
 
     critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay } ok {
