@@ -34,12 +34,12 @@ extern "C" {
 
   int traverse(MData *m, Surface &s, Ray &r)
   {
-	double n0 = m->n;
+	double n0 = m->indicies[r.wave];
 	double  z = m->z;
 
     double tanx = s.p[Pm_TanX];
     double tany = s.p[Pm_TanY];
-    double n    = s.p[Px_n];
+    double n    = s.indicies[r.wave];
 
     // http://www.scratchapixel.com/lessons/3d-basic-lessons/lesson-7-intersecting-simple-shapes/ray-plane-and-ray-disk-intersection/
 

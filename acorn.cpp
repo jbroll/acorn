@@ -90,7 +90,7 @@ extern "C" {
 
 		    ray->vignetted = surf[i].traverse(m, &surf[i], ray);
 
-		    if ( ray->vignetted == 2 ) {
+		    if ( ray->vignetted == 2 ) {		// Coordbreak returns 2
 			ray->vignetted = 0;
 
 			if ( xray ) {
@@ -139,7 +139,7 @@ extern "C" {
 		}
 
 		if ( !once ) {
-		    m->n  = surf[i].p[Px_n] > 0.0 ? surf[i].p[Px_n] : m->n;
+		    m->indicies  = surf[i].indicies[0] > 0.0 ? surf[i].indicies: m->indicies;
 		    m->z += surf[i].p[Px_thickness];
 		}
 	    }
@@ -150,7 +150,7 @@ extern "C" {
 		for ( j = 0, ray = R; j < nray; j++, ray = (Ray *) (((char *) ray) + rsize) ) {	// Rays that have not traversed are vignetted.
 		    ray->vignetted = !traversed[j];
 		}
-		m->n  = surf[0].p[Px_n] > 0.0 ? surf[0].p[Px_n] : m->n;
+		m->indicies  = surf[0].indicies[0] > 0.0 ? surf[0].indicies: m->indicies;
 		m->z += surf[0].p[Px_thickness];
 	    }
 	}

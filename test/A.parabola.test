@@ -7,7 +7,6 @@ package require acorn
 
 source util/rays.tcl
 
-
 ::tcltest::test A.parabola { A.parabola } -match tol -body {
     set ::MatchTol 0.0000005
 
@@ -23,6 +22,8 @@ source util/rays.tcl
 
     #Parabolic print
     Parabolic trace rays
+
+    #acorn::prays rays
 
     acorn::rays-rms rays
 } -cleanup { Parabolic destroy

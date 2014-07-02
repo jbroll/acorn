@@ -56,7 +56,7 @@ lib/acorn/macosx-x86_64/acorn.dylib :	$(ACORN_SRCS)
 	ARCH=Darwin.x86_64 critcl -target macosx-x86_64 -pkg acorn 
 
 lib/acorn/linux-x86_64/acorn.so :	$(ACORN_SRCS)
-	ARCH=$(ARCH) critcl -pkg acorn 
+	ARCH=$(ARCH) ./critcl31.kit -pkg acorn 
 
 
 lib/rays/macosx-ix86/rays.dylib   :	rays.tcl rays.h

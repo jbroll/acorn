@@ -89,7 +89,7 @@ oo::class create ::acorn::ZMX {
     constructor { type args } {
 	next
 
-	set aray [acorn::Rays create [namespace current]::aray]
+	set aray    [acorn::Rays create [namespace current]::aray]
 
 	set objects     {}
 	set pup         {}
