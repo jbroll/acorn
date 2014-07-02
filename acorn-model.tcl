@@ -146,7 +146,7 @@ oo::class create ::acorn::BaseModel {
 			my [$surf get $j name] set indicies [acorn::glass_indicies [$surf get $j glass_ptr] $wave]
 		    }
 		} else {
-		    my [$surf get $j name] set indicies [acorn::doubleList $plusone]
+		    $surf set $j indicies [acorn::doubleList [string repeat [my [$surf get $j name] get n] [llength $wave]]]
 		}
 		    
 

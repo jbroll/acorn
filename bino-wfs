@@ -2,33 +2,23 @@
 #
 lappend auto_path lib
 
-set Data zmx-models
-
 package require acorn
 
-    acorn::ZMX create Model source $Data/bino_wfs.ZMX
+acorn::ZMX create Model source zmx-models/bino_wfs.ZMX
 
 Model set field 1 x  0.25
 Model set field 1 y  0
 
 Model update
 
-set ray1 [acorn::mkrays . nx 5000 ny 1000 diameter [Model get pupilDiameter] intensity 10]
+set ray1 [acorn::mkrays . nx 200 ny 200 diameter [Model get pupilDiameter] intensity 10]
    $ray1 angles : 0.25 0
 
-#acorn::prays $ray1
 
 Model trace $ray1 {} current 4 
-set ray1 [acorn::mkrays . nx 200 ny 200 diameter [Model get pupilDiameter] intensity 10]
-
-
 echo [fits 16 { 1000 1000 } { 1 1 } { 0 0 } [$ray1 bin ushort 1000 1000 .008 .008 15 5 100 5 0] {}] > /Users/john/ds9.fits b
 
 exit
-
-
-#acorn::prays $ray1
-
 
 puts [Model 20 get x y]
 puts ""
@@ -55,5 +45,3 @@ foreach n [iota 1 12] {
 }
 
 Model print
-
-

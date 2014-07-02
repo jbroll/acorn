@@ -23,6 +23,8 @@ source util/rays.tcl
     #Parabolic print
     Parabolic trace rays
 
+    #acorn::prays rays
+
     acorn::rays-rms rays
 } -cleanup { Parabolic destroy
     	     rename rays {}
