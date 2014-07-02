@@ -334,7 +334,9 @@ oo::class create ::acorn::ZMX {
      	$current set $surf aper_type obstruction 
 	my [$current get $surf name] set aper_min  $rad 
      }
-     method OBDC { x y  } { # aperture decenter }
+     method OBDC { x y  } { 					# aperture decenter 
+	my [$current get $surf name] set aper_xoff  $x aper_yoff $y 
+     }
 
      method GLAS { name args } {
 	 $current set $surf glass $name
@@ -480,7 +482,7 @@ oo::class create ::acorn::ZMX {
 	    
 	    # Try a chief ray solve
 	    #
-	    lassign [my get field 1] x fx y fy		; # Get the current field angles
+	    lassign [my get field 1] x fx y fy			; # Get the current field angles
 	    $aray set px 0 py 0 pz 0 vignetted 0		; # Set up aray.
 	    $aray angles : $fx $fy
 

@@ -45,13 +45,15 @@ oo::class create ::acorn::BaseModel {
 
     constructor {} {
 	set grouptype sequential
-	set basedef { name {} type simple comment {} n 1.00 glass {} x 0.0 y 0.0 z 0.0 rx 0.0 ry 0.0 rz 0.0 thickness 0.0 aper_type {} aper_param {} aper_min 0.0 aper_max 0.0 enable 1 annot 0 }
+	set basedef { name {} type simple comment {} n 1.00 glass {} x 0.0 y 0.0 z 0.0 rx 0.0 ry 0.0 rz 0.0 thickness 0.0
+			aper_type {} aper_param {} aper_min 0.0 aper_max 0.0 aper_xoff 0.0 aper_yoff 0.0
+			enable 1 annot 0 }
 	set default {}
 	set basemap { 	name name type type comment comment glass glass indicies indicies 
 	    		aperture aperture aper_type aper_type aper_param aper_param aper_data aper_data aper_leng aper_leng 
 			traverse traverse infos infos thickness thickness enable enable annot annot
 	}
-    	set basepar { x y z rx ry rz thickness aper_min aper_max n }
+    	set basepar { x y z rx ry rz thickness aper_min aper_max aper_xoff aper_yoff n }
 	foreach par $basepar i [iota 0 [llength $basepar]-1] { lappend basemap $par p$i }
 	set anonsurf 0
 

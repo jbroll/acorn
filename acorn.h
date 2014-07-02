@@ -33,7 +33,7 @@ typedef int (*InfosFunc)(int info, char ***str, double **val);
 enum PX_Param {
     Px_px, Px_py, Px_pz, Px_rx, Px_ry, Px_rz
   , Px_thickness
-  , Px_aper_min, Px_aper_max
+  , Px_aper_min, Px_aper_max, Px_aper_xoff, Px_aper_yoff
   , Px_n
 
   , Px_NParams
