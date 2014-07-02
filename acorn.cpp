@@ -129,8 +129,6 @@ extern "C" {
 		    ray->k = rtreverse * ray->k;
 
 		    if ( xray ) {
-fprintf(stderr, "xray %d\n", i);
-fflush(stderr);
 			memcpy(xray, ray, rsize);
 			((Ray *)xray)->vignetted = 0;
 			xray += rsize;

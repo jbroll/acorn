@@ -108,6 +108,8 @@ if { [::critcl::compiled] } {
     critcl::ccode {
 	#include <Eigen/Dense>
 
+	#include <float.h>
+
 	using namespace std;
 	using namespace Eigen;
 
@@ -294,8 +296,6 @@ if { [::critcl::compiled] } {
     critcl::cproc ::acorn::Rays::stat { Tcl_Interp* ip int { v 0 } } ok {
 	ARecPath *path = (ARecPath *) clientdata;
 
-	printf("Here in stat\n");
-
 	Ray *rays = (Ray *)path->recs;
 
 	int     n = 0;
@@ -306,13 +306,18 @@ if { [::critcl::compiled] } {
 	double cx = 0;
 	double cy = 0;
 
+	double xmin =  DBL_MAX;
+	double xmax = -DBL_MAX;
+	double ymin =  DBL_MAX;
+	double ymax = -DBL_MAX;
+
 	double rx, ry, rr;
 
 	for ( int i = path->first; i <= path->last; i++ ) {
 	    if ( rays[i].p[X] != rays[i].p[X]
 	      || rays[i].p[Y] != rays[i].p[Y] 
 	      || rays[i].p[Z] != rays[i].p[Z] ) { continue; }
-	    if ( v && rays[i].vignetted   )     { continue; }
+	    if ( !v && rays[i].vignetted   )     { continue; }
 
 	    cx += rays[i].p[X];
 	    cy += rays[i].p[Y];
@@ -322,6 +327,11 @@ if { [::critcl::compiled] } {
 	    x += (rays[i].p[X]-cx) * (rays[i].p[X]-cx);
 	    y += (rays[i].p[Y]-cy) * (rays[i].p[Y]-cy);
 	    r +=  rr*r;
+
+	    if ( rays[i].p[X] < xmin ) { xmin = rays[i].p[X]; }
+	    if ( rays[i].p[X] > xmax ) { xmax = rays[i].p[X]; }
+	    if ( rays[i].p[Y] < ymin ) { ymin = rays[i].p[Y]; }
+	    if ( rays[i].p[Y] > ymax ) { ymax = rays[i].p[Y]; }
 
 	    n++;
 	}
@@ -343,11 +353,36 @@ if { [::critcl::compiled] } {
 
 	Tcl_Obj *result = Tcl_NewObj();
 
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("x", -1));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj((xmax+xmin)/2.0));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("y", -1));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj((ymax+ymin)/2.0));
+
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("xmin", -1));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(xmin));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("xmax", -1));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(xmax));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("ymin", -1));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(ymin));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("ymax", -1));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(ymax));
+
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("xrange", -1));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(xmax-xmin));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("yrange", -1));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(ymax-ymin));
+
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("cx", -1));
 	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(cx));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("cy", -1));
 	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(cy));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("rx", -1));
 	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(rx));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("ry", -1));
 	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(ry));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("rr", -1));
 	Tcl_ListObjAppendElement(ip, result, Tcl_NewDoubleObj(rr));
+	Tcl_ListObjAppendElement(ip, result, Tcl_NewStringObj("n", -1));
 	Tcl_ListObjAppendElement(ip, result, Tcl_NewIntObj( n));
 
 	Tcl_SetObjResult(ip, result);

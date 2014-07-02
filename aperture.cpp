@@ -29,25 +29,19 @@ using namespace Eigen;
 	    double py = r->p(Y) - s->p[Px_aper_yoff];
 
 	    if ( !strcmp(s->aper_type, "circular") ) {
-		return r->p(X)*r->p(X)+r->p(Y)*r->p(Y) > s->p[Px_aper_max]*s->p[Px_aper_max];
 		return px*px+py*py > s->p[Px_aper_max]*s->p[Px_aper_max];
 	    }
-/*
 	    if ( !strcmp(s->aper_type, "rectangular") ) {
 		double w = s->p[Px_aper_min];
 		double h = s->p[Px_aper_max];
 
 		return px < -w || px > w || py < -h || py > h;
 	    }
- */
 	    if ( !strcmp(s->aper_type, "obstruction") ) {
-		return r->p(X)*r->p(X)+r->p(Y)*r->p(Y) < s->p[Px_aper_min]*s->p[Px_aper_min];
+		return px*px+py*py < s->p[Px_aper_min]*s->p[Px_aper_min];
 	    }
 
 	    if ( !strcmp(s->aper_type, "annulus") )  {
-                return r->p(X)*r->p(X)+r->p(Y)*r->p(Y) > s->p[Px_aper_max]*s->p[Px_aper_max]
-                   || r->p(X)*r->p(X)+r->p(Y)*r->p(Y) < s->p[Px_aper_max]*s->p[Px_aper_min] ;
-
 		return px*px+py*py > s->p[Px_aper_max]*s->p[Px_aper_max]
 		    || px*px+py*py < s->p[Px_aper_max]*s->p[Px_aper_min] ;
 	    }

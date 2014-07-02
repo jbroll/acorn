@@ -5,18 +5,15 @@ lappend auto_path ./lib arec/lib
 package require tcltest
 package require acorn
 
-acorn::ZMX create B source zmx-models/p8_110912af_072512ac.zmx
+set model zmx-models/p24_110912af_072512ac_inch.zmx
+#acorn::ZMX create B source zmx-models/p8_110912af_072512ac.zmx
+
+acorn::ZMX create B source $model
+
 B config 1
 
-acorn::mkrays rays nx 50 x0 -128 x1 128 ny 50 y0 -128 y1 128 circle 1
 
 set argv [lassign $argv action]
-
-if { $action eq "plot" } {
-    set pipe [list | "row !v | plottable size 8 8 x,y marker circle"]
-} else {
-    set pipe {}
-}
 
 
 switch $action {
@@ -24,15 +21,9 @@ switch $action {
  prays {
     acorn::prays rays
  }
- index {
-    B update
-    B print
- }
  trak {
     acorn::Rays create aray 1
-    aray set kz 1.0
-    aray set px 20 py 20 pz 0 kx 0 ky 0 kz 1
-
+    aray set px 112.326530612245 py 33.95918367346944 kz 1.0
 
     acorn::Rays create trak 71
 
@@ -48,21 +39,43 @@ switch $action {
  }
  plot  -
  trace { 
+    lassign $argv field wavel
 
-    set w1 [B get wavelength 1 wave]
-    set w2 [B get wavelength 2 wave]
-    set w3 [B get wavelength 3 wave]
+    if { $field == "" } { set field 1 }
+    if { $wavel == "" } { set wavel 1 }
 
-    set w $w1
+    set x [B get field $field x]
+    set y [B get field $field y]
+    set w [B get wavelength $wavel wave]
 
-    puts stderr "wave : $w1 $w2 $w3"
+    acorn::mkrays rays nx 50 x0 -128 x1 128 ny 50 y0 -128 y1 128 circle 1
+	          rays angles : $x $y
 
 
-    timer 1 start
+
     B trace rays {} [expr $w*10000] 16
-    puts [timer 1 stop]
 
-    acorn::prays rays {*}$pipe
+    puts "RayTrace $model"
+    puts ""
+    puts "field    	$x $y"
+    puts "wavelength	$w"
+    puts ""
+
+    if { $action eq "plot" } {
+	foreach {*}[rays stat] {}
+
+	set range [expr { max($xrange, $yrange) }]
+	set xmin [expr $x - $range/2]
+	set xmax [expr $x + $range/2]
+	set ymin [expr $y - $range/2]
+	set ymax [expr $y + $range/2]
+
+	set plot [list | "row !v | plottable size 8 8 x,y marker circle xaxis min $xmin max $xmax yaxis min $ymin max $ymax"]
+    } else { 
+	set plot {}
+    }
+
+    acorn::prays rays {*}$plot
  }
 }
 
