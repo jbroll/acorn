@@ -16,18 +16,11 @@ set ray1 [acorn::mkrays . nx 200 ny 200 diameter [Model get pupilDiameter] inten
 
 
 Model trace $ray1 {} current 4 
-echo [fits 16 { 1000 1000 } { 1 1 } { 0 0 } [$ray1 bin ushort 1000 1000 .008 .008 15 5 100 5 0] {}] > /Users/john/ds9.fits b
+echo [fits 16 { 1000 1000 } { 1 1 } { 0 0 } [$ray1 bin ushort 1000 1000 .008 .008 15 5 100 5 0] {}] > bino-wfs.fits b
 
-exit
-
-puts [Model 20 get x y]
-puts ""
-set trak [acorn::Rays new 32]
-#acorn::prays trak %.3f
 
 puts ""
 puts ""
-Model print
 
 puts "n	a	x	y"
 puts "-	-	-	-"
@@ -44,4 +37,3 @@ foreach n [iota 1 12] {
     puts "$n	[format %.4f $a]	[join [lmap x [Model 20 get x y] { format %.4f $x }]  \t]"
 }
 
-Model print

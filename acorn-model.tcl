@@ -45,13 +45,15 @@ oo::class create ::acorn::BaseModel {
 
     constructor {} {
 	set grouptype sequential
-	set basedef { name {} type simple comment {} n 1.00 glass {} x 0.0 y 0.0 z 0.0 rx 0.0 ry 0.0 rz 0.0 thickness 0.0 aper_type {} aper_param {} aper_min 0.0 aper_max 0.0 enable 1 annot 0 }
+	set basedef { name {} type simple comment {} n 1.00 glass {} x 0.0 y 0.0 z 0.0 rx 0.0 ry 0.0 rz 0.0 thickness 0.0
+			aper_type {} aper_param {} aper_min 0.0 aper_max 0.0 aper_xoff 0.0 aper_yoff 0.0
+			enable 1 annot 0 }
 	set default {}
-	set basemap { 	name name type type comment comment glass glass indicies indicies 
+	set basemap { 	name name type type comment comment glass glass indicies indicies glass_ptr glass_ptr
 	    		aperture aperture aper_type aper_type aper_param aper_param aper_data aper_data aper_leng aper_leng 
 			traverse traverse infos infos thickness thickness enable enable annot annot
 	}
-    	set basepar { x y z rx ry rz thickness aper_min aper_max n }
+    	set basepar { x y z rx ry rz thickness aper_min aper_max aper_xoff aper_yoff n }
 	foreach par $basepar i [iota 0 [llength $basepar]-1] { lappend basemap $par p$i }
 	set anonsurf 0
 
@@ -92,6 +94,20 @@ oo::class create ::acorn::BaseModel {
 	    map    { return $parmap }
 	}
     }
+
+    method update {} {
+	
+        my foreach-surface surf {
+	    if { [my $surf get glass] ne {} && [my $surf get glass] ne "(null)" } {
+		if { [my $surf get glass_ptr] == -1 } {
+		    my $surf set n -1
+		} else {
+		    my $surf set n  [acorn::glass_indx [my $surf get glass_ptr] [my get wavelength current]]
+		}
+	    }
+        }
+    }
+
 
     method trace { { rays {} } { surfs {} } { wave current } { thread 0 } { xray 0 } } {		# Assemble the surfaces to be traced.
 	set ok 0
@@ -140,8 +156,10 @@ oo::class create ::acorn::BaseModel {
 		if { [$surf get $j glass] ne {} && [$surf get $j glass] ne "(null)" } {
 		    if { [$surf get $j glass_ptr] == -1 } {
 			my [$surf get $j name] set indicies [acorn::doubleList $minusone]
+			#my [$surf get $j name] set n -1
 		    } else {
 			my [$surf get $j name] set indicies [acorn::glass_indicies [$surf get $j glass_ptr] $wave]
+			#my [$surf get $j name] set n        [acorn::glass_indx     [$surf get $j glass_ptr] [lindex $wave 0]]
 		    }
 		} else {
 		    $surf set $j indicies [acorn::doubleList [string repeat [my [$surf get $j name] get n] [llength $wave]]]
@@ -230,11 +248,9 @@ oo::class create ::acorn::BaseModel {
     method foreach-surface { value script } {
 	set i 0
 
-	foreach { type surf } $surfaces {
-	    #slist $i set surf [$surf getptr] nsurf [$surf length] type [string equal $type non-sequential]
-
-	    foreach j [iota 0 [$surf length]-1] {
-		uplevel [list set $value [$surf $j get name]]
+	foreach { type _surf } $surfaces {
+	    foreach j [iota 0 [$_surf length]-1] {
+		uplevel [list set $value [$_surf get $j name]]
 		uplevel $script
 	    }
 	    incr i

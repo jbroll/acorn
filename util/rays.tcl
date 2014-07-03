@@ -29,7 +29,7 @@ proc acorn::xmkrays { name args } {
     return $name
 }
 
-proc acorn::prays { rays { pipe {} } { out stdout } } {
+proc acorn::xprays { rays { pipe {} } { out stdout } } {
 
     if { $pipe eq ">" } { set out [open $out w] }
 

@@ -60,7 +60,7 @@ extern "C" {
 
 	double T = s.p[Pm_lines];
 	double M = s.p[Pm_order];
-	double L = s.indicies[r.wave];
+	double L = m->wavelength[r.wave];
 
 #if 1
 	// Diffract

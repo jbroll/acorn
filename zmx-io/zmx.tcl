@@ -81,7 +81,7 @@ oo::class create ::acorn::ZMX {
 	debug 
 
     variable float semi
-    variable nfield fieldx fieldy
+    variable fieldx fieldy
     variable aray
 
     accessor grouptype current surfaces default debug
@@ -102,7 +102,7 @@ oo::class create ::acorn::ZMX {
 
 	procs TRAC BLNK CLAP COAT COFN COMM CONF CONI CURV DIAM DISZ DMFS EFFL ENVD ENPD FLAP FLOA FTYP FWGN FWGT GCAT GFAC GLAS GLCZ GLRS GSTD HIDE IGNR MAZH MIRR MNUM MODE NAME NOTE	\
 	      NSCD NSCS NSOA NSOD NSOH NSOO NSOP NSOQ NSOS NSOU NSOV NSOW PARM PPAR PRAM PFIL PICB POLS POPS PUSH PUPD PWAV PZUP RAIM ROPD SCOL SDMA SLAB STOP SURF		\
-	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVL WAVN WAVM WWGT WWGN XDAT XFLD XFLN YFLD YFLN XFIE RSCE RWRE MOFF OBSC SQAP ELOB WAVE THIC ZVDX ZVDY ZVCX ZVCY ZVAN \
+	      TOL  TOLE TYPE UNIT VANN VCXN VCYN VDSZ VDXN VDYN VERS WAVL WAVN WAVM WWGT WWGN XDAT XFLD XFLN YFLD YFLN XFIE RSCE RWRE MOFF OBSC ELOB WAVE THIC ZVDX ZVDY ZVCX ZVCY ZVAN \
 	      OBDC PRIM
 
 	switch $type {
@@ -159,6 +159,7 @@ oo::class create ::acorn::ZMX {
 
     method update {} {
 	my config $mce_current
+	next
     }
 
     method pickup {} { eval $pup }
@@ -312,11 +313,13 @@ oo::class create ::acorn::ZMX {
      method SQOB { args } { # aperture obscuration is true }
      method OBSC { args } { # aperture obscuration is true }
      method ELOB { args } { # aperture obscuration is true }
-     method SQAP { w h args  } { 
+
+     linked method SQAP { w h args  } { 
      	$current set $surf aper_type rectangular 
-     	my [$current get $surf name] set aper_max  [expr $w/2.0] 
-     	my [$current get $surf name] set aper_min  [expr $h/2.0] 
+     	my [$current get $surf name] set aper_min  $w 
+     	my [$current get $surf name] set aper_max  $h 
      }
+
      method ELAP { w h  } {
      	$current set $surf aper_type eliptical 
 	my [$current get $surf name] set aper_max  [expr $w/2.0] 
@@ -334,7 +337,9 @@ oo::class create ::acorn::ZMX {
      	$current set $surf aper_type obstruction 
 	my [$current get $surf name] set aper_min  $rad 
      }
-     method OBDC { x y  } { # aperture decenter }
+     method OBDC { x y  } { 					# aperture decenter 
+	my [$current get $surf name] set aper_xoff  $x aper_yoff $y 
+     }
 
      method GLAS { name args } {
 	 $current set $surf glass $name
@@ -417,7 +422,7 @@ oo::class create ::acorn::ZMX {
     method CONF { args } {}
     method DMFS { args } {}
     method FLOA { args } { set float 1 }
-    method FTYP { args } { set nfield [lindex $args 2] }
+    method FTYP { a b nfield nwave args } { my set nfield $nfield; my set nwave $nwave }
     method FWGT { args } {}
     method FWGN { args } {}
     method GFAC { args } {}
@@ -480,7 +485,7 @@ oo::class create ::acorn::ZMX {
 	    
 	    # Try a chief ray solve
 	    #
-	    lassign [my get field 1] x fx y fy		; # Get the current field angles
+	    lassign [my get field 1] x fx y fy			; # Get the current field angles
 	    $aray set px 0 py 0 pz 0 vignetted 0		; # Set up aray.
 	    $aray angles : $fx $fy
 
@@ -499,18 +504,20 @@ oo::class create ::acorn::ZMX {
 
     # Multi Configuration Editor
     #
-    method MNUM { n { curr 1 } } { set mce_current $curr }					; # Multi Configure Number of configs
+    linked method MNUM { n { curr 1 } } { set mce_current $curr }				; # Multi Configure Number of configs
 
-    method WAVE { wave config args } { append mce($config) "my xWAVE $wave $args\n" }	; # Set Wavelength
-    method IGNR { surf config args } { append mce($config) "my xIGNR $surf $args\n" }	; # Ignore surface
-    method PRAM { surf config args } { append mce($config) "my xPRAM $surf $args\n" }	; # Set Parameter
-    method XFIE { surf config args } { append mce($config) "my xXFIE $surf $args\n" }
-    method THIC { surf config args } { append mce($config) "my xTHIC $surf $args\n" }
+    linked method WAVE { wave  config args } { append mce($config) "my xWAVE $wave  $args\n" }	; # Set Wavelength
+    linked method IGNR { surf  config args } { append mce($config) "my xIGNR $surf  $args\n" }	; # Ignore surface
+    linked method PRAM { surf  config args } { append mce($config) "my xPRAM $surf  $args\n" }	; # Set Parameter
+    linked method XFIE { field config args } { append mce($config) "my xXFIE $field $args\n" }	; # Set X Field
+    linked method YFIE { field config args } { append mce($config) "my xYFIE $field $args\n" }
+    linked method THIC { surf  config args } { append mce($config) "my xTHIC $surf  $args\n" }
 
-    private method xIGNR { surf value args }         { my $surf set enable [expr !int($value)] }
-    private method xPRAM { surf value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
-    private method xTHIC { surf value args }         { my $surf set thickness                                      $value }
-    private method xXFIE { surf value args } 	     { 	# X field value }
-    private method xWAVE { wave value args } 	     {  my set wavelength $wave wave $value }
+    private method xIGNR { surf  value args }         { my $surf set enable [expr !int($value)] }
+    private method xPRAM { surf  value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
+    private method xTHIC { surf  value args }         { my $surf set thickness                                      $value }
+    private method xXFIE { field value args } 	     { 	my set field $field x $value }
+    private method xYFIE { field value args } 	     { 	my set field $field y $value }
+    private method xWAVE { wave  value args } 	     {  my set wavelength $wave wave $value }
 }
 
