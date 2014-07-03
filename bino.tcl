@@ -18,10 +18,6 @@ set w3 [B get wavelength 3 wave]
 
 set w $w1
 
-#puts stderr "wave : $w"
-
-puts MkRays
-
 acorn::mkrays rays nx 3000 x0 -128 x1 128 ny 3000 y0 -128 y1 128 circle 1
 
 #acorn::Rays create rays  1
