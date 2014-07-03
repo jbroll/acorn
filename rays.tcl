@@ -5,10 +5,14 @@
 
 critcl::cflags -O3
 critcl::cheaders -I/Users/john/include -I/home/john/include
-critcl::cheaders rays.h arec/arec.h
+critcl::cheaders rays.h arec/arec.h xtypes.h
 
 critcl::tsources rays.tcl
 critcl::clibraries -lstdc++ -Lranlib -lranlib
+
+if { ![::critcl::compiled] } {
+    source doubleList.tcl
+}
 
 package provide rays 0.1
 
@@ -115,23 +119,21 @@ if { [::critcl::compiled] } {
 
 	#include "rays.h"
 	#include "arec.h"
+	#include "xtypes.h"
+
+	int xrand() {
+	    int x;
+
+	    while ( (x = rand()) < 100 ) {};
+
+	    return x;
+	}
 
 	extern "C" {
 	    float gennor(float av,float sd);
-	    long ignpoi(float mu);
 	}
 
 
-	    void swap2(char *to, char *from, long nbytes)
-	    {
-		char c;
-		long i;
-		for ( i=0; i < nbytes; i += 2, (to += 2), (from += 2) ) {
-		    c = *from;
-		    *(to) = *(from+1);
-		    *(to+1) = c;
-		}
-	    }
 
     }
 
@@ -168,14 +170,55 @@ if { [::critcl::compiled] } {
 	return i;
     } -pass-cdata true
 
-    critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay } ok {
+
+    critcl::cproc ::acorn::Rays::waves { Tcl_Interp* ip doubleList waves int { N 50 } } ok {
 	ARecPath *path = (ARecPath *) clientdata;
 	Ray      *rays = (Ray *)path->recs;
 
+	double cumb = 0.0;
+
+	int    nbin = waves.length*N;
+	short *bins = (short *) malloc(nbin*sizeof(short));
+
+	int i;
+	int j = 0;
+	for ( i = 0; i < waves.length; i++ ) {
+	    cumb += waves.list[i];
+	    int max = cumb*N > nbin ? nbin : cumb*waves.length*N;
+
+
+	    for ( ; j < nbin && j < max; j++ ) {
+		bins[j] = i;
+	    }
+	}
+	while ( j < nbin ) { bins[j] = nbin-1; }
+
 	for ( int i = path->first; i <= path->last; i++ ) {
-	    rays[i].k[X] = sin(ax/57.2957795);
-	    rays[i].k[Y] = sin(ay/57.2957795);
+	    rays[i].wave = bins[xrand()%nbin];
+	}
+
+	return TCL_OK;
+    } -pass-cdata true
+
+    critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay double { fwhm 0.0 } } ok {
+	ARecPath *path = (ARecPath *) clientdata;
+	Ray      *rays = (Ray *)path->recs;
+
+	fwhm /= 3600;
+
+	double aax = ax;
+	double aay = ay;
+
+	for ( int i = path->first; i <= path->last; i++ ) {
+	    if ( fwhm ) {
+		aax = ax + gennor(0.0, fwhm/2.35);
+		aay = ay + gennor(0.0, fwhm/2.35);
+	    }
+
+	    rays[i].k[X] = sin(aax/57.2957795);
+	    rays[i].k[Y] = sin(aay/57.2957795);
 	    rays[i].k[Z] = 1.0;
+
 
 	    rays[i].k.normalize();
 	    
@@ -197,13 +240,14 @@ if { [::critcl::compiled] } {
 
 
 
-    critcl::cproc ::acorn::Rays::bin { Tcl_Interp* ip char* Type int nx int ny double sx double sy int radius double sigma double bias double noise int poison } ok {
-#define TY_USHORT	1
+
+    critcl::cproc ::acorn::Rays::bin { Tcl_Interp* ip char* Type Tcl_Obj* Data int nx int ny double sx double sy int { radius 1 } double { sigma 0 } } ok {
 	ARecPath *path = (ARecPath *) clientdata;
 
 	int	 type;
-	int      size;
-	void    *data;
+	int      size, length;
+
+	void    *data = Tcl_GetByteArrayFromObj(Data, &length);
 
         float    cx, cy, h;
         int      x, y, r = radius;
@@ -215,31 +259,22 @@ if { [::critcl::compiled] } {
 	    size = sizeof(unsigned short);
 	}
 
-	data = malloc(nx * ny * size);
-
 	double sum = 0;
 
 
 
-        sum = 0;
+	if ( radius > 1 ) {
+	    sum = 0;
 
-        for ( y = -r/2; y < r/2; y++ ) {
-            for ( x = -r/2; x < r/2; x++ ) {
-                    double squ = x*x + y*y;
+	    for ( y = -r/2; y < r/2; y++ ) {
+		for ( x = -r/2; x < r/2; x++ ) {
+			double squ = x*x + y*y;
 
-                     sum += exp(-squ/sigma);
-            }
-        }
-
-        h /= sum;       // Normalize the height for the volume of the gausian.
-
-
-	for ( y = 0; y < ny; y++ ) {
-	    for ( x = 0; x < nx; x++ ) {
-		switch ( type ) {
-		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] = gennor(bias, noise); break;
+			 sum += exp(-squ/sigma);
 		}
 	    }
+
+	    h /= sum;       // Normalize the height for the volume of the gausian.
 	}
 
 	for ( int i = path->first; i <= path->last; i++ ) {
@@ -251,46 +286,41 @@ if { [::critcl::compiled] } {
 	    cx += nx/2;
 	    cy += ny/2;
 
-	    for ( y = -r/2; y < r/2; y++ ) {
-		for ( x = -r/2; x < r/2; x++ ) {
-		    if ( cx+r < 0 || cx-r >= nx ) { continue; }
-		    if ( cy+r < 0 || cy-r >= ny ) { continue; }
+	    if ( radius > 1 ) {
+		for ( y = -r/2; y < r/2; y++ ) {
+		    for ( x = -r/2; x < r/2; x++ ) {
+			if ( cx+r < 0 || cx-r >= nx ) { continue; }
+			if ( cy+r < 0 || cy-r >= ny ) { continue; }
 
-		    double fx = cx - (int) cx;
-		    double fy = cy - (int) cy;
+			double fx = cx - (int) cx;
+			double fy = cy - (int) cy;
 
-		    int xi = (int)cx + x;
-		    int yi = (int)cy + y;
+			int xi = (int)cx + x;
+			int yi = (int)cy + y;
 
-		    if ( xi < 0 || xi >= nx ) { continue; }
-		    if ( yi < 0 || yi >= ny ) { continue; }
+			if ( xi < 0 || xi >= nx ) { continue; }
+			if ( yi < 0 || yi >= ny ) { continue; }
 
-		    double squ = (x+fx)*(x+fx) + (y+fy)*(y+fy);
+			double squ = (x+fx)*(x+fx) + (y+fy)*(y+fy);
 
+			switch ( type ) {
+			 case TY_USHORT : ((unsigned short *) data)[yi*nx + xi] += h*exp(-squ/sigma); break;
+			}
+		    }
+		}
+	    } else {
+		int ix = cx + 0.5;
+		int iy = cy + 0.5;
+
+		if ( ix >= 0 && ix < nx && ix >= 0 && ix < ny ) {
 		    switch ( type ) {
-		     case TY_USHORT : ((unsigned short *) data)[yi*nx + xi] += h*exp(-squ/sigma); break;
+		     case TY_USHORT : ((unsigned short *) data)[ix*nx + iy] += h; break;
 		    }
 		}
 	    }
 	}
 
-	for ( y = 0; y < ny; y++ ) {
-	    for ( x = 0; x < nx; x++ ) {
-		
-		switch ( type ) {
-		 case TY_USHORT :
-		     if ( poison ) { ((unsigned short *) data)[y*nx + x] = ignpoi(((unsigned short *) data)[y*nx + x]); }
-		     ((unsigned short *) data)[y*nx + x] -= 32768;     break;
-		}
-	    }
-	}
-
-	swap2((char*) data, (char *)data, nx*ny*size);
-
-	Tcl_SetObjResult(ip, Tcl_NewByteArrayObj((const unsigned char *) data, nx*ny*size));
-
 	return TCL_OK;
-	
     } -pass-cdata true
 
     critcl::cproc ::acorn::Rays::stat { Tcl_Interp* ip int { v 0 } } ok {

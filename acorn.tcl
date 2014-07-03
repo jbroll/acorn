@@ -5,7 +5,7 @@
 
 critcl::cflags -O3
 critcl::cheaders -I/Users/john/include -I/home/john/include
-critcl::cheaders arec/arec.h acorn.h rays.h
+critcl::cheaders arec/arec.h acorn.h rays.h xtypes.h
 
 critcl::tsources jbr.tcl/func.tcl jbr.tcl/tcloo.tcl			\
 		 jbr.tcl/fits.tcl jbr.tcl/unix.tcl			\
@@ -16,7 +16,7 @@ critcl::tsources jbr.tcl/func.tcl jbr.tcl/tcloo.tcl			\
 
 critcl::csources acorn.cpp aperture.cpp glass/acorn-glass.cpp glass/glass.c tpool/tpool.c
 
-critcl::clibraries -lstdc++
+critcl::clibraries -lstdc++ -Lranlib -lranlib
 
 
 try { set ::ACORN    $env(ACORN)/ 		} on error message { 	set ::ACORN 	.			}
@@ -24,36 +24,7 @@ try { set ::Surfaces $env(ACORN_SURFACES)	} on error message { 	set ::Surfaces $
 try { set ::GlassDir $env(ACORN_GLASS)		} on error message { 	set ::GlassDir ${::ACORN}/glass		}
 
 if { ![::critcl::compiled] } {
-    ::critcl::argtype doubleList {
-	    if ( getDoubleList(interp, @@, &@A) != TCL_OK ) { { return TCL_ERROR; } }
-    } 
-
-    ::critcl::argtypesupport doubleList {
-	    typedef struct _doubleList {
-		    double *list;
-		    int	length;
-	    } doubleList;
-
-	    int getDoubleList(Tcl_Interp *interp, Tcl_Obj *obj, doubleList *list) {
-		    int i, objc;
-		    Tcl_Obj **objv;
-
-		if ( Tcl_ListObjGetElements(interp, obj, &objc, &objv) != TCL_OK ) { return TCL_ERROR; }
-
-		list->list   = (double *) malloc(objc*sizeof(double));
-		list->length = objc;
-
-		for ( i = 0; i < objc; i++ ) {
-		    if ( Tcl_GetDoubleFromObj(interp, objv[i], &list->list[i]) != TCL_OK ) {
-			free(list->list);
-			return TCL_ERROR;
-		    }
-		}
-
-		return TCL_OK;
-	    }
-
-    }
+    source doubleList.tcl
 }
 
 namespace eval acorn {
@@ -69,8 +40,11 @@ namespace eval acorn {
 
 	#include "arec.h"
 	#include "acorn.h"
+	#include "xtypes.h"
 
 	extern "C" {
+	    float gennor(float av,float sd);
+	    long ignpoi(float mu);
 
 	    int  SurfSize(void);
 	    int  RaysSize(void);
@@ -83,6 +57,17 @@ namespace eval acorn {
 	    double glass_indx(void *glass, double wave);
 	    int  GlasSize(void);
 	}
+
+	    void swap2(char *to, char *from, long nbytes)
+	    {
+		char c;
+		long i;
+		for ( i=0; i < nbytes; i += 2, (to += 2), (from += 2) ) {
+		    c = *from;
+		    *(to) = *(from+1);
+		    *(to+1) = c;
+		}
+	    }
     }
 
     proc init {} {
@@ -198,8 +183,79 @@ namespace eval acorn {
     critcl::cproc doubleList { doubleList doubles } long {
 	return (long) doubles.list;
     }
-    critcl::cproc free { long pointer } void {
-	free((void *) pointer);
+
+    critcl::cproc malloc { long size } Tcl_Obj* {
+	Tcl_Obj* obj = Tcl_NewByteArrayObj(NULL, size);
+	Tcl_IncrRefCount(obj);
+
+	unsigned char *bytes = Tcl_GetByteArrayFromObj(obj, NULL);
+	memset(bytes, 0, size);
+
+	return obj;
+    }
+    critcl::cproc free   { long pointer } void { free((void *) pointer);	}
+
+    critcl::cproc ::acorn::noise   { Tcl_Interp* ip char* Type Tcl_Obj* Data int nx int ny double bias double noise } ok {
+	int	 type, size, x, y, length;
+
+	unsigned char *data = Tcl_GetByteArrayFromObj(Data, &length);
+
+	if ( !strcmp(Type, "ushort" ) ) {
+	    type = TY_USHORT;
+	    size = sizeof(unsigned short);
+	}
+	for ( y = 0; y < ny; y++ ) {
+	    for ( x = 0; x < nx; x++ ) {
+		
+		switch ( type ) {
+		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] += gennor(bias, noise); break;
+		}
+	    }
+	}
+
+	return TCL_OK;
+    }
+
+    critcl::cproc ::acorn::poisson { Tcl_Interp* ip char* Type Tcl_Obj* Data int nx int ny } ok {
+	int	 type, size, x, y, length;
+
+	unsigned char *data = Tcl_GetByteArrayFromObj(Data, &length);
+
+	if ( !strcmp(Type, "ushort" ) ) {
+	    type = TY_USHORT;
+	    size = sizeof(unsigned short);
+	}
+
+	for ( y = 0; y < ny; y++ ) {
+	    for ( x = 0; x < nx; x++ ) {
+		switch ( type ) {
+		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] += ignpoi(((unsigned short *) data)[y*nx + x]); break;
+		}
+	    }
+	}
+
+	return TCL_OK;
+    }
+    critcl::cproc ::acorn::fits { Tcl_Interp* ip char* Type Tcl_Obj* Data int nx int ny } ok {
+	int	 type, size, x, y, length;
+
+	unsigned char *data = Tcl_GetByteArrayFromObj(Data, &length);
+
+	if ( !strcmp(Type, "ushort" ) ) {
+	    type = TY_USHORT;
+	    size = sizeof(unsigned short);
+	}
+
+	if ( type == TY_USHORT ) {
+	    for ( y = 0; y < ny; y++ ) {
+		for ( x = 0; x < nx; x++ ) {
+		     ((unsigned short *) data)[y*nx + x] -= 32768; 
+		}
+	    }
+	}
+	swap2((char*) data, (char *)data, nx*ny*size);
+
+	return TCL_OK;
     }
 
     critcl::cproc _prays { long r int nray } void { prays((void *) r, nray); }

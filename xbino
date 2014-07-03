@@ -5,6 +5,14 @@ lappend auto_path ./lib arec/lib
 package require tcltest
 package require acorn
 
+set mask 21			; # The mask is surface 21?
+set mm2inch 25.4
+
+set slitX aper_min 
+set slitY aper_max 
+
+source /Users/john/src/jbr.tcl/starbase.tcl
+
 set model zmx-models/p24_110912af_072512ac_inch.zmx
 #acorn::ZMX create B source zmx-models/p8_110912af_072512ac.zmx
 
@@ -17,6 +25,72 @@ set argv [lassign $argv action]
 
 
 switch $action {
+ image {
+    lassign $argv file mask field wavel
+
+    if { $field == "" } { set field 1 }
+    if { $wavel == "" } { set wavel 1 }
+
+    set x [B get field $field x]
+    set y [B get field $field y]
+    set w [B get wavelength $wavel wave]
+
+    starbase_readfp T [set fp [open $file]]
+    set crval1 [starbase_hdrget T crval1]
+    set crpix1 [starbase_hdrget T crpix1]
+    set cdelt1 [starbase_hdrget T cdelt1]
+
+    gets $fp line
+    set waves [split [string trim [read $fp]] \n]
+
+    foreach i [iota 1 [llength [lindex $waves 0]]] {			; # Create the spectrum wavelength list
+	lappend wave [expr { ($i-$crpix1) * $cdelt1 + $crval1 }]
+    }
+
+    set scale  [expr { 1.0/($mm2inch*1000/15) }]
+
+    set image [acorn::malloc [expr { 2*4096*4096 }]]
+
+    set seeing 0.7
+
+    starbase_read Slits $mask
+    set RA [starbase_hdrget Slits ra]
+    set DC [starbase_hdrget Slits dec]
+    
+    starbase_foreachrow Slits -colvars {
+	# Compute the angles of ra and dec
+	#
+	set ax .
+	set ay .
+
+	puts "$ra $dec $x $y $width $height"
+
+	continue
+
+	acorn::mkrays rays nx 2500 x0 -128 x1 128 ny 2500 y0 -128 y1 128 circle 1 intensity 1
+		      rays angles : $ax $ay $seeing
+
+	set spec [lindex $waves $row]					; # Select a spectrum probability function
+
+	rays waves $spec						; # Add wavelength numbers to rays
+
+	puts [B 21 set aper_xoff]
+	puts [B 21 set aper_yoff]
+
+	B 21 set $slitX [expr { 0.010/$mm2inch }]
+	B 21 set $slitY [expr { 1/$mm2inch }]
+
+	B trace rays {} $wave 4
+
+	rays bin ushort $image 4096 4096 $scale $scale
+    }
+
+    acorn::poisson ushort $image 4096 4096
+    acorn::noise   ushort $image 4096 4096 1000 3
+    acorn::fits    ushort $image 4096 4096
+
+    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > bino.fits b
+ }
  print { B print }
  prays {
     acorn::prays rays
@@ -49,8 +123,7 @@ switch $action {
     set w [B get wavelength $wavel wave]
 
     acorn::mkrays rays nx 50 x0 -128 x1 128 ny 50 y0 -128 y1 128 circle 1
-	          rays angles : $x $y
-
+	          rays angles : $x $y 
 
 
     B trace rays {} [expr $w*10000] 16

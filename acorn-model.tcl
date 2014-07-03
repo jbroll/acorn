@@ -129,8 +129,8 @@ oo::class create ::acorn::BaseModel {
 	if { $wave eq "current" } {
 	    set wave [my get wavelength current]
 	}
-	set plusone  [string repeat  1 [llength $wave]]
-	set minusone [string repeat -1 [llength $wave]]
+	set plusone  [lrepeat [llength $wave]  1]
+	set minusone [lrepeat [llength $wave] -1]
 
 	mdata set 0 z 0
 	mdata set 0 indicies    [acorn::doubleList $plusone]
@@ -162,7 +162,7 @@ oo::class create ::acorn::BaseModel {
 			#my [$surf get $j name] set n        [acorn::glass_indx     [$surf get $j glass_ptr] [lindex $wave 0]]
 		    }
 		} else {
-		    $surf set $j indicies [acorn::doubleList [string repeat [my [$surf get $j name] get n] [llength $wave]]]
+		    $surf set $j indicies [acorn::doubleList [lrepeat [llength $wave] [my [$surf get $j name] get n]]]
 		}
 		    
 
