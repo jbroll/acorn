@@ -12,6 +12,8 @@ set slitX aper_min
 set slitY aper_max 
 
 source /Users/john/src/jbr.tcl/starbase.tcl
+source /Users/john/src/jbr.tcl/strtod.tcl
+source /Users/john/src/jbr.tcl/2d.tcl
 
 set model zmx-models/p24_110912af_072512ac_inch.zmx
 #acorn::ZMX create B source zmx-models/p8_110912af_072512ac.zmx
@@ -23,6 +25,38 @@ B config 1
 
 set argv [lassign $argv action]
 
+
+proc maskXY { ax ay } {
+    acorn::Rays create ray1 1
+    acorn::Rays create trak 79
+
+    ray1 set kz 1.0
+    ray1 angles : $ax $ay
+
+    set w  [B get wavelength 1 wave]
+
+    B 1 set aper_type none
+    B trace ray1 {} [expr $w*10000] 0 trak
+
+    set x [trak get 20 px]
+    set y [trak get 20 py]
+    set v [trak get 20 vignetted]
+
+    rename ray1 {}
+    rename trak {}
+
+    return [list $x $y $v]
+}
+
+proc counts { mag exptime } {
+    set pi 3.14159
+
+    set throughput	0.25
+    set counts0		1.09e10
+    set	area	[expr { $pi*3.25*3.25 }]
+
+    expr { int($throughput * $counts0 * pow(10, -0.4*$mag) * $exptime * $area) }
+}
 
 switch $action {
  image {
@@ -36,9 +70,12 @@ switch $action {
     set w [B get wavelength $wavel wave]
 
     starbase_readfp T [set fp [open $file]]
+
     set crval1 [starbase_hdrget T crval1]
     set crpix1 [starbase_hdrget T crpix1]
     set cdelt1 [starbase_hdrget T cdelt1]
+
+    set targets [starbase_select T { row } where { $target ne "sky" && $target ne "unused" }]
 
     gets $fp line
     set waves [split [string trim [read $fp]] \n]
@@ -54,62 +91,72 @@ switch $action {
     set seeing 0.7
 
     starbase_read Slits $mask
-    set RA [starbase_hdrget Slits ra]
-    set DC [starbase_hdrget Slits dec]
-    
+    set RA [strtod [starbase_hdrget Slits ra]]
+    set DC [strtod [starbase_hdrget Slits dec]]
+    set PA [strtod [starbase_hdrget Slits pa]]
+
     starbase_foreachrow Slits -colvars {
 	# Compute the angles of ra and dec
 	#
-	set ax .
-	set ay .
+	set ra [expr { ([strtod $ra] -$RA)*15*cos($DC/57.2957795) }]
+	set dc [expr {  [strtod $dec]-$DC }]
 
-	puts "$ra $dec $x $y $width $height"
+	lassign [2d::transform [2d::rotate [expr { -$PA }] d] $ra $dc] ax ay
+	lassign [maskXY $ax $ay] mx my
 
-	continue
+	B 21 set aper_xoff $mx
+	B 21 set aper_yoff $my
 
-	acorn::mkrays rays nx 2500 x0 -128 x1 128 ny 2500 y0 -128 y1 128 circle 1 intensity 1
+	B 21 set $slitX [expr { 0.084/$mm2inch }]
+	B 21 set $slitY [expr { .840/$mm2inch }]
+
+	set mag [expr rand()*3+19.5]
+	set counts [counts $mag 1800]
+	set box [expr int(sqrt($counts))]
+
+	puts "[format %.2f $mag] $counts $box [format "%.3f %.3f" $ra $dc] $x $y $width $height [format "%.3f %.3f %d" {*}[maskXY $ax $ay]]"
+
+
+	acorn::mkrays rays nx $box x0 -128 x1 128 ny $box y0 -128 y1 128 circle 1 intensity 1
 		      rays angles : $ax $ay $seeing
 
-	set spec [lindex $waves $row]					; # Select a spectrum probability function
+	rays waves [lindex $waves [lindex $targets $row-1]]						; # Add wavelength numbers to rays from spectrum probability function
 
-	rays waves $spec						; # Add wavelength numbers to rays
-
-	puts [B 21 set aper_xoff]
-	puts [B 21 set aper_yoff]
-
-	B 21 set $slitX [expr { 0.010/$mm2inch }]
-	B 21 set $slitY [expr { 1/$mm2inch }]
-
-	B trace rays {} $wave 4
+	B trace rays {} $wave 6
 
 	rays bin ushort $image 4096 4096 $scale $scale
+
+	rename rays {}
     }
 
     acorn::poisson ushort $image 4096 4096
     acorn::noise   ushort $image 4096 4096 1000 3
     acorn::fits    ushort $image 4096 4096
 
-    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > bino.fits b
+    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > [file root $mask].[starbase_name Slits].fits b
  }
  print { B print }
  prays {
     acorn::prays rays
  }
  trak {
-    acorn::Rays create aray 1
-    aray set px 112.326530612245 py 33.95918367346944 kz 1.0
+    lassign $argv ax ay
 
-    acorn::Rays create trak 71
+    acorn::Rays create ray1 1
+    acorn::Rays create trak 79
 
-    
+    ray1 set kz 1.0
+    ray1 angles : $ax $ay
+
     set w1 [B get wavelength 1 wave]
     set w  $w1
 
-    B trace aray {} [expr $w*10000] 0 trak
+    B 1 set aper_type none
+    B trace ray1 {} [expr $w*10000] 0 trak
 
-    acorn::prays aray
-    puts ""
-    acorn::prays trak
+    #acorn::prays ray1
+    #puts ""
+    acorn::prays trak %.3f
  }
  plot  -
  trace { 
@@ -118,19 +165,19 @@ switch $action {
     if { $field == "" } { set field 1 }
     if { $wavel == "" } { set wavel 1 }
 
-    set x [B get field $field x]
-    set y [B get field $field y]
-    set w [B get wavelength $wavel wave]
+    set ax [B get field $field x]
+    set ay [B get field $field y]
+    set  w [B get wavelength $wavel wave]
 
     acorn::mkrays rays nx 50 x0 -128 x1 128 ny 50 y0 -128 y1 128 circle 1
-	          rays angles : $x $y 
+	          rays angles : $ax $ay 
 
 
     B trace rays {} [expr $w*10000] 16
 
     puts "RayTrace $model"
     puts ""
-    puts "field    	$x $y"
+    puts "field    	$ax $ay"
     puts "wavelength	$w"
     puts ""
 

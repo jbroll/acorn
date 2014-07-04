@@ -32,6 +32,7 @@ using namespace Eigen;
 		return px*px+py*py > s->p[Px_aper_max]*s->p[Px_aper_max];
 	    }
 	    if ( !strcmp(s->aper_type, "rectangular") ) {
+
 		double w = s->p[Px_aper_min];
 		double h = s->p[Px_aper_max];
 

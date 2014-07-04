@@ -186,12 +186,12 @@ if { [::critcl::compiled] } {
 	    cumb += waves.list[i];
 	    int max = cumb*N > nbin ? nbin : cumb*waves.length*N;
 
-
 	    for ( ; j < nbin && j < max; j++ ) {
 		bins[j] = i;
 	    }
 	}
-	while ( j < nbin ) { bins[j] = nbin-1; }
+
+	while ( j < nbin ) { bins[j++] = i-1; }
 
 	for ( int i = path->first; i <= path->last; i++ ) {
 	    rays[i].wave = bins[xrand()%nbin];
@@ -261,11 +261,7 @@ if { [::critcl::compiled] } {
 
 	double sum = 0;
 
-
-
 	if ( radius > 1 ) {
-	    sum = 0;
-
 	    for ( y = -r/2; y < r/2; y++ ) {
 		for ( x = -r/2; x < r/2; x++ ) {
 			double squ = x*x + y*y;
@@ -278,6 +274,8 @@ if { [::critcl::compiled] } {
 	}
 
 	for ( int i = path->first; i <= path->last; i++ ) {
+
+	    if ( rays[i].vignetted ) { continue; }
 
 	    cx = rays[i].p[X]/sx;
 	    cy = rays[i].p[Y]/sy;

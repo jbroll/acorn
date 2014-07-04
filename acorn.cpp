@@ -28,7 +28,9 @@ extern "C" {
 	int *traversed = new int[nray];
 	Ray *ray;
 
-	//printf("Ray0 %p %d %d\n", R, nray, rsize);
+	//fprintf(stderr, "Ray0 %ld %p %d %d\n", R, R, nray, rsize);
+	//fflush(stderr);
+
 	//return;
 
 	for ( int h = 0; h < nsurfs; h++ ) {
@@ -69,7 +71,7 @@ extern "C" {
 		txreverse 	= txforward.inverse();
 		rtreverse 	= rtforward.inverse();
 
-		//printf("Surface %d %d: %f %f %f	%d\n", h, i, -surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz], once);
+		//printf("Surface %s %d %d: %f %f %f	%d\n", surf[i].type, h, i, -surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz], once);
 
 		for ( j = 0, ray = R; j < nray; j++, ray = (Ray *) (((char *) ray) + rsize) ) {
 		    Vector3d saveP = ray->p;
@@ -80,15 +82,16 @@ extern "C" {
 
 		    if ( ray->vignetted ) { continue; }
 
-
 		    ray->p = txforward * ray->p;		// Put the ray into the surface cs.
 		    ray->k = rtforward * ray->k;
 
 			//printf("Conv ");
 			//prays(ray, 1);
-		        //printf("traverse %f %f\n", n, z);
 
 		    ray->vignetted = surf[i].traverse(m, &surf[i], ray);
+
+			//printf("Trav ");
+			//prays(ray, 1);
 
 		    if ( ray->vignetted == 2 ) {		// Coordbreak returns 2
 			ray->vignetted = 0;
@@ -130,7 +133,6 @@ extern "C" {
 
 		    if ( xray ) {
 			memcpy(xray, ray, rsize);
-			((Ray *)xray)->vignetted = 0;
 			xray += rsize;
 		    }
 

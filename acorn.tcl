@@ -196,17 +196,15 @@ namespace eval acorn {
     critcl::cproc free   { long pointer } void { free((void *) pointer);	}
 
     critcl::cproc ::acorn::noise   { Tcl_Interp* ip char* Type Tcl_Obj* Data int nx int ny double bias double noise } ok {
-	int	 type, size, x, y, length;
+	int	 type, x, y, length;
 
 	unsigned char *data = Tcl_GetByteArrayFromObj(Data, &length);
 
 	if ( !strcmp(Type, "ushort" ) ) {
 	    type = TY_USHORT;
-	    size = sizeof(unsigned short);
 	}
 	for ( y = 0; y < ny; y++ ) {
 	    for ( x = 0; x < nx; x++ ) {
-		
 		switch ( type ) {
 		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] += gennor(bias, noise); break;
 		}
@@ -217,19 +215,30 @@ namespace eval acorn {
     }
 
     critcl::cproc ::acorn::poisson { Tcl_Interp* ip char* Type Tcl_Obj* Data int nx int ny } ok {
-	int	 type, size, x, y, length;
+	int	 type, x, y, length;
 
 	unsigned char *data = Tcl_GetByteArrayFromObj(Data, &length);
 
 	if ( !strcmp(Type, "ushort" ) ) {
 	    type = TY_USHORT;
-	    size = sizeof(unsigned short);
 	}
 
 	for ( y = 0; y < ny; y++ ) {
 	    for ( x = 0; x < nx; x++ ) {
 		switch ( type ) {
-		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] += ignpoi(((unsigned short *) data)[y*nx + x]); break;
+		 case TY_USHORT : {
+		    int value  = (int) (((unsigned short *) data)[y*nx + x]);
+
+		    if ( value ) {
+			int noise = ignpoi(value);
+
+			if ( value + noise > 0 ) {
+			    ((unsigned short *) data)[y*nx + x] = value + noise;
+			}
+		    }
+		    
+		    break;
+		  }
 		}
 	    }
 	}
