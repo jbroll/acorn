@@ -49,11 +49,9 @@ proc maskXY { ax ay } {
 }
 
 proc counts { mag exptime } {
-    set pi 3.14159
-
     set throughput	0.25
     set counts0		1.09e10
-    set	area	[expr { $pi*3.25*3.25 }]
+    set	area	[expr { 6.5*6.5 }]
 
     expr { int($throughput * $counts0 * pow(10, -0.4*$mag) * $exptime * $area) }
 }
@@ -96,6 +94,7 @@ switch $action {
     set PA [strtod [starbase_hdrget Slits pa]]
 
     starbase_foreachrow Slits -colvars {
+
 	# Compute the angles of ra and dec
 	#
 	set ra [expr { ([strtod $ra] -$RA)*15*cos($DC/57.2957795) }]
@@ -120,7 +119,11 @@ switch $action {
 	acorn::mkrays rays nx $box x0 -128 x1 128 ny $box y0 -128 y1 128 circle 1 intensity 1
 		      rays angles : $ax $ay $seeing
 
-	rays waves [lindex $waves [lindex $targets $row-1]]						; # Add wavelength numbers to rays from spectrum probability function
+	puts [rays length]
+
+	puts "$row [lindex $targets $row-1] : [starbase_rowget T [lindex $targets $row-1]]"
+	rays waves [lindex $waves [lindex $targets $row-1]-1] 		; # Add wavelength numbers to rays from spectrum probability function
+
 
 	B trace rays {} $wave 6
 
@@ -133,7 +136,7 @@ switch $action {
     acorn::noise   ushort $image 4096 4096 1000 3
     acorn::fits    ushort $image 4096 4096
 
-    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > [file root $mask].[starbase_name Slits].fits b
+    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > [file root $mask]-[starbase_name Slits].fits b
  }
  print { B print }
  prays {

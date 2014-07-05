@@ -1,3 +1,8 @@
+
+
+./xbino image ~/PS1_host_2014A_md05_2_skysub.ms.dump kurtz1.msk 
+
+
 iprofiler -timeprofiler -T 10000 `which tclsh8.6` test/GMT-thead.timer
 
 arec array  type

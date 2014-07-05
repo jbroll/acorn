@@ -171,30 +171,32 @@ if { [::critcl::compiled] } {
     } -pass-cdata true
 
 
-    critcl::cproc ::acorn::Rays::waves { Tcl_Interp* ip doubleList waves int { N 50 } } ok {
+    critcl::cproc ::acorn::Rays::waves { Tcl_Interp* ip doubleList waves } ok {
 	ARecPath *path = (ARecPath *) clientdata;
 	Ray      *rays = (Ray *)path->recs;
 
-	double cumb = 0.0;
+	int       nray = path->last-path->first+1;
 
-	int    nbin = waves.length*N;
-	short *bins = (short *) malloc(nbin*sizeof(short));
+	double cumb = 0.0;
+	double N = nray/waves.length;
 
 	int i;
 	int j = 0;
-	for ( i = 0; i < waves.length; i++ ) {
+	for ( i = 0; i < waves.length; i++ ) {					// Assign wave number according to cumbulative probability
 	    cumb += waves.list[i];
-	    int max = cumb*N > nbin ? nbin : cumb*waves.length*N;
+	    int max = cumb*N > nray ? nray : (cumb*waves.length*N+0.5);
 
-	    for ( ; j < nbin && j < max; j++ ) {
-		bins[j] = i;
+	    for ( ; j < nray && j < max; j++ ) {
+		rays[j].wave = i;
 	    }
 	}
 
-	while ( j < nbin ) { bins[j++] = i-1; }
+	while ( j < nray ) { rays[j++].wave = i-1; }				// Maye one or two left over?
 
-	for ( int i = path->first; i <= path->last; i++ ) {
-	    rays[i].wave = bins[xrand()%nbin];
+	for ( int i = path->last; i >= path->first+1; i-- ) {			// Shuffle
+	    int j = xrand() % i;
+
+	    int tmp = rays[i].wave; rays[i].wave = rays[j].wave; rays[j].wave = tmp;
 	}
 
 	return TCL_OK;
