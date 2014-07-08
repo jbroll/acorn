@@ -27,7 +27,7 @@ if { [::critcl::compiled] } {
     }
 
     proc ::acorn::mkrays { name args } {
-	set args [dict merge { type acorn::Rays circle 0 nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - intensity 1 } $args]
+	set args [dict merge { type acorn::Rays dist grid nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - intensity 1 } $args]
 
 	dict with args {}
 
@@ -53,7 +53,8 @@ if { [::critcl::compiled] } {
 	if { $xi eq "-" } { set xi [expr { ($x1-$x0)/($nx-1.0) }] }
 	if { $yi eq "-" } { set yi [expr { ($y1-$y0)/($ny-1.0) }] }
 
-	$name length = [$name mkrays : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle]
+
+	$name length = [$name mkrays-$dist : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle]
 
 	return $name
     }
@@ -138,8 +139,43 @@ if { [::critcl::compiled] } {
 
     }
 
-    critcl::cproc ::acorn::Rays::mkrays { Tcl_Interp* ip double nx double x0 double x1 double xi
-							 double ny double y0 double y1 double yi
+    critcl::cproc ::acorn::Rays::mkrays-uniform { Tcl_Interp* ip
+						  double x double y double w double h double intensity
+						  char* { circle NULL } double { r1 DBL_MAX } double { r2 DBL_MAX }
+						} int {
+	ARecPath *path = (ARecPath *) clientdata;
+	Ray      *rays = (Ray *)path->recs;
+
+	if ( r2 == DBL_MAX ) {
+	    r2 = r1;
+	    r1 = DBL_MAX;
+	}
+
+	if ( circle ) {
+	    w = r2;
+	    h = r2;
+	}
+
+	if ( r1 != DBL_MAX ) { r1 *= r1; }
+	if ( r2 != DBL_MAX ) { r2 *= r2; }
+
+	for ( int i = path->first; i >= path->last+1; ) {
+	    double x = genunf(-w, w);
+	    double y = genunf(-h, h);
+
+	    double sqr = x*x+y*y;
+
+	    if ( circle ) {
+		if ( r1 != DBL_MAX ) { if ( sqr < r1 ) { continue; } }
+		if ( r2 != DBL_MAX ) { if ( sqr > r2 ) { continue; } }
+	    }
+
+	    i++;
+	}
+    } -pass-cdata true
+
+    critcl::cproc ::acorn::Rays::mkrays-grid { Tcl_Interp* ip double nx double x0 double x1 double xi
+						double ny double y0 double y1 double yi
 						double intensity int circle } int {
 	ARecPath *path = (ARecPath *) clientdata;
 	Ray      *rays = (Ray *)path->recs;
@@ -185,7 +221,7 @@ if { [::critcl::compiled] } {
 	int j = 0;
 	for ( i = 0; i < waves.length; i++ ) {					// Assign wave number according to cumbulative probability
 	    cumb += waves.list[i];
-	    int max = cumb*N > nray ? nray : (cumb*waves.length*N+0.5);
+	    int max = cumb*N > nray ? nray : (cumb*nray+0.5);
 
 	    for ( ; j < nray && j < max; j++ ) {
 		rays[j].wave = i;
@@ -203,7 +239,9 @@ if { [::critcl::compiled] } {
 	return TCL_OK;
     } -pass-cdata true
 
-    critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay char* { dist NULL } double { dx 0.0 } double { dy DBL_MAX } } ok {
+    critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay char* { dist NULL } double { dx 0.0 } double { dy DBL_MAX } 
+		char* { clip NULL } double { c1 0.0 } double { c2 0.0 }
+		} ok {
 	ARecPath *path = (ARecPath *) clientdata;
 	Ray      *rays = (Ray *)path->recs;
 
@@ -215,16 +253,38 @@ if { [::critcl::compiled] } {
 	double aax = ax;
 	double aay = ay;
 
+	
+	if ( clip && !strcmp(clip, "circle") ) {
+	    if ( c2 == DBL_MAX ) {
+		c2 = c1;
+		c1 = DBL_MAX;
+	    }
+	    c1 *= c1;
+	    c2 *= c2;
+	}
+
 	if ( dist && !strcmp(dist, "normal") ) {
-	    for ( int i = path->first; i <= path->last; i++ ) {
+	    for ( int i = path->first; i <= path->last; ) {
 		aax = ax + gennor(0.0, dx/2.35);
 		aay = ay + gennor(0.0, dy/2.35);
+
+		if ( clip && !strcmp(clip, "circle") ) {
+		    double sqr = aax*aax+aay*aay;
+
+		    if ( sqr > c1 ) { continue; }
+		}
+		if ( clip && !strcmp(clip, "box") ) {
+		    if ( abs(aax) > c1 ) { continue; }
+		    if ( abs(aay) > c2 ) { continue; }
+		}
 
 		rays[i].k[X] = sin(aax/57.2957795);
 		rays[i].k[Y] = sin(aay/57.2957795);
 		rays[i].k[Z] = 1.0;
 
 		rays[i].k.normalize();
+
+		i++;
 	    }
 
 	    return TCL_OK;
@@ -234,6 +294,17 @@ if { [::critcl::compiled] } {
 	    for ( int i = path->first; i <= path->last; i++ ) {
 		aax = ax + genunf(-dx, +dx);
 		aay = ay + genunf(-dy, +dy);
+
+		if ( clip && !strcmp(clip, "circle") ) {
+		    double sqr = aax*aax+aay*aay;
+
+		    if ( c1 != DBL_MAX && sqr < c1 ) { continue; }
+		    if ( c2 != DBL_MAX && sqr > c2 ) { continue; }
+		}
+		if ( clip && !strcmp(clip, "box") ) {
+		    if ( abs(aax) > c1 ) { continue; }
+		    if ( abs(aay) > c2 ) { continue; }
+		}
 
 		rays[i].k[X] = sin(aax/57.2957795);
 		rays[i].k[Y] = sin(aay/57.2957795);
