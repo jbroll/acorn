@@ -77,6 +77,10 @@ switch $action {
     }
     set wave [lmap x [regsub -all {[^.0-9 ]} [cat bino/JohnFileWave.dat] {}] { expr { $x*10000 } }]
 
+    set spectrum [regsub -all {[^.0-9 ]} [cat bino/JohnFileSky.dat] {}]
+    set skysum      [sum $spectrum]
+    set skys     [lmap x $spectrum { expr { $x/$skysum } }]
+
     set image [acorn::malloc [expr { 2*4096*4096 }]]
 
     starbase_read Slits $mask
@@ -98,7 +102,7 @@ switch $action {
 	B 21 set aper_yoff $my
 
 	B 21 set $slitX [expr { 0.084/$mm2inch }]
-	B 21 set $slitY [expr { .840/$mm2inch }]
+	B 21 set $slitY [expr { 0.840/$mm2inch }]
 
 	set nth [expr { ($row-1) % [llength $waves] }]
 
@@ -110,14 +114,23 @@ switch $action {
 
 
 	acorn::mkrays rays nx $box x0 -128 x1 128 ny $box y0 -128 y1 128 circle 1 intensity 1
-		      rays angles : $ax $ay $seeing
+		      rays angles : $ax $ay normal $seeing 
 
 	rays waves $spectrum	 		; # Add wavelength numbers to rays from spectrum probability function
 
 	B trace rays {} $wave 6
+	rays bin ushort $image 4096 4096 $scale $scale
+	rename rays {}
+
+	set counts   	[expr { int($skysum * $ratio * (5*0.5)) }]
+	set box 	[expr int(sqrt($counts))]
+
+	acorn::mkrays rays nx $box x0 -128 x1 128 ny $box y0 -128 y1 128 circle 1 intensity 1
+		      rays angles : $ax $ay uniform 0.25 2.5
+	rays waves $skys
+	B trace rays {} $wave 6
 
 	rays bin ushort $image 4096 4096 $scale $scale
-
 	rename rays {}
     }
 
@@ -187,7 +200,7 @@ switch $action {
 
 
 	acorn::mkrays rays nx $box x0 -128 x1 128 ny $box y0 -128 y1 128 circle 1 intensity 1
-		      rays angles : $ax $ay $seeing
+		      rays angles : $ax $ay normal $seeing
 
 	rays waves [lindex $waves [lindex $targets $row-1]-1] 		; # Add wavelength numbers to rays from spectrum probability function
 
