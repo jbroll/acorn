@@ -5,6 +5,8 @@ OS  =$(shell uname)
 
 INC= -I/Users/john/include -I/home/john/include
 
+CRITCL=./critcl31.kit
+
 CFLAGS=$(INC) -msse -fPIC -O3 $(BITS) 
 
 SRC	= acorn.cpp acorn.h aperture.cpp glass/glass.c glass/acorn-glass.cpp tpool/tpool.c
@@ -50,23 +52,23 @@ rays.Darwin.x86_64 : lib/rays/macosx-x86_64/rays.dylib
 rays.Linux.x86_64  : lib/rays/linux-x86_64/rays.so
 
 lib/acorn/macosx-ix86/acorn.dylib   :	$(ACORN_SRCS)
-	ARCH=Darwin.i386 critcl -target macosx-x86_32 -pkg acorn 
+	ARCH=Darwin.i386 $(CRITCL) -target macosx-x86_32 -pkg acorn 
 
 lib/acorn/macosx-x86_64/acorn.dylib :	$(ACORN_SRCS)
-	ARCH=Darwin.x86_64 critcl -target macosx-x86_64 -pkg acorn 
+	ARCH=Darwin.x86_64 $(CRITCL) -target macosx-x86_64 -pkg acorn 
 
 lib/acorn/linux-x86_64/acorn.so :	$(ACORN_SRCS)
 	ARCH=$(ARCH) ./critcl31.kit -pkg acorn 
 
 
 lib/rays/macosx-ix86/rays.dylib   :	rays.tcl rays.h
-	ARCH=Darwin.i386 critcl -target macosx-x86_32 -pkg rays 
+	ARCH=Darwin.i386 $(CRITCL) -target macosx-x86_32 -pkg rays 
 
 lib/rays/macosx-x86_64/rays.dylib :	rays.tcl rays.h
-	ARCH=Darwin.x86_64 critcl -target macosx-x86_64 -pkg rays 
+	ARCH=Darwin.x86_64 $(CRITCL) -target macosx-x86_64 -pkg rays 
 
 lib/rays/linux-x86_64/rays.so :	rays.tcl rays.h
-	ARCH=linux.x86_64 critcl -pkg rays 
+	ARCH=linux.x86_64 $(CRITCL) -pkg rays 
 
 
 
@@ -75,13 +77,13 @@ nproc.Darwin.x86_64 : lib/nproc/macosx-x86_64/nproc.dylib
 nproc.Linux.x86_64  : lib/nproc/linux-x86_64/nproc.so
 
 lib/nproc/macosx-ix86/nproc.dylib   :	nproc.tcl
-	ARCH=Darwin.i386 critcl -target macosx-x86_32 -pkg nproc 
+	ARCH=Darwin.i386 $(CRITCL) -target macosx-x86_32 -pkg nproc 
 
 lib/nproc/macosx-x86_64/nproc.dylib :	nproc.tcl
-	ARCH=Darwin.x86_64 critcl -target macosx-x86_64 -pkg nproc 
+	ARCH=Darwin.x86_64 $(CRITCL) -target macosx-x86_64 -pkg nproc 
 
 lib/nproc/linux-x86_64/nproc.so :	nproc.tcl
-	ARCH=$(ARCH) critcl -pkg nproc 
+	ARCH=$(ARCH) $(CRITCL) -pkg nproc 
 
 
 
