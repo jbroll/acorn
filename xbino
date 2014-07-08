@@ -133,6 +133,8 @@ switch $action {
 
 	rays bin ushort $image 4096 4096 $scale $scale
 	rename rays {}
+
+	if ( $row > 5 } { break }
     }
 
     acorn::poisson ushort $image 4096 4096
