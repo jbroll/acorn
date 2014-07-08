@@ -131,6 +131,7 @@ if { [::critcl::compiled] } {
 
 	extern "C" {
 	    float gennor(float av,float sd);
+	    float genunf(float dx,float dy);
 	}
 
 
@@ -202,31 +203,58 @@ if { [::critcl::compiled] } {
 	return TCL_OK;
     } -pass-cdata true
 
-    critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay double { fwhm 0.0 } } ok {
+    critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay char* { dist NULL } double { dx 0.0 } double { dy DBL_MAX } } ok {
 	ARecPath *path = (ARecPath *) clientdata;
 	Ray      *rays = (Ray *)path->recs;
 
-	fwhm /= 3600;
+	if ( dy == DBL_MAX ) { dy = dx; }
+
+	dx /= 3600;
+	dy /= 3600;
 
 	double aax = ax;
 	double aay = ay;
 
-	for ( int i = path->first; i <= path->last; i++ ) {
-	    if ( fwhm ) {
-		aax = ax + gennor(0.0, fwhm/2.35);
-		aay = ay + gennor(0.0, fwhm/2.35);
+	if ( dist && !strcmp(dist, "normal") ) {
+	    for ( int i = path->first; i <= path->last; i++ ) {
+		aax = ax + gennor(0.0, dx/2.35);
+		aay = ay + gennor(0.0, dy/2.35);
+
+		rays[i].k[X] = sin(aax/57.2957795);
+		rays[i].k[Y] = sin(aay/57.2957795);
+		rays[i].k[Z] = 1.0;
+
+		rays[i].k.normalize();
 	    }
 
-	    rays[i].k[X] = sin(aax/57.2957795);
-	    rays[i].k[Y] = sin(aay/57.2957795);
+	    return TCL_OK;
+	}
+
+	if ( dist && !strcmp(dist, "uniform") ) {
+	    for ( int i = path->first; i <= path->last; i++ ) {
+		aax = ax + genunf(-dx, +dx);
+		aay = ay + genunf(-dy, +dy);
+
+		rays[i].k[X] = sin(aax/57.2957795);
+		rays[i].k[Y] = sin(aay/57.2957795);
+		rays[i].k[Z] = 1.0;
+
+		rays[i].k.normalize();
+	    }
+
+	    return TCL_OK;
+	}
+
+	for ( int i = path->first; i <= path->last; i++ ) {
+	    rays[i].k[X] = sin(ax/57.2957795);
+	    rays[i].k[Y] = sin(ay/57.2957795);
 	    rays[i].k[Z] = 1.0;
 
-
 	    rays[i].k.normalize();
-	    
 	}
 
 	return TCL_OK;
+
     } -pass-cdata true
 
     critcl::cproc ::acorn::Rays::advance { Tcl_Interp* ip double dist } ok {
@@ -314,7 +342,7 @@ if { [::critcl::compiled] } {
 
 		if ( ix >= 0 && ix < nx && ix >= 0 && ix < ny ) {
 		    switch ( type ) {
-		     case TY_USHORT : ((unsigned short *) data)[ix*nx + iy] += h; break;
+		     case TY_USHORT : ((unsigned short *) data)[iy*nx + ix] += h; break;
 		    }
 		}
 	    }

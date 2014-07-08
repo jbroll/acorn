@@ -66,7 +66,7 @@ extern "C" {
 	// Diffract
 
 	double dpdy = M*T*L/10000.0;		// diffraction routine from Welford
-	double dpdx = 0;
+	double dpdx = 0.0;
 	double nn   = 1.0;
 	double rad;
 
