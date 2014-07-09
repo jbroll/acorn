@@ -242,7 +242,8 @@ if { [::critcl::compiled] } {
 	return TCL_OK;
     } -pass-cdata true
 
-    critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay char* { dist NULL } double { dx 0.0 } double { dy DBL_MAX } 
+    critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay
+		char* { dist NULL } double { dx 0.0 } double { dy DBL_MAX } 
 		char* { clip NULL } double { c1 0.0 } double { c2 0.0 }
 		} ok {
 	ARecPath *path = (ARecPath *) clientdata;
@@ -250,8 +251,8 @@ if { [::critcl::compiled] } {
 
 	if ( dy == DBL_MAX ) { dy = dx; }
 
-	dx /= 3600;
-	dy /= 3600;
+	dx /= 3600.0;
+	dy /= 3600.0;
 
 	double aax = ax;
 	double aay = ay;
@@ -294,6 +295,9 @@ if { [::critcl::compiled] } {
 	}
 
 	if ( dist && !strcmp(dist, "uniform") ) {
+	    dx /= 2.0;
+	    dy /= 2.0;
+
 	    for ( int i = path->first; i <= path->last; i++ ) {
 		aax = ax + genunf(-dx, +dx);
 		aay = ay + genunf(-dy, +dy);

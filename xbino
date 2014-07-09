@@ -28,36 +28,41 @@ B config 1
 set argv [lassign $argv action]
 
 
-proc maskXY { ax ay } {
-    acorn::Rays create ray1 1
-    acorn::Rays create trak 79
+    proc maskXY { ax ay } {				; # Trace a ray to the mask and return its X, Y.
+	acorn::Rays create ray1 1
+	acorn::Rays create trak 79
 
-    ray1 set kz 1.0
-    ray1 angles : $ax $ay
+	ray1 set kz 1.0
+	ray1 angles : $ax $ay
 
-    set w  [B get wavelength 1 wave]
+	set w  [B get wavelength 1 wave]
 
-    B 1 set aper_type none
-    B trace ray1 {} [expr $w*10000] 0 trak
+	B 1 set aper_type none
+	B trace ray1 {} [expr $w*10000] 0 trak
 
-    set x [trak get 20 px]
-    set y [trak get 20 py]
-    set v [trak get 20 vignetted]
+	set x [trak get 20 px]
+	set y [trak get 20 py]
+	set v [trak get 20 vignetted]
 
-    rename ray1 {}
-    rename trak {}
+	rename ray1 {}
+	rename trak {}
 
-    return [list $x $y $v]
-}
+	return [list $x $y $v]
+    }
 
-proc counts { mag exptime } {
-    set throughput	0.25
-    set counts0		1.09e10
-    set	area	[expr { 6.5*6.5 }]
+    proc counts { mag exptime } {			; # compute counts at mag *exptime
+	set throughput	0.25
+	set counts0		1.09e10
+	set	area	[expr { 6.5*6.5 }]
 
-    expr { int($throughput * $counts0 * pow(10, -0.4*$mag) * $exptime * $area) }
-}
+	expr { int($throughput * $counts0 * pow(10, -0.4*$mag) * $exptime * $area) }
+    }
 
+    proc vnorm { v { sum {} } } {
+	if { $sum eq {} } { set sum [sum $v] }
+
+	lmap x $v { expr { $x/$sum } }
+    }
 
 
     set scale [expr { 1.0/($mm2inch*1000/15) }]
@@ -67,11 +72,10 @@ switch $action {
 
  longslit {
     set wave     { 4500 5000 5500 6000 6500 7000 7500 8000 8500 }
+
     set spectrum [lrepeat [llength $wave] 1.0]
-    puts $spectrum
     set sum [sum $spectrum]
-    set spectrum [lmap x $spectrum { expr { $x/$sum } }]
-    puts $spectrum
+    set spectrum [vnorm $spectrum $sum]
 
     set ax [B get field 1 x]
     set ay [B get field 1 y]
@@ -87,7 +91,7 @@ switch $action {
     set image [acorn::malloc [expr { 2*4096*4096 }]]
 
     acorn::mkrays rays nx 1000 x0 -128 x1 128 ny 1000 y0 -128 y1 128 circle 1 intensity 1
-		  rays angles : $ax $ay uniform  1.0 [expr 7.0*60]
+		  rays angles : $ax $ay uniform 1.0 [expr 14.0*60]
 
     rays waves $spectrum	 		; # Add wavelength numbers to rays from spectrum probability function
 
@@ -170,7 +174,7 @@ switch $action {
 	set box 	[expr int(sqrt($counts))]
 
 	acorn::mkrays rays nx $box x0 -128 x1 128 ny $box y0 -128 y1 128 circle 1 intensity 1
-		      rays angles : $ax $ay uniform 0.25 2.5
+		      rays angles : $ax $ay uniform 1 5
 	rays waves $skys
 	B trace rays {} $wave 18
 	rays bin ushort $image 4096 4096 $scale $scale
