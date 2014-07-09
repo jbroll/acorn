@@ -28,6 +28,7 @@ if { [::critcl::compiled] } {
 
     proc ::acorn::mkrays { name args } {
 	set args [dict merge { type acorn::Rays dist grid nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - intensity 1 } $args]
+	set circle 0
 
 	dict with args {}
 
@@ -172,6 +173,8 @@ if { [::critcl::compiled] } {
 
 	    i++;
 	}
+
+	return TCL_OK;
     } -pass-cdata true
 
     critcl::cproc ::acorn::Rays::mkrays-grid { Tcl_Interp* ip double nx double x0 double x1 double xi

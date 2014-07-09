@@ -78,10 +78,6 @@ extern "C" {
 	if ( n0   < 0 ) {  nn = -1.0;
 	} else	 	{  nn =  1.0; }
 
-	double nx = nhat(X);
-	double ny = nhat(Y);
-	double nz = nhat(Z);
-
 	double ux = r.k(X) + nn * (dpdx);
 	double uy = r.k(Y) + nn * (dpdy);
 	double uz = r.k(Z);
