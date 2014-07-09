@@ -27,13 +27,16 @@ if { [::critcl::compiled] } {
     }
 
     proc ::acorn::mkrays { name args } {
-	set args [dict merge { type acorn::Rays dist grid nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - intensity 1 } $args]
-	set circle 0
+	set args [dict merge { type acorn::Rays dist grid nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - intensity 1 x 0 y 0 circle 0 radius0 0 } $args]
 
 	dict with args {}
 
-	if { $name eq "-" } 		   { set name [$type new [expr { $nx*$ny }]] }
-	if { [info commands $name] eq {} } { $type create $name  [expr { $nx*$ny }]  }
+	if { ![info exists n] } {
+	    set n [expr { $nx*$ny }]
+	}
+
+	if { $name eq "-" } 		   { set name [$type new $n] }
+	if { [info commands $name] eq {} } { $type create $name  $n  }
 
 
 	if { [info exists diameter] } {
@@ -42,7 +45,9 @@ if { [::critcl::compiled] } {
 
 	if { [info exists radius] } {
 	    set circle 1
-	    set box $radius
+	    set box    $radius
+	    set width  [expr { $radius*2 }]
+	    set height [expr { $radius*2 }]
 	}
 
 	if { [info exists box] } {
@@ -54,8 +59,16 @@ if { [::critcl::compiled] } {
 	if { $xi eq "-" } { set xi [expr { ($x1-$x0)/($nx-1.0) }] }
 	if { $yi eq "-" } { set yi [expr { ($y1-$y0)/($ny-1.0) }] }
 
+	switch $dist {
+	 grid 	 { $name length = [$name mkrays-grid   : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle] }
+ 	 uniform {
+			set width  [expr {  $width/2 }]
+			set height [expr { $height/2 }]
 
-	$name length = [$name mkrays-$dist : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle]
+
+		                  $name mkrays-uniform : $x $y $width $height $circle $radius0 $radius }
+	 normal	 { $name mkrays-normal }
+	}
 
 	return $name
     }
@@ -142,34 +155,38 @@ if { [::critcl::compiled] } {
 
     critcl::cproc ::acorn::Rays::mkrays-uniform { Tcl_Interp* ip
 						  double x double y double w double h double intensity
-						  char* { circle NULL } double { r1 DBL_MAX } double { r2 DBL_MAX }
+						  double r0 double r1 
 						} int {
 	ARecPath *path = (ARecPath *) clientdata;
 	Ray      *rays = (Ray *)path->recs;
 
-	if ( r2 == DBL_MAX ) {
-	    r2 = r1;
-	    r1 = DBL_MAX;
+	if ( r1 != 0.0 ) {
+	    w = r1;
+	    h = r1;
 	}
 
-	if ( circle ) {
-	    w = r2;
-	    h = r2;
-	}
+	r0 *= r0;
+	r1 *= r1;
 
-	if ( r1 != DBL_MAX ) { r1 *= r1; }
-	if ( r2 != DBL_MAX ) { r2 *= r2; }
+	for ( int i = path->first; i <= path->last; ) {
+	    double xx = x + genunf(-w, w);
+	    double yy = y + genunf(-h, h);
 
-	for ( int i = path->first; i >= path->last+1; ) {
-	    double x = genunf(-w, w);
-	    double y = genunf(-h, h);
+	    double sqr = xx*xx+yy*yy;
 
-	    double sqr = x*x+y*y;
+	    if ( r0 != 0.0 ) { if ( sqr < r0 ) { continue; } }
+	    if ( r1 != 0.0 ) { if ( sqr > r1 ) { continue; } }
 
-	    if ( circle ) {
-		if ( r1 != DBL_MAX ) { if ( sqr < r1 ) { continue; } }
-		if ( r2 != DBL_MAX ) { if ( sqr > r2 ) { continue; } }
-	    }
+	    rays[i].p[X] =  xx;
+	    rays[i].p[Y] =  yy;
+	    rays[i].p[Z] = 0.0;
+	    rays[i].k[X] = 0.0;
+	    rays[i].k[Y] = 0.0;
+	    rays[i].k[Z] = 1.0;
+
+	    rays[i].intensity = intensity;
+	    rays[i].vignetted = 0;
+	    rays[i].wave      = 0;
 
 	    i++;
 	}
@@ -418,7 +435,7 @@ if { [::critcl::compiled] } {
 		int ix = cx + 0.5;
 		int iy = cy + 0.5;
 
-		if ( ix >= 0 && ix < nx && ix >= 0 && ix < ny ) {
+		if ( ix >= 0 && ix < nx && iy >= 0 && iy < ny ) {
 		    switch ( type ) {
 		     case TY_USHORT : ((unsigned short *) data)[iy*nx + ix] += h; break;
 		    }

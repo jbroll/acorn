@@ -112,6 +112,112 @@ switch $action {
     set seeing 0.7
 
     foreach file [glob bino/E.*] {
+	set fp [open $file]
+
+	starbase_header X $fp
+
+	set wave {}
+	set sky  {}
+	set obj  {}
+
+	foreach { w s o } [split [string trim [read  $fp]]] { 
+	    lappend wave [expr { $w*10000 }]
+	    lappend sky  $s
+	    lappend obj  $o
+	}
+
+	lappend spectra [dict create						\
+			    wave $wave						\
+			    skysum [expr { int([sum $sky]) }] sky [vnorm $sky]	\
+			    objsum [expr { int([sum $obj]) }] obj [vnorm $obj]	\
+			    slitwidth 	[starbase_hdrget X slitwidth]		\
+			    slitheight 	[starbase_hdrget X slitheight]		\
+			    seeing	[starbase_hdrget X seeing]		\
+		]
+	close $fp
+    }
+
+    set image [acorn::malloc [expr { 2*4096*4096 }]]
+
+    starbase_read Slits $mask
+    set RA [strtod [starbase_hdrget Slits ra]]
+    set DC [strtod [starbase_hdrget Slits dec]]
+    set PA [strtod [starbase_hdrget Slits pa]]
+
+    starbase_foreachrow Slits -colvars {
+
+	# Compute the angles of ra and dec
+	#
+	set ra [expr { ([strtod $ra] -$RA)*15*cos($DC/57.2957795) }]
+	set dc [expr {  [strtod $dec]-$DC }]
+
+
+	lassign [2d::transform [2d::rotate [expr { -$PA }] d] $ra $dc] ax ay
+	lassign [maskXY $ax $ay] mx my
+
+	B 21 set aper_xoff [expr { $x/$mm2inch }]
+	B 21 set aper_yoff [expr { $y/$mm2inch }]
+
+	B 21 set $slitX [expr { 0.084/$mm2inch }]
+	B 21 set $slitY [expr { 0.840/$mm2inch }]
+
+	set nth [expr { ($row-1) % [llength $spectra] }]
+
+	foreach { name value } [lindex $spectra  $nth] { set $name $value }
+
+	    puts "$nth $objsum"
+
+	    # Create, trace and bin the object spectrum
+	    #
+
+	    acorn::mkrays rays dist uniform n $objsum radius0 15 radius 128
+			  rays angles : $ax $ay normal $seeing 
+
+
+	    puts "	waves"
+	    rays waves $obj
+
+	    puts "	trace"
+	    B trace rays {} $wave 16
+
+	    puts "	bin"
+	    rays bin ushort $image 4096 4096 $scale $scale
+	    rename rays {}
+
+	    puts "$nth $skysum"
+
+	    # Create, trace and bin the sky spectrum
+	    #
+	    acorn::mkrays rays dist uniform n $skysum radius0 15 radius 128
+			  rays angles : $ax $ay uniform $slitwidth $slitheight
+
+	    puts "	waves"
+	    rays waves $sky
+
+	    puts "	trace"
+	    B trace rays {} $wave 16
+
+	    puts "	bin"
+	    rays bin ushort $image 4096 4096 $scale $scale
+	    rename rays {}
+
+	#if { $row > 4 } { break }
+    }
+
+    acorn::poisson ushort $image 4096 4096
+    acorn::noise   ushort $image 4096 4096 1000 3
+    acorn::fits    ushort $image 4096 4096
+
+    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > [file root $mask]-[starbase_name Slits].fits b
+ }
+ image-old {
+    lassign $argv mask 
+
+    set scale [expr { 1.0/($mm2inch*1000/15) }]
+    set ratio [expr { (6.5*6.5) / (3.14159*3.25*3.25) }]
+    set seeing 0.7
+
+    foreach file [glob bino/E.*] {
 	set spectrum [regsub -all {[^.0-9 ]} [cat $file] {}]
 	set sum      [sum $spectrum]
 	set spectrum [lmap x $spectrum { expr { $x/$sum } }]
