@@ -20,7 +20,6 @@ source jbr.tcl/strtod.tcl
 source jbr.tcl/2d.tcl
 
 set model zmx-models/p24_110912af_072512ac_inch.zmx
-#acorn::ZMX create B source zmx-models/p8_110912af_072512ac.zmx
 
 acorn::ZMX create B source $model
 
@@ -170,13 +169,8 @@ switch $action {
 
 	lassign [maskXY $ax $ay] mx my
 
-puts stderr "ax $ax ay $ay mx $mx my $my"
-
 	B 21 set aper_xoff $mx ; # [expr { $x/$mm2inch }]
 	B 21 set aper_yoff $my ; # [expr { $y/$mm2inch }]
-
-	#B 21 set aper_xoff [expr { $x/$mm2inch }]
-	#B 21 set aper_yoff [expr { $y/$mm2inch }]
 
 	B 21 set $slitX [expr { 0.100/$mm2inch }]
 	B 21 set $slitY [expr { 0.433/$mm2inch }]
