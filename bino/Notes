@@ -1,0 +1,33 @@
+
+action=$1;	shift
+
+case $action in
+ sextract)
+    for file in CR*.fits ; do
+	base=`basename $file .fits`
+	wfs sextract $file > $base.tab
+    done
+    ;;
+
+ postage)
+    postage.py CR*.fits
+    ;;
+
+ shotgun)
+    file=$1
+    secs=$2
+
+    rate=0.000413824			# per mm^2 per second
+    area=3775				# mm^2
+
+    count=`calc "int($rate*$area*$secs)"`
+    scale=5.98				# 13u/15u * 90u/13u
+
+
+    ./shotgun.py $file $count 7.98
+    ;;
+
+esac
+
+
+

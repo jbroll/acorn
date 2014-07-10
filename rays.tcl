@@ -471,7 +471,8 @@ if { [::critcl::compiled] } {
 	    if ( rays[i].p[X] != rays[i].p[X]
 	      || rays[i].p[Y] != rays[i].p[Y] 
 	      || rays[i].p[Z] != rays[i].p[Z] ) { continue; }
-	    if ( !v && rays[i].vignetted   )     { continue; }
+
+	    if ( v != rays[i].vignetted   )     { continue; }
 
 	    cx += rays[i].p[X];
 	    cy += rays[i].p[Y];

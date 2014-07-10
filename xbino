@@ -10,6 +10,7 @@ interp alias {} print {} puts
 
 set mask 21			; # The mask is surface 21?
 set mm2inch 25.4
+set seeing 0.7
 
 set slitX aper_min 
 set slitY aper_max 
@@ -25,21 +26,31 @@ acorn::ZMX create B source $model
 
 B config 1
 
+proc plot-rays { rays { v 0 } } {
+
+    foreach {*}[rays stat : $v] {}
+
+    set range [expr { max($xrange, $yrange)*1.1 }]
+    set xmin [expr $x - $range/2]
+    set xmax [expr $x + $range/2]
+    set ymin [expr $y - $range/2]
+    set ymax [expr $y + $range/2]
+
+    acorn::prays $rays | "row v==$v | plottable size 8 8 x,y marker circle xaxis min $xmin max $xmax yaxis min $ymin max $ymax"
+}
+
 
 set argv [lassign $argv action]
 
 
-    proc maskXY { ax ay } {				; # Trace a ray to the mask and return its X, Y.
+    proc maskXY { ax ay { w 6300 } } {				; # Trace a ray to the mask and return its X, Y.
 	acorn::Rays create ray1 1
 	acorn::Rays create trak 79
 
-	ray1 set kz 1.0
 	ray1 angles : $ax $ay
 
-	set w  [B get wavelength 1 wave]
-
 	B 1 set aper_type none
-	B trace ray1 {} [expr $w*10000] 0 trak
+	B trace ray1 {} $w 0 trak
 
 	set x [trak get 20 px]
 	set y [trak get 20 py]
@@ -67,7 +78,6 @@ set argv [lassign $argv action]
 
 
     set scale [expr { 1.0/($mm2inch*1000/15) }]
-    set seeing 0.7
 
 switch $action {
 
@@ -109,8 +119,6 @@ switch $action {
     lassign $argv mask 
 
     set scale [expr { 1.0/($mm2inch*1000/15) }]
-    set ratio [expr { (6.5*6.5) / (3.14159*3.25*3.25) }]
-    set seeing 0.7
 
     foreach file [glob bino/E.*] {
 	set fp [open $file]
@@ -155,13 +163,23 @@ switch $action {
 
 
 	lassign [2d::transform [2d::rotate [expr { -$PA }] d] $ra $dc] ax ay
+
+	    set ax [B get field 1 x]
+	    set ay [B get field 1 y]
+
+
 	lassign [maskXY $ax $ay] mx my
 
-	B 21 set aper_xoff [expr { $x/$mm2inch }]
-	B 21 set aper_yoff [expr { $y/$mm2inch }]
+puts stderr "ax $ax ay $ay mx $mx my $my"
 
-	B 21 set $slitX [expr { 0.084/$mm2inch }]
-	B 21 set $slitY [expr { 0.420/$mm2inch }]
+	B 21 set aper_xoff $mx ; # [expr { $x/$mm2inch }]
+	B 21 set aper_yoff $my ; # [expr { $y/$mm2inch }]
+
+	#B 21 set aper_xoff [expr { $x/$mm2inch }]
+	#B 21 set aper_yoff [expr { $y/$mm2inch }]
+
+	B 21 set $slitX [expr { 0.100/$mm2inch }]
+	B 21 set $slitY [expr { 0.433/$mm2inch }]
 
 	set nth [expr { ($row-1) % [llength $spectra] }]
 
@@ -171,7 +189,6 @@ switch $action {
 
 	    # Create, trace and bin the object spectrum
 	    #
-
 	    acorn::mkrays rays dist uniform n $objsum radius0 15 radius 128
 			  rays angles : $ax $ay normal $seeing $seeing box 1.0 5.0
 
@@ -184,6 +201,7 @@ switch $action {
 
 	    puts -nonewline "	bin"; flush stdout
 	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $scale $scale]"; flush stdout
+
 	    rename rays {}
 
 #set skysum 100000
@@ -193,7 +211,7 @@ switch $action {
 	    # Create, trace and bin the sky spectrum
 	    #
 	    acorn::mkrays rays dist uniform n $skysum radius0 15 radius 128
-			  rays angles : $ax $ay uniform $slitwidth $slitheight
+			  rays angles : $ax $ay uniform [expr $slitwidth*1.01] [expr $slitheight*1.01]
 
 	    puts -nonewline "	waves"; flush stdout
 	    rays waves $sky
@@ -205,9 +223,10 @@ switch $action {
 
 	    puts -nonewline "	bin"; flush stdout
 	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $scale $scale]"; flush stdout
-#puts ""
-#acorn::prays rays
+
+#plot-rays rays 21
 #exit
+
 	    rename rays {}
 
 	    puts ""
@@ -431,20 +450,10 @@ switch $action {
     puts ""
 
     if { $action eq "plot" } {
-	foreach {*}[rays stat] {}
-
-	set range [expr { max($xrange, $yrange) }]
-	set xmin [expr $x - $range/2]
-	set xmax [expr $x + $range/2]
-	set ymin [expr $y - $range/2]
-	set ymax [expr $y + $range/2]
-
-	set plot [list | "row !v | plottable size 8 8 x,y marker circle xaxis min $xmin max $xmax yaxis min $ymin max $ymax"]
+	plot-rays rays
     } else { 
-	set plot {}
+	acorn::prays rays
     }
-
-    acorn::prays rays {*}$plot
  }
 }
 
