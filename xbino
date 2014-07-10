@@ -161,7 +161,7 @@ switch $action {
 	B 21 set aper_yoff [expr { $y/$mm2inch }]
 
 	B 21 set $slitX [expr { 0.084/$mm2inch }]
-	B 21 set $slitY [expr { 0.840/$mm2inch }]
+	B 21 set $slitY [expr { 0.420/$mm2inch }]
 
 	set nth [expr { ($row-1) % [llength $spectra] }]
 
@@ -205,6 +205,7 @@ switch $action {
 
 	    puts -nonewline "	bin"; flush stdout
 	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $scale $scale]"; flush stdout
+#puts ""
 #acorn::prays rays
 #exit
 	    rename rays {}
