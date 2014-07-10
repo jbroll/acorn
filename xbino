@@ -4,6 +4,7 @@ lappend auto_path ./lib arec/lib
 
 package require tcltest
 package require acorn
+package require nproc
 
 interp alias {} print {} puts
 
@@ -95,7 +96,7 @@ switch $action {
 
     rays waves $spectrum	 		; # Add wavelength numbers to rays from spectrum probability function
 
-    B trace rays {} $wave 6
+    B trace rays {} $wave [nproc]
     rays bin ushort $image 4096 4096 $scale $scale
     rename rays {}
 
@@ -171,17 +172,17 @@ switch $action {
 	    #
 
 	    acorn::mkrays rays dist uniform n $objsum radius0 15 radius 128
-			  rays angles : $ax $ay normal $seeing 
+			  rays angles : $ax $ay normal $seeing $seeing box 1.0 5.0
 
 
 	    puts "	waves"
 	    rays waves $obj
 
 	    puts "	trace"
-	    B trace rays {} $wave 16
+	    B trace rays {} $wave [nproc]
 
 	    puts "	bin"
-	    rays bin ushort $image 4096 4096 $scale $scale
+	    puts "v [rays bin ushort $image 4096 4096 $scale $scale]"
 	    rename rays {}
 
 	    puts "$nth $skysum"
@@ -197,8 +198,12 @@ switch $action {
 	    puts "	trace"
 	    B trace rays {} $wave 16
 
+
+
 	    puts "	bin"
-	    rays bin ushort $image 4096 4096 $scale $scale
+	    puts "v [rays bin ushort $image 4096 4096 $scale $scale]"
+#acorn::prays rays
+#exit
 	    rename rays {}
 
 	#if { $row > 4 } { break }

@@ -169,16 +169,16 @@ if { [::critcl::compiled] } {
 	r1 *= r1;
 
 	for ( int i = path->first; i <= path->last; ) {
-	    double xx = x + genunf(-w, w);
-	    double yy = y + genunf(-h, h);
+	    double xx = genunf(-w, w);
+	    double yy = genunf(-h, h);
 
 	    double sqr = xx*xx+yy*yy;
 
 	    if ( r0 != 0.0 ) { if ( sqr < r0 ) { continue; } }
 	    if ( r1 != 0.0 ) { if ( sqr > r1 ) { continue; } }
 
-	    rays[i].p[X] =  xx;
-	    rays[i].p[Y] =  yy;
+	    rays[i].p[X] =  x + xx;
+	    rays[i].p[Y] =  y + yy;
 	    rays[i].p[Z] = 0.0;
 	    rays[i].k[X] = 0.0;
 	    rays[i].k[Y] = 0.0;
@@ -260,13 +260,13 @@ if { [::critcl::compiled] } {
     } -pass-cdata true
 
     critcl::cproc ::acorn::Rays::angles { Tcl_Interp* ip double ax double ay
-		char* { dist NULL } double { dx 0.0 } double { dy DBL_MAX } 
+		char* { dist NULL } double { dx 0.0 } double { dy 0.0 } 
 		char* { clip NULL } double { c1 0.0 } double { c2 0.0 }
 		} ok {
 	ARecPath *path = (ARecPath *) clientdata;
 	Ray      *rays = (Ray *)path->recs;
 
-	if ( dy == DBL_MAX ) { dy = dx; }
+	if ( dy == 0.0 ) { dy = dx; }
 
 	dx /= 3600.0;
 	dy /= 3600.0;
@@ -274,11 +274,14 @@ if { [::critcl::compiled] } {
 	double aax = ax;
 	double aay = ay;
 
+	c1 /= 3600;
+	c2 /= 3600;
+
 	
 	if ( clip && !strcmp(clip, "circle") ) {
-	    if ( c2 == DBL_MAX ) {
+	    if ( c2 == 0.0 ) {
 		c2 = c1;
-		c1 = DBL_MAX;
+		c1 = 0.0;
 	    }
 	    c1 *= c1;
 	    c2 *= c2;
@@ -286,21 +289,21 @@ if { [::critcl::compiled] } {
 
 	if ( dist && !strcmp(dist, "normal") ) {
 	    for ( int i = path->first; i <= path->last; ) {
-		aax = ax + gennor(0.0, dx/2.35);
-		aay = ay + gennor(0.0, dy/2.35);
+		aax = gennor(0.0, dx/2.35);
+		aay = gennor(0.0, dx/2.35);
 
 		if ( clip && !strcmp(clip, "circle") ) {
 		    double sqr = aax*aax+aay*aay;
 
-		    if ( sqr > c1 ) { continue; }
+		    if ( sqr > c2 ) { continue; }
 		}
 		if ( clip && !strcmp(clip, "box") ) {
-		    if ( abs(aax) > c1 ) { continue; }
-		    if ( abs(aay) > c2 ) { continue; }
+		    if ( abs(aax) > c1/2 ) { continue; }
+		    if ( abs(aay) > c2/2 ) { continue; }
 		}
 
-		rays[i].k[X] = sin(aax/57.2957795);
-		rays[i].k[Y] = sin(aay/57.2957795);
+		rays[i].k[X] = sin((ax+aax)/57.2957795);
+		rays[i].k[Y] = sin((ay+aay)/57.2957795);
 		rays[i].k[Z] = 1.0;
 
 		rays[i].k.normalize();
@@ -316,8 +319,8 @@ if { [::critcl::compiled] } {
 	    dy /= 2.0;
 
 	    for ( int i = path->first; i <= path->last; i++ ) {
-		aax = ax + genunf(-dx, +dx);
-		aay = ay + genunf(-dy, +dy);
+		aax = genunf(-dx, +dx);
+		aay = genunf(-dy, +dy);
 
 		if ( clip && !strcmp(clip, "circle") ) {
 		    double sqr = aax*aax+aay*aay;
@@ -325,13 +328,9 @@ if { [::critcl::compiled] } {
 		    if ( c1 != DBL_MAX && sqr < c1 ) { continue; }
 		    if ( c2 != DBL_MAX && sqr > c2 ) { continue; }
 		}
-		if ( clip && !strcmp(clip, "box") ) {
-		    if ( abs(aax) > c1 ) { continue; }
-		    if ( abs(aay) > c2 ) { continue; }
-		}
 
-		rays[i].k[X] = sin(aax/57.2957795);
-		rays[i].k[Y] = sin(aay/57.2957795);
+		rays[i].k[X] = sin((ax+aax)/57.2957795);
+		rays[i].k[Y] = sin((ay+aay)/57.2957795);
 		rays[i].k[Z] = 1.0;
 
 		rays[i].k.normalize();
@@ -366,7 +365,7 @@ if { [::critcl::compiled] } {
 
 
 
-    critcl::cproc ::acorn::Rays::bin { Tcl_Interp* ip char* Type Tcl_Obj* Data int nx int ny double sx double sy int { radius 1 } double { sigma 0 } } ok {
+    critcl::cproc ::acorn::Rays::bin { Tcl_Interp* ip char* Type Tcl_Obj* Data int nx int ny double sx double sy int { radius 1 } double { sigma 0 } } int {
 	ARecPath *path = (ARecPath *) clientdata;
 
 	int	 type;
@@ -398,9 +397,11 @@ if { [::critcl::compiled] } {
 	    h /= sum;       // Normalize the height for the volume of the gausian.
 	}
 
+	int v = 0;
+
 	for ( int i = path->first; i <= path->last; i++ ) {
 
-	    if ( rays[i].vignetted ) { continue; }
+	    if ( rays[i].vignetted ) { v++; continue; }
 
 	    cx = rays[i].p[X]/sx;
 	    cy = rays[i].p[Y]/sy;
@@ -443,7 +444,7 @@ if { [::critcl::compiled] } {
 	    }
 	}
 
-	return TCL_OK;
+	return v;
     } -pass-cdata true
 
     critcl::cproc ::acorn::Rays::stat { Tcl_Interp* ip int { v 0 } } ok {
