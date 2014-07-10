@@ -163,8 +163,8 @@ switch $action {
 
 	lassign [2d::transform [2d::rotate [expr { -$PA }] d] $ra $dc] ax ay
 
-	    set ax [B get field 1 x]
-	    set ay [B get field 1 y]
+#	    set ax [B get field 1 x]
+#	    set ay [B get field 1 y]
 
 
 	lassign [maskXY $ax $ay] mx my
