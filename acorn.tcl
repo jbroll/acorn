@@ -43,8 +43,11 @@ namespace eval acorn {
 	#include "xtypes.h"
 
 	extern "C" {
+	    void setall(long seed0, long seed1);
+
 	    float gennor(float av,float sd);
 	    long ignpoi(float mu);
+
 
 	    int  SurfSize(void);
 	    int  RaysSize(void);
@@ -69,6 +72,10 @@ namespace eval acorn {
 		}
 	    }
     }
+
+    critcl::cinit {
+	setall((long) &setall % 2147483398 + 1, time(NULL) % 2147483398 + 1);
+    } {}
 
     proc init {} {
 	package require arec

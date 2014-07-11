@@ -11,6 +11,8 @@ interp alias {} print {} puts
 set mask 21			; # The mask is surface 21?
 set mm2inch 25.4
 set seeing 0.7
+set scale [expr { 1.0/($mm2inch*1000/15) }]
+
 
 set slitX aper_min 
 set slitY aper_max 
@@ -76,7 +78,6 @@ set argv [lassign $argv action]
     }
 
 
-    set scale [expr { 1.0/($mm2inch*1000/15) }]
 
 switch $action {
 
@@ -117,9 +118,7 @@ switch $action {
  image {
     lassign $argv mask 
 
-    set scale [expr { 1.0/($mm2inch*1000/15) }]
-
-    foreach file [glob bino/E.*] {
+    foreach file [lsort [glob bino/E.*]] {
 	set fp [open $file]
 
 	starbase_header X $fp
@@ -159,7 +158,6 @@ switch $action {
 	#
 	set ra [expr { ([strtod $ra] -$RA)*15*cos($DC/57.2957795) }]
 	set dc [expr {  [strtod $dec]-$DC }]
-
 
 	lassign [2d::transform [2d::rotate [expr { -$PA }] d] $ra $dc] ax ay
 
