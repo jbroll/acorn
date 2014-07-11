@@ -32,9 +32,6 @@ class AGF(object):
     def __getitem__(self, indx):
 	return self.glass[indx]
 
-    def CC(self, *line):
-	pass
-
     def NM(self, op, name, formula, MIL, Nd, Vd, exclude, status, *line):
 	if self.current :
 	    self.glass.append(self.current)
@@ -54,6 +51,7 @@ class AGF(object):
     def TD(self, op, D0, D1, D2, E0, E1, Ltk, temp, *line):
 	self.current.update({ "D0": D0, "D1": D1, "D2": D2, "E0": E0, "E1": E1, "Ltk": Ltk, "temp": temp })
 
+    def CC(self, *line): pass
     def LD(self, op, name, *line): pass
     def OD(self, op, name, *line): pass
     def IT(self, op, name, *line): pass
