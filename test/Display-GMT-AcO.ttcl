@@ -3,9 +3,9 @@
 lappend auto_path /home/john/lib /Users/john/lib ./lib ../lib tripack/lib
 
 
-source ngon.tcl
-source display-common.tcl
-source 3d.tcl
+source util/ngon.tcl
+source util/display-common.tcl
+source util/3d.tcl
 
 package require acorn
 package require tripack
