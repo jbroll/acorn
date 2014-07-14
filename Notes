@@ -1,7 +1,12 @@
 
+./xbino image kurtz2.msk bino/objects/*
+
+
+
 ( time ./xbino image kurtz2.msk 2>&1 > kurtz2-Mask1b.log ) >> kurtz2-Mask1b.log 2>&1
 
-./xbino image ~/PS1_host_2014A_md05_2_skysub.ms.dump kurtz1.msk 
+
+
 
 
 iprofiler -timeprofiler -T 10000 `which tclsh8.6` test/GMT-thead.timer

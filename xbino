@@ -78,47 +78,135 @@ set argv [lassign $argv action]
     }
 
 
+proc load-spectra { files } {
+    foreach file [lsort $files] {
+	set fp [open $file]
+
+	starbase_header X $fp
+
+	set wave {}
+	set sky  {}
+	set obj  {}
+
+	foreach { w s o } [split [string trim [read  $fp]]] { 
+	    lappend wave [expr { $w*10000 }]
+	    lappend sky  $s
+	    lappend obj  $o
+	}
+
+	lappend spectra [dict create						\
+			    file $file						\
+			    wave $wave						\
+			    skysum [expr { int([sum $sky]) }] sky [vnorm $sky]	\
+			    objsum [expr { int([sum $obj]) }] obj [vnorm $obj]	\
+			    slitwidth 	[starbase_hdrget X slitwidth]		\
+			    slitheight 	[starbase_hdrget X slitheight]		\
+			    seeing	[starbase_hdrget X seeing]		\
+		]
+	close $fp
+    }
+
+    return $spectra
+}
+
+proc trace-slits { mask spectra image } {
+
+    starbase_read Slits $mask
+    set RA [strtod [starbase_hdrget Slits ra]]
+    set DC [strtod [starbase_hdrget Slits dec]]
+    set PA [strtod [starbase_hdrget Slits pa]]
+
+    starbase_foreachrow Slits -colvars {
+
+	# Compute the angles of ra and dec
+	#
+	set ra [expr { ([strtod $ra] -$RA)*15*cos($DC/57.2957795) }]
+	set dc [expr {  [strtod $dec]-$DC }]
+
+	lassign [2d::transform [2d::rotate [expr { -$PA }] d] $ra $dc] ax ay
+
+#	    set ax [B get field 1 x]
+#	    set ay [B get field 1 y]
+
+
+	lassign [maskXY $ax $ay] mx my
+
+	B 21 set aper_xoff $mx ; # [expr { $x/$mm2inch }]
+	B 21 set aper_yoff $my ; # [expr { $y/$mm2inch }]
+
+	B 21 set $slitX [expr { 0.100/$mm2inch }]
+	B 21 set $slitY [expr { 0.433/$mm2inch }]
+
+	set nth [expr { ($row-1) % [llength $spectra] }]
+
+	foreach { name value } [lindex $spectra  $nth] { set $name $value }
+
+	    puts -nonewline "$file $objsum";	flush stdout
+
+	    # Create, trace and bin the object spectrum
+	    #
+	    acorn::mkrays rays dist uniform n $objsum radius0 15 radius 128
+			  rays angles : $ax $ay normal $seeing $seeing box $slitwidth $slitheight
+
+
+	    puts -nonewline "	waves"; flush stdout
+	    rays waves $obj
+
+	    puts -nonewline "	trace"; flush stdout
+	    B trace rays {} $wave [nproc]
+
+	    puts -nonewline "	bin"; flush stdout
+	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $scale $scale]"; flush stdout
+
+	    rename rays {}
+
+#set skysum 100000
+
+	    puts -nonewline "	sky $skysum"; flush stdout
+
+	    # Create, trace and bin the sky spectrum
+	    #
+	    acorn::mkrays rays dist uniform n $skysum radius0 15 radius 128
+			  rays angles : $ax $ay uniform [expr $slitwidth*1.01] [expr $slitheight*1.01]
+
+	    puts -nonewline "	waves"; flush stdout
+	    rays waves $sky
+
+	    puts -nonewline "	trace"; flush stdout
+	    B trace rays {} $wave 16
+
+
+
+	    puts -nonewline "	bin"; flush stdout
+	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $scale $scale]"; flush stdout
+
+#plot-rays rays 21
+#exit
+
+	    rename rays {}
+
+	    puts ""
+	#if { $row > 4 } { break }
+    }
+}
+
 
 switch $action {
 
- longslit {
-    set wave     { 4500 5000 5500 6000 6500 7000 7500 8000 8500 }
+ comp {
+	set spectra [lassign $argv mask]
 
-    set spectrum [lrepeat [llength $wave] 1.0]
-    set sum [sum $spectrum]
-    set spectrum [vnorm $spectrum $sum]
+	set spectra [load-spectra $spectra]
 
-    set ax [B get field 1 x]
-    set ay [B get field 1 y]
-
-    lassign [maskXY $ax $ay] mx my
-
-    B 21 set aper_xoff $mx
-    B 21 set aper_yoff $my
-
-    B 21 set $slitX [expr { 0.168/$mm2inch }]
-    B 21 set $slitY 7.0
-
-    set image [acorn::malloc [expr { 2*4096*4096 }]]
-
-    acorn::mkrays rays nx 1000 x0 -128 x1 128 ny 1000 y0 -128 y1 128 circle 1 intensity 1
-		  rays angles : $ax $ay uniform 1.0 [expr 14.0*60]
-
-    rays waves $spectrum	 		; # Add wavelength numbers to rays from spectrum probability function
-
-    B trace rays {} $wave [nproc]
-    rays bin ushort $image 4096 4096 $scale $scale
-    rename rays {}
-
-    acorn::fits    ushort $image 4096 4096
-
-    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > longslit.fits b
+	trace-slits $mask $spectra
  }
-
  image {
-    lassign $argv mask 
+    set files [lassign $argv mask]
 
-    foreach file [lsort [glob bino/E.*]] {
+puts $files
+
+    foreach file [lsort $files] {
+puts $file
 	set fp [open $file]
 
 	starbase_header X $fp
@@ -182,7 +270,7 @@ switch $action {
 	    # Create, trace and bin the object spectrum
 	    #
 	    acorn::mkrays rays dist uniform n $objsum radius0 15 radius 128
-			  rays angles : $ax $ay normal $seeing $seeing box 1.0 5.0
+			  rays angles : $ax $ay normal $seeing $seeing box $slitwidth $slitheight
 
 
 	    puts -nonewline "	waves"; flush stdout
@@ -231,91 +319,8 @@ switch $action {
 
     echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > [file root $mask]-[starbase_name Slits].fits b
  }
- image-old {
-    lassign $argv mask 
-
-    set scale [expr { 1.0/($mm2inch*1000/15) }]
-    set ratio [expr { (6.5*6.5) / (3.14159*3.25*3.25) }]
-    set seeing 0.7
-
-    foreach file [glob bino/E.*] {
-	set spectrum [regsub -all {[^.0-9 ]} [cat $file] {}]
-	set sum      [sum $spectrum]
-	set spectrum [lmap x $spectrum { expr { $x/$sum } }]
-
-	lappend waves $spectrum
-	lappend count $sum
-    }
-    set wave [lmap x [regsub -all {[^.0-9 ]} [cat bino/JohnFileWave.dat] {}] { expr { $x*10000 } }]
-
-    set spectrum [regsub -all {[^.0-9 ]} [cat bino/JohnFileSky.dat] {}]
-    set skysum      [sum $spectrum]
-    set skys     [lmap x $spectrum { expr { $x/$skysum } }]
-
-    set image [acorn::malloc [expr { 2*4096*4096 }]]
-
-    starbase_read Slits $mask
-    set RA [strtod [starbase_hdrget Slits ra]]
-    set DC [strtod [starbase_hdrget Slits dec]]
-    set PA [strtod [starbase_hdrget Slits pa]]
-
-    starbase_foreachrow Slits -colvars {
-
-	# Compute the angles of ra and dec
-	#
-	set ra [expr { ([strtod $ra] -$RA)*15*cos($DC/57.2957795) }]
-	set dc [expr {  [strtod $dec]-$DC }]
 
 
-	lassign [2d::transform [2d::rotate [expr { -$PA }] d] $ra $dc] ax ay
-	lassign [maskXY $ax $ay] mx my
-
-
-	B 21 set aper_xoff [expr { $x/$mm2inch }]
-	B 21 set aper_yoff [expr { $y/$mm2inch }]
-
-	B 21 set $slitX [expr { 0.084/$mm2inch }]
-	B 21 set $slitY [expr { 0.840/$mm2inch }]
-
-	set nth [expr { ($row-1) % [llength $waves] }]
-
-	set spectrum 	[lindex $waves  $nth]
-	set counts   	[expr { int([lindex $count $nth] * $ratio ) }]
-	set box 	[expr int(sqrt($counts))]
-
-	set mx [expr $mx*$mm2inch]
-	set my [expr $my*$mm2inch]
-
-	puts "[format "%8d %6d $ra $dec %7.3f %7.3f %7.3f %7.3f" $counts $box $x $y $width $height] : [format "%7.3f %7.3f %7.3f %7.3f" $ax $ay $mx $my]"
-
-	acorn::mkrays rays nx $box x0 -128 x1 128 ny $box y0 -128 y1 128 circle 1 intensity 1
-		      rays angles : $ax $ay normal $seeing 
-
-	rays waves $spectrum	 		; # Add wavelength numbers to rays from spectrum probability function
-
-	B trace rays {} $wave 18
-	rays bin ushort $image 4096 4096 $scale $scale
-	rename rays {}
-
-	set counts   	[expr { int($skysum * $ratio * (5*0.5)) }]
-	set box 	[expr int(sqrt($counts))]
-
-	acorn::mkrays rays nx $box x0 -128 x1 128 ny $box y0 -128 y1 128 circle 1 intensity 1
-		      rays angles : $ax $ay uniform 1 5
-	rays waves $skys
-	B trace rays {} $wave 18
-	rays bin ushort $image 4096 4096 $scale $scale
-	rename rays {}
-
-	#if { $row > 4 } { break }
-    }
-
-    acorn::poisson ushort $image 4096 4096
-    acorn::noise   ushort $image 4096 4096 1000 3
-    acorn::fits    ushort $image 4096 4096
-
-    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > [file root $mask]-[starbase_name Slits].fits b
- }
  image-hecto {
     lassign $argv file mask field wavel
 
@@ -447,5 +452,39 @@ switch $action {
 	acorn::prays rays
     }
  }
+ longslit {
+    set wave     { 4500 5000 5500 6000 6500 7000 7500 8000 8500 }
+
+    set spectrum [lrepeat [llength $wave] 1.0]
+    set sum [sum $spectrum]
+    set spectrum [vnorm $spectrum $sum]
+
+    set ax [B get field 1 x]
+    set ay [B get field 1 y]
+
+    lassign [maskXY $ax $ay] mx my
+
+    B 21 set aper_xoff $mx
+    B 21 set aper_yoff $my
+
+    B 21 set $slitX [expr { 0.168/$mm2inch }]
+    B 21 set $slitY 7.0
+
+    set image [acorn::malloc [expr { 2*4096*4096 }]]
+
+    acorn::mkrays rays nx 1000 x0 -128 x1 128 ny 1000 y0 -128 y1 128 circle 1 intensity 1
+		  rays angles : $ax $ay uniform 1.0 [expr 14.0*60]
+
+    rays waves $spectrum	 		; # Add wavelength numbers to rays from spectrum probability function
+
+    B trace rays {} $wave [nproc]
+    rays bin ushort $image 4096 4096 $scale $scale
+    rename rays {}
+
+    acorn::fits    ushort $image 4096 4096
+
+    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > longslit.fits b
+ }
+
 }
 

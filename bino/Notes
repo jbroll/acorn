@@ -15,7 +15,8 @@ case $action in
 
  shotgun)
     file=$1
-    secs=$2
+    rays=$2
+    secs=$3
 
     rate=0.000413824			# per mm^2 per second
     area=3775				# mm^2
@@ -24,7 +25,7 @@ case $action in
     scale=5.98				# 13u/15u * 90u/13u
 
 
-    ./shotgun.py $file $count 7.98
+    ./shotgun.py $file $rays $count $scale
     ;;
 
 esac
