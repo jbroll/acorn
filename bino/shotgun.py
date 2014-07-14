@@ -9,10 +9,11 @@ sys.path.append("/home/john/src/jbr.py")
 import fits
 
 image  = sys.argv[1]
-count  = int(sys.argv[2])
-scale  = float(sys.argv[3])
+cosmic = sys.argv[2]
+count  = int(sys.argv[3])
+scale  = float(sys.argv[4])
 
-if len(sys.argv) > 4 :
+if len(sys.argv) > 5 :
     output = sys.argv[4]
 else :
     output = image
@@ -20,8 +21,10 @@ else :
 
 img = fits.hdu(image)
 
+print "shutgun: ", image, count, scale
+
 for i in random.sample(range(0, 10000), count):
-    ray = fits.hdu("postage/cr" + "%04d" % i + ".fits")
+    ray = fits.hdu(cosmic + "/postage/cr" + "%04d" % i + ".fits")
 
     x = random.uniform(0, img.NAXIS1-12)
     y = random.uniform(0, img.NAXIS2-12)

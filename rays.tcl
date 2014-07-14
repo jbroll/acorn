@@ -145,6 +145,8 @@ if { [::critcl::compiled] } {
 	}
 
 	extern "C" {
+	    void setall(long seed0, long seed1);
+
 	    float gennor(float av,float sd);
 	    float genunf(float dx,float dy);
 	}
@@ -152,6 +154,9 @@ if { [::critcl::compiled] } {
 
 
     }
+    critcl::cinit {
+	setall((long) &setall % 2147483398 + 1, time(NULL) % 2147483398 + 1);
+    } {}
 
     critcl::cproc ::acorn::Rays::mkrays-uniform { Tcl_Interp* ip
 						  double x double y double w double h double intensity
