@@ -4,11 +4,6 @@
 import math
 import unix
 
-from cffi import FFI
-cffi = FFI()
-
-cffi.cdef(unix.cat("../glass/glass.hh"))
-
 def isfloat(value):
     try:
 	float(value)

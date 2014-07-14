@@ -14,13 +14,16 @@ class AttrDict(dict):
 	super(AttrDict, self).__init__(*args, **kwargs)
 	self.__dict__ = self
 
+class AGFFile(file):
+    return AGF(unix.cat(file)) 						# Slurp up the file - Fixing up UNICODE
+
 class AGF(object):
 
-    def __init__(self, file):
+    def __init__(self, agf):
 	self.current = None
 	self.glass   = []
 
-	for line in unix.cat(file).split('\n'):				# Slurp up the file - Fixing up UNICODE
+	for line in agf.split('\n'):
 	    line = line.split()
 
 	    if len(line) : getattr(self, line[0])(*line)		# Call internal methods to parse lines

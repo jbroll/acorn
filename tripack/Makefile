@@ -1,6 +1,6 @@
 
 
-FC=gfortran-mp-4.7 -m32 -g
+#FC=gfortran-mp-4.7 -m32 -g
 #FC=gfortran
 #FC=gcc -m32 -g
 #FC=f77 -m32
