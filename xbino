@@ -2,7 +2,6 @@
 #
 lappend auto_path ./lib arec/lib
 
-package require tcltest
 package require acorn
 package require nproc
 
@@ -74,7 +73,12 @@ set argv [lassign $argv action]
     proc vnorm { v { sum {} } } {
 	if { $sum eq {} } { set sum [sum $v] }
 
-	lmap x $v { expr { $x/$sum } }
+
+	if { $sum } {
+	    set v [lmap x $v { expr { $x/$sum } }]
+	}
+
+	return $v
     }
 
 
@@ -88,7 +92,7 @@ proc load-spectra { files } {
 	set sky  {}
 	set obj  {}
 
-	foreach { w s o } [split [string trim [read  $fp]]] { 
+	foreach { w s o } [string trim [read  $fp]] { 
 	    lappend wave [expr { $w*10000 }]
 	    lappend sky  $s
 	    lappend obj  $o
@@ -99,8 +103,8 @@ proc load-spectra { files } {
 			    wave $wave						\
 			    skysum [expr { int([sum $sky]) }] sky [vnorm $sky]	\
 			    objsum [expr { int([sum $obj]) }] obj [vnorm $obj]	\
-			    slitwidth 	[starbase_hdrget X slitwidth]		\
-			    slitheight 	[starbase_hdrget X slitheight]		\
+			    specwidth 	[starbase_hdrget X slitwidth]		\
+			    specheight 	[starbase_hdrget X slitheight]		\
 			    seeing	[starbase_hdrget X seeing]		\
 		]
 	close $fp
@@ -131,15 +135,21 @@ proc trace-slits { mask spectra image } {
 
 	lassign [maskXY $ax $ay] mx my
 
-	B 21 set aper_xoff $mx ; # [expr { $x/$mm2inch }]
-	B 21 set aper_yoff $my ; # [expr { $y/$mm2inch }]
+	B 21 set aper_xoff $mx ; # [expr { $x/$::mm2inch }]
+	B 21 set aper_yoff $my ; # [expr { $y/$::mm2inch }]
 
-	B 21 set $slitX [expr { 0.100/$mm2inch }]
-	B 21 set $slitY [expr { 0.433/$mm2inch }]
+	B 21 set $::slitX [expr { 0.100/$::mm2inch }]
+	B 21 set $::slitY [expr { 0.433/$::mm2inch }]
 
 	set nth [expr { ($row-1) % [llength $spectra] }]
 
 	foreach { name value } [lindex $spectra  $nth] { set $name $value }
+
+	    set slitwidth  [expr { $width  / 0.168 }]
+	    set slitheight [expr { $height / 0.168 }]
+
+	    set objsum [expr { $objsum * ( $slitwidth*$slitheight ) / ( $specwidth*$specheight ) }]
+	    set objsum [expr int(min($objsum, 30000000))]
 
 	    puts -nonewline "$file $objsum";	flush stdout
 
@@ -155,12 +165,15 @@ proc trace-slits { mask spectra image } {
 	    puts -nonewline "	trace"; flush stdout
 	    B trace rays {} $wave [nproc]
 
+#plot-rays rays 21
+#exit
 	    puts -nonewline "	bin"; flush stdout
-	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $scale $scale]"; flush stdout
+	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $::scale $::scale]"; flush stdout
 
 	    rename rays {}
 
-#set skysum 100000
+	    set skysum [expr { $skysum * ( $slitwidth*$slitheight ) / ( $specwidth*$specheight ) }]
+	    set skysum [expr int(min($skysum, 30000000))]
 
 	    puts -nonewline "	sky $skysum"; flush stdout
 
@@ -168,7 +181,6 @@ proc trace-slits { mask spectra image } {
 	    #
 	    acorn::mkrays rays dist uniform n $skysum radius0 15 radius 128
 			  rays angles : $ax $ay uniform [expr $slitwidth*1.01] [expr $slitheight*1.01]
-
 	    puts -nonewline "	waves"; flush stdout
 	    rays waves $sky
 
@@ -178,35 +190,39 @@ proc trace-slits { mask spectra image } {
 
 
 	    puts -nonewline "	bin"; flush stdout
-	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $scale $scale]"; flush stdout
+	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $::scale $::scale]"; flush stdout
 
-#plot-rays rays 21
-#exit
 
 	    rename rays {}
 
 	    puts ""
 	#if { $row > 4 } { break }
     }
+
+    return [starbase_name Slits]
 }
 
 
 switch $action {
 
- comp {
-	set spectra [lassign $argv mask]
-
-	set spectra [load-spectra $spectra]
-
-	trace-slits $mask $spectra
- }
  image {
+    set spectra [lassign $argv mask tag]
+
+    set spectra [load-spectra $spectra]
+    set image   [acorn::malloc [expr { 2*4096*4096 }]]
+
+    set label   [trace-slits $mask $spectra $image]
+
+    acorn::poisson ushort $image 4096 4096
+    acorn::noise   ushort $image 4096 4096 1000 3
+    acorn::fits    ushort $image 4096 4096
+
+    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > [file root $mask]-$label.$tag.fits b
+ }
+ image-1 {
     set files [lassign $argv mask]
 
-puts $files
-
     foreach file [lsort $files] {
-puts $file
 	set fp [open $file]
 
 	starbase_header X $fp
@@ -224,6 +240,8 @@ puts $file
 	lappend spectra [dict create						\
 			    file $file						\
 			    wave $wave						\
+			    sky  $sky						\
+			    obj  $obj						\
 			    skysum [expr { int([sum $sky]) }] sky [vnorm $sky]	\
 			    objsum [expr { int([sum $obj]) }] obj [vnorm $obj]	\
 			    slitwidth 	[starbase_hdrget X slitwidth]		\
