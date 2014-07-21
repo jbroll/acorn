@@ -1,6 +1,8 @@
 #!/usr/bin/env tclkit8.6.1
 #
-lappend auto_path ./lib arec/lib
+lappend auto_path ./lib arec/lib /pool/sao/jroll/acorn/lib
+
+set env(ACORN) /pool/sao/jroll/acorn
 
 package require acorn
 package require nproc
@@ -12,6 +14,7 @@ set mm2inch 25.4
 set seeing 0.7
 set scale [expr { 1.0/($mm2inch*1000/15) }]
 
+set chunksize 30000000
 
 set slitX aper_min 
 set slitY aper_max 
@@ -20,7 +23,7 @@ source jbr.tcl/starbase.tcl
 source jbr.tcl/strtod.tcl
 source jbr.tcl/2d.tcl
 
-set model zmx-models/p24_110912af_072512ac_inch.zmx
+set model $env(ACORN)/zmx-models/p24_110912af_072512ac_inch.zmx
 
 acorn::ZMX create B source $model
 
@@ -82,7 +85,9 @@ set argv [lassign $argv action]
     }
 
 
-proc load-spectra { files } {
+proc load-spectra { files { scale 1.0 } } {
+    if { $scale eq {} } { set scale 1.0 }
+
     foreach file [lsort $files] {
 	set fp [open $file]
 
@@ -98,14 +103,14 @@ proc load-spectra { files } {
 	    lappend obj  $o
 	}
 
-	lappend spectra [dict create						\
-			    file $file						\
-			    wave $wave						\
-			    skysum [expr { int([sum $sky]) }] sky [vnorm $sky]	\
-			    objsum [expr { int([sum $obj]) }] obj [vnorm $obj]	\
-			    specwidth 	[starbase_hdrget X slitwidth]		\
-			    specheight 	[starbase_hdrget X slitheight]		\
-			    seeing	[starbase_hdrget X seeing]		\
+	lappend spectra [dict create							\
+			    file $file							\
+			    wave $wave							\
+			    skysum [expr { int([sum $sky]*$scale) }] sky [vnorm $sky]	\
+			    objsum [expr { int([sum $obj]*$scale) }] obj [vnorm $obj]	\
+			    specwidth 	[starbase_hdrget X slitwidth]			\
+			    specheight 	[starbase_hdrget X slitheight]			\
+			    seeing	[starbase_hdrget X seeing]			\
 		]
 	close $fp
     }
@@ -113,7 +118,7 @@ proc load-spectra { files } {
     return $spectra
 }
 
-proc trace-slits { mask spectra image } {
+proc trace-slits { mask spectra image { this 0 } } {
 
     starbase_read Slits $mask
     set RA [strtod [starbase_hdrget Slits ra]]
@@ -121,6 +126,8 @@ proc trace-slits { mask spectra image } {
     set PA [strtod [starbase_hdrget Slits pa]]
 
     starbase_foreachrow Slits -colvars {
+
+	if { $this && $this != $row } { continue }
 
 	# Compute the angles of ra and dec
 	#
@@ -149,7 +156,7 @@ proc trace-slits { mask spectra image } {
 	    set slitheight [expr { $height / 0.168 }]
 
 	    set objsum [expr { $objsum * ( $slitwidth*$slitheight ) / ( $specwidth*$specheight ) }]
-	    set objsum [expr int(min($objsum, 30000000))]
+	    set objsum [expr int(min($objsum, 100000000))]
 
 	    puts -nonewline "$file $objsum";	flush stdout
 
@@ -172,28 +179,32 @@ proc trace-slits { mask spectra image } {
 
 	    rename rays {}
 
-	    set skysum [expr { $skysum * ( $slitwidth*$slitheight ) / ( $specwidth*$specheight ) }]
-	    set skysum [expr int(min($skysum, 30000000))]
+	    set skysum [expr { int($skysum * ( $slitwidth*$slitheight ) / ( $specwidth*$specheight )) }]
 
-	    puts -nonewline "	sky $skysum"; flush stdout
+	    while { $skysum > 0 } {
+	        set chunk [expr { min($skysum, 20000000) }]
 
-	    # Create, trace and bin the sky spectrum
-	    #
-	    acorn::mkrays rays dist uniform n $skysum radius0 15 radius 128
-			  rays angles : $ax $ay uniform [expr $slitwidth*1.01] [expr $slitheight*1.01]
-	    puts -nonewline "	waves"; flush stdout
-	    rays waves $sky
+		puts -nonewline "	sky $skysum"; flush stdout
 
-	    puts -nonewline "	trace"; flush stdout
-	    B trace rays {} $wave 16
+		# Create, trace and bin the sky spectrum
+		#
+		acorn::mkrays rays dist uniform n $chunk radius0 15 radius 128
+			      rays angles : $ax $ay uniform [expr $slitwidth*1.01] [expr $slitheight*1.01]
+		puts -nonewline "	waves"; flush stdout
+		rays waves $sky
 
-
-
-	    puts -nonewline "	bin"; flush stdout
-	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $::scale $::scale]"; flush stdout
+		puts -nonewline "	trace"; flush stdout
+		B trace rays {} $wave 16
 
 
-	    rename rays {}
+
+		puts -nonewline "	bin"; flush stdout
+		puts -nonewline "	v [rays bin ushort $image 4096 4096 $::scale $::scale]"; flush stdout
+
+		set skysum [expr { $skysum-$::chunksize }]
+
+		rename rays {}
+	    }
 
 	    puts ""
 	#if { $row > 4 } { break }
@@ -206,18 +217,29 @@ proc trace-slits { mask spectra image } {
 switch $action {
 
  image {
-    set spectra [lassign $argv mask tag]
+    set spectra [lassign $argv mask tag slit scale]
 
-    set spectra [load-spectra $spectra]
+    set spectra [load-spectra $spectra $scale]
     set image   [acorn::malloc [expr { 2*4096*4096 }]]
 
-    set label   [trace-slits $mask $spectra $image]
+    set label   [trace-slits $mask $spectra $image $slit]
 
     acorn::poisson ushort $image 4096 4096
-    acorn::noise   ushort $image 4096 4096 1000 3
+
+    if { !$slit } {
+        acorn::noise   ushort $image 4096 4096 1000 3
+    }
+
     acorn::fits    ushort $image 4096 4096
 
-    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > [file root $mask]-$label.$tag.fits b
+    if { $tag ne {} } {
+	append label ".$tag"
+    }
+    if { $slit ne 0 } {
+	append label .$slit
+    }
+
+    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > [file tail [file root $mask]]-$label.fits b
  }
  image-1 {
     set files [lassign $argv mask]
@@ -301,8 +323,6 @@ switch $action {
 	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $scale $scale]"; flush stdout
 
 	    rename rays {}
-
-#set skysum 100000
 
 	    puts -nonewline "	sky $skysum"; flush stdout
 
