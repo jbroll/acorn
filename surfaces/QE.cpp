@@ -7,7 +7,7 @@ using namespace Eigen;
 #include <sys/mman.h>
 
 #include "../acorn.h"
-#include "/data/mmti/src/fitsy/fitsy.h"
+#include <fitsy.h>
 
 #include "acorn-utils.h"
 
@@ -31,7 +31,7 @@ extern "C" {
 	double **maps;			// Array of QE arrays.
   } QEMap;
 
-  static QEMap *QEInit(MData *m, Surface &s) {
+  int inits(MData *m, Surface &s, Ray &ray) {
 	int i, j, nmap;
 
 	char  path[1024];
@@ -47,17 +47,21 @@ extern "C" {
 	    if ( s.p[nmap+Pm_w0] == 0.0 ) { break; }
 
 	    path[0] = '\0';
-	    if ( qemaps ) { strncpy(path, qemaps, sizeof(path)-1); }
-	    strcat(path, "/");
+	    if ( qemaps ) {
+		strncpy(path, qemaps, sizeof(path)-1);
+		strcat(path, "/");
+	    }
 	    strcat(path, s.s[nmap]);
 
 	    if ( !ft_simpleimageread(path, NULL, (void **) &map->maps[nmap], NULL, -64) ) {
 		fprintf(stderr, "Cannot load QE map : %s\n", path);
 	    }
-	    //printf("map %d %p\n", nmap, map->maps[nmap]);
+	    //printf("map %d %f %s\n", nmap, s.p[nmap+Pm_w0], path);
 	}
 
 	map->nmap = nmap;
+
+	s.data = (void *) map;
     }
 	
     if ( map->waves ) {
@@ -91,13 +95,15 @@ extern "C" {
 		j--;
 
 		map->waves[i] = j;
-		map->ratio[i] = (s.p[j+Pm_w0] - wave) / (s.p[j+Pm_w0] - s.p[j+Pm_w0+1]);
+		map->ratio[i] = 1.0 - (s.p[j+Pm_w0] - wave) / (s.p[j+Pm_w0] - s.p[j+Pm_w0+1]);
 	    }
 	}
+
+	//fprintf(stderr, "wave %d %f : %d %f\n", i, wave, map->waves[i], map->ratio[i]);
     }
 
 
-    return map;
+    return 1;
   }
 
   int info(int command, char **strings, double **values) 
@@ -122,36 +128,36 @@ extern "C" {
 
   int traverse(MData *m, Surface &s, Ray &r)
   {
-    int    nx = s.p[Pm_nx];
-    int    ny = s.p[Pm_ny];
+    int    nx = (int) s.p[Pm_nx];
+    int    ny = (int) s.p[Pm_ny];
     double sx = s.p[Pm_sx];
     double sy = s.p[Pm_sy];
 
     QEMap *map = (QEMap *) s.data;
 
-    if ( !map || map->nwave != m->nwave ) { 
-	s.data = (void *) QEInit(m, s);
-	map = (QEMap *) s.data;
-    }
-
     int    qemap = map->waves[r.wave];
     double ratio = map->ratio[r.wave];
 
-    int cx = r.p[X]/sx;
-    int cy = r.p[Y]/sy;
+    int cx = (int) (r.p[X]/sx);
+    int cy = (int) (r.p[Y]/sy);
 
     cx += nx/2;
     cy += ny/2;
 
-    int ix = cx + 0.5;
-    int iy = cy + 0.5;
+    int ix = (int) (cx + 0.5);
+    int iy = (int) (cy + 0.5);
 
     if ( ix >= 0 && ix < nx && iy >= 0 && iy < ny ) {
-	double    QE = map->maps[qemap][iy*nx + ix];
+	double    QE1 = map->maps[qemap][iy*nx + ix];
 
-	//printf("%d %d %f\n", ix, iy, QE);
+	if ( ratio == 1.0 ) {
+	    r.intensity *= QE1;
+	} else {
+	    double    QE2 = map->maps[qemap+1][iy*nx + ix];
 
-	r.intensity += 1*QE;
+	    r.intensity *= QE1*ratio + QE2*(1.0-ratio);
+	}
+
     }
 
     return 0;

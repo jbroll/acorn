@@ -29,7 +29,14 @@ set model $env(ACORN)/zmx-models/p24_110912af_072512ac_inch.zmx
 
 acorn::ZMX create B source $model
 
-B surface QE { type QE nx 4242 ny 4176 w0 3500 map0 11303-01-01+ql000n01+N.fits w1 7000 map1 11303-01-01+ql000n01+N.fits }
+B surface QE { type QE nx 4242 ny 4176
+	w0  3500 map0 11303-01-01+ql350n01+N.fits
+	w1  4000 map1 11303-01-01+ql400n01+N.fits
+	w2  5000 map2 11303-01-01+ql500n01+N.fits
+	w3  6500 map3 11303-01-01+ql650n01+N.fits
+	w4  9000 map4 11303-01-01+ql900n01+N.fits
+	w5 10000 map5 11303-01-01+ql000n01+N.fits
+    }
 B QE set sx $scale
 B QE set sy $scale
 
@@ -536,7 +543,7 @@ switch $action {
 
     set image [acorn::malloc [expr { 2*4096*4096 }]]
 
-    acorn::mkrays rays nx 1000 x0 -128 x1 128 ny 1000 y0 -128 y1 128 circle 1 intensity 1
+    acorn::mkrays rays nx 100 x0 -128 x1 128 ny 100 y0 -128 y1 128 circle 1 intensity 1
 		  rays angles : $ax $ay uniform 1.0 [expr 14.0*60]
 
     rays waves $spectrum	 		; # Add wavelength numbers to rays from spectrum probability function

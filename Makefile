@@ -3,7 +3,8 @@
 OS  =$(shell uname)
 
 
-INC= -I/Users/john/include -I/home/john/include
+INC= -I/Users/john/include -I/home/john/include -I/home/jroll/include
+JLIBS= -L/data/mmti/lib -L/home/jroll/lib
 
 CRITCL=./critcl31.kit
 
@@ -128,7 +129,7 @@ surfaces/lib/$(ARCH)/lens-array-hex.so : surfaces/lens-array-hex.cpp acorn.h $(A
 
 surfaces/lib/$(ARCH)/QE.so : surfaces/QE.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	$(CXX) $(CFLAGS) -shared $(INC) surfaces/QE.cpp -o surfaces/lib/$(ARCH)/QE.so -L/data/mmti/src/fitsy -lfitsy
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/QE.cpp -o surfaces/lib/$(ARCH)/QE.so -L$(JLIBS) -lfitsy
 
 
 

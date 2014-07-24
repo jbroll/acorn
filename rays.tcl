@@ -4,7 +4,7 @@
 ::critcl::config language c++ 
 
 critcl::cflags -O3
-critcl::cheaders -I/Users/john/include -I/home/john/include
+critcl::cheaders -I/Users/john/include -I/home/john/include -I/home/jroll/include
 critcl::cheaders rays.h arec/arec.h xtypes.h
 
 critcl::tsources rays.tcl
@@ -447,11 +447,10 @@ if { [::critcl::compiled] } {
 			double count;
 			double extra = modf(h, &count);
 			
-			((unsigned short *) data)[iy*nx + ix] += count;
+			((unsigned short *) data)[iy*nx + ix] += (unsigned short) count;
 
-
-			if ( extra != 0.0 ) {
-			    ((unsigned short *) data)[iy*nx + ix] += (extra < genunf(0, 1.0)); 
+			if ( extra != 0.0 && extra > genunf(0.0, 1.0) ) {
+			    ((unsigned short *) data)[iy*nx + ix] += 1; 
 			}
 
 			break;

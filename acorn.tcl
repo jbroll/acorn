@@ -4,7 +4,7 @@
 ::critcl::config language c++ 
 
 critcl::cflags -O3
-critcl::cheaders -I/Users/john/include -I/home/john/include
+critcl::cheaders -I/Users/john/include -I/home/john/include -I/home/jroll/include
 critcl::cheaders arec/arec.h acorn.h rays.h xtypes.h
 
 critcl::tsources jbr.tcl/func.tcl jbr.tcl/tcloo.tcl			\
@@ -30,6 +30,7 @@ if { ![::critcl::compiled] } {
 namespace eval acorn {
     variable SurfaceTypes
     variable SurfaceInfos
+    variable SurfaceInits
 
     critcl::ccode {
 	#include <dlfcn.h>
@@ -93,7 +94,10 @@ namespace eval acorn {
 		error "Cannot load traverse from $type"
 	    }
 	    if { ![set ::acorn::SurfaceInfos([file rootname [file tail $type]]) [acorn::getsymbol $type info]] } {
-		error "Cannot load traverse from $type"
+		error "Cannot load info from $type"
+	    }
+	    if { ![set ::acorn::SurfaceInits([file rootname [file tail $type]]) [acorn::getsymbol $type inits]] } {
+		set ::acorn::SurfaceInits([file rootname [file tail $type]]) 0
 	    }
 	}
 
@@ -109,6 +113,7 @@ namespace eval acorn {
 	    string	comment
 	    long	traverse
 	    long	infos
+	    long	inits
 
 	    string	aper_type;
 	    string	aper_param;
@@ -189,6 +194,13 @@ namespace eval acorn {
 
 	return TCL_OK;
     }
+
+    critcl::cproc inits { Tcl_Interp* ip long inits long model long surface long ray } ok {
+	    ((TraceFunc) inits)((MData *) model, (Surface *) surface, (Ray *) ray);
+
+	    return TCL_OK;
+    }
+
     critcl::cproc trace_rays { long m long s int nsurf long r int nray int rsize int nthread long xray } void {
                   trace_rays((void *) m, (void *) s, nsurf, (void *) r, nray, rsize, nthread, (char *) xray); 
     }
@@ -231,7 +243,7 @@ namespace eval acorn {
 	for ( y = 0; y < ny; y++ ) {
 	    for ( x = 0; x < nx; x++ ) {
 		switch ( type ) {
-		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] += gennor(bias, noise); break;
+		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] += (short unsigned int) gennor(bias, noise); break;
 		}
 	    }
 	}

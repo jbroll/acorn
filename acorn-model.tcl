@@ -171,6 +171,10 @@ oo::class create ::acorn::BaseModel {
 		    slist set $i nsurf [expr $j+1]
 		    break
 		}
+
+		if { [$surf get $j inits] } {
+		    acorn::inits [$surf get $j inits] [mdata getptr] [$surf getptr $j] 0
+		}
 	    }
 	    if { $j < [$surf length]-1 } { break }
 
@@ -266,6 +270,7 @@ oo::class create ::acorn::BaseModel {
 	set type   [dict get   $params type]
 
 	$current set $i traverse $::acorn::SurfaceTypes($type)		; # Get the surface traverse and infos functions
+	$current set $i inits    $::acorn::SurfaceInits($type)
 	$current set $i infos    $::acorn::SurfaceInfos($type)
 
 	if { [$current get $i infos] != -1 } {

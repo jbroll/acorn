@@ -46,6 +46,7 @@ typedef struct _Surface {
     char*	comment;
     TraceFunc   traverse;
     InfosFunc   info;
+    TraceFunc   inits;
 
     char*	aper_type;
     char*	aper_param;
