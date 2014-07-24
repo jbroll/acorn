@@ -42,3 +42,7 @@ Current Binospec data simulation generation and parameters.
 #./xxx | compute "x=atan2(l,n)*3600*57.3; y=atan2(m,n)*3600*57.3" | histtable x -n 50 | plottable center,count
 #./xxx | compute "x=atan2(l,n)*3600*57.3; y=atan2(m,n)*3600*57.3" | plottable size 8 8 x,y marker circle
 
+#./xxx | compute "x=atan2(l,n)*3600*57.3; y=atan2(m,n)*3600*57.3; .r=sqrt(x*x+y*y)" |			# Get the rays and conver back to radial arcsec
+#histtable r -min 0 -n 50 |										# Make a histogram
+#compute "count=count/(3.14*(right*right-left*left))" |							# Normalize by the annular area
+#plottable center,count											# Plot
