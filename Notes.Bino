@@ -46,4 +46,3 @@ Current Binospec data simulation generation and parameters.
 #histtable r -min 0 -n 50 |										# Make a histogram
 #compute "count=count/(3.14*(right*right-left*left))" |							# Normalize by the annular area
 #plottable center,count											# Plot
-
