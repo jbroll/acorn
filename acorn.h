@@ -63,6 +63,7 @@ typedef struct _Surface {
 
     long	enable;
     long	annote;
+    void	*data;
 } Surface;
 
 typedef struct _SurfaceList {
@@ -75,6 +76,7 @@ typedef struct _MData {
     double z;
     double *indicies;
     double *wavelength;
+    int     nwave;
 } MData;
 
 void aper_init(Surface *s, Affine3d transform);

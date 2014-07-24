@@ -132,9 +132,10 @@ oo::class create ::acorn::BaseModel {
 	set plusone  [lrepeat [llength $wave]  1]
 	set minusone [lrepeat [llength $wave] -1]
 
-	mdata set 0 z 0
-	mdata set 0 indicies    [acorn::doubleList $plusone]
-	mdata set 0 wavelengths [acorn::doubleList $wave]
+	mdata set z 0
+	mdata set indicies    [acorn::doubleList $plusone]
+	mdata set wavelengths [acorn::doubleList $wave]
+	mdata set nwave       [llength $wave]
 
 	set i 0
 
@@ -197,6 +198,7 @@ oo::class create ::acorn::BaseModel {
 	mdata set n 1
 	mdata set z $z
 	mdata set wavelengths [acorn::doubleList $wave]
+	mdata set nwave       [llength $wave]
 
 	foreach { type surf } $surfaces {			# Find the surface to trace
 	    foreach j [iota 0 [$surf length]-1] {
@@ -256,38 +258,6 @@ oo::class create ::acorn::BaseModel {
 	    incr i
 	}
     }
-}
-
-oo::class create ::acorn::Model {
-    superclass ::acorn::BaseModel
-
-    variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs objects
-    accessor grouptype current surfaces default basepar
-
-    constructor { args } {
-	next 
-
-	procs surface coordbrk surface-group surface-group-non-sequential
-
-
-	set body [lindex $args end]
-	set args [lrange $args 0 end-1]
-
-	foreach { name value } [dict merge { grouptype sequential } $args] { set $name $value }
-
-	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
-
-	eval $body
-
-	if { [$current length] } { lappend surfaces $grouptype $current 
-	} else {
-	    rename $current {}
-	}
-
-	set current Surface-Add-Error
-    }
-    method coordbrk { name args } { my surface name [list {*}[join $args] type coordbrk] }
-
     method surface { name args } {
 
 	set i [$current length]
@@ -339,6 +309,8 @@ oo::class create ::acorn::Model {
 	    ::oo::objdefine [self] [list export  [$current get $i comment]]
 	}
     }
+    method coordbrk { name args } { my surface name [list {*}[join $args] type coordbrk] }
+
     method surface-group { name args } {
 	set savedefault $default
 	set savetype    $grouptype
@@ -362,7 +334,34 @@ oo::class create ::acorn::Model {
 	set grouptype    $savetype
     }
     method surface-group-non-sequential { name args } { tailcall surface-group $name grouptype non-sequential {*}$args }
+}
 
+oo::class create ::acorn::Model {
+    superclass ::acorn::BaseModel
+
+    variable grouptype current surfaces default basedef basemap basepar anonsurf surfdefs objects
+    accessor grouptype current surfaces default basepar
+
+    constructor { args } {
+	next 
+
+	procs surface coordbrk surface-group surface-group-non-sequential
+
+
+	set body [lindex $args end]
+	set args [lrange $args 0 end-1]
+
+	foreach { name value } [dict merge { grouptype sequential } $args] { set $name $value }
+
+	set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
+
+	eval $body
+
+	if { [$current length] } { lappend surfaces $grouptype $current 
+	} else {
+	    rename $current {}
+	}
+    }
 }
 
 proc acorn::model { args } { tailcall acorn::Model create {*}$args }

@@ -2,7 +2,9 @@
 #
 lappend auto_path ./lib arec/lib /pool/sao/jroll/acorn/lib
 
-set env(ACORN) /pool/sao/jroll/acorn
+if { [file exists $env(HOME)/.acorn] } {
+    source $env(HOME)/.acorn
+}
 
 package require acorn
 package require nproc
@@ -26,6 +28,13 @@ source jbr.tcl/2d.tcl
 set model $env(ACORN)/zmx-models/p24_110912af_072512ac_inch.zmx
 
 acorn::ZMX create B source $model
+
+B surface QE { type QE nx 4242 ny 4176 w0 3500 map0 11303-01-01+ql000n01+N.fits w1 7000 map1 11303-01-01+ql000n01+N.fits }
+B QE set sx $scale
+B QE set sy $scale
+
+#B print
+#exit
 
 B config 1
 

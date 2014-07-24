@@ -100,6 +100,7 @@ namespace eval acorn {
 	arec::typedef ::acorn::ModelData {
 	    double	z
 	    long        indicies, wavelengths;
+	    int		nwave;
 	}
 
 	arec::typedef ::acorn::Surfs {
@@ -125,6 +126,7 @@ namespace eval acorn {
 
 	    long	enable
 	    long	annot
+	    long	data
 	}
 	arec::typedef ::acorn::SurfaceList {
 	    long 	 surf;
@@ -151,20 +153,36 @@ namespace eval acorn {
     }
 
     critcl::cproc infos { Tcl_Interp* ip int info long infos } ok {
-    	char   **str;
-	double *val;
-
-	int n = ((InfosFunc) infos)(info, &str, &val);
 
 	Tcl_Obj *result = Tcl_GetObjResult(ip);
 	Tcl_Obj  	 *strs = Tcl_NewObj();
 	Tcl_Obj  	 *vals = Tcl_NewObj();
 	int i;
 
-	for ( i = 0; i < n; i++ ) {
-	    Tcl_ListObjAppendElement(ip, strs , Tcl_NewStringObj(str[i], -1));
-	    Tcl_ListObjAppendElement(ip, vals , Tcl_NewDoubleObj(val[i]));
-	}	
+	if ( info == 1 ) {
+	    char   **str;
+	    double *val;
+
+	    int n = ((InfosFunc) infos)(info, &str, &val);
+
+
+	    for ( i = 0; i < n; i++ ) {
+		Tcl_ListObjAppendElement(ip, strs , Tcl_NewStringObj(str[i], -1));
+		Tcl_ListObjAppendElement(ip, vals , Tcl_NewDoubleObj(val[i]));
+	    }	
+	}
+	if ( info == 2 ) {
+	    char   **str;
+	    char   **val;
+
+	    int n = ((InfosFunc) infos)(info, &str, (double **)&val);
+
+	    for ( i = 0; i < n; i++ ) {
+		Tcl_ListObjAppendElement(ip, strs , Tcl_NewStringObj(str[i], -1));
+		Tcl_ListObjAppendElement(ip, vals , Tcl_NewStringObj(val[i], -1));
+	    }	
+	}
+
 
 	Tcl_ListObjAppendElement(ip, result, strs);
 	Tcl_ListObjAppendElement(ip, result, vals);

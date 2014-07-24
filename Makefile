@@ -25,7 +25,9 @@ SURFS	= surfaces/lib/$(ARCH)/simple.so		\
 	  surfaces/lib/$(ARCH)/lens-array-rect.so	\
 	  surfaces/lib/$(ARCH)/lens-array-hex.so	\
 	  surfaces/lib/$(ARCH)/evenasph.so		\
-	  surfaces/lib/$(ARCH)/dgrating.so
+	  surfaces/lib/$(ARCH)/dgrating.so		\
+	  surfaces/lib/$(ARCH)/QE.so
+
 
 ACORN_SRCS = $(SRC) $(TCL)
 ACORN_OBJS = $(SURFS) 
@@ -123,6 +125,13 @@ surfaces/lib/$(ARCH)/lens-array-rect.so : surfaces/lens-array-rect.cpp acorn.h $
 surfaces/lib/$(ARCH)/lens-array-hex.so : surfaces/lens-array-hex.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
 	$(CXX) $(CFLAGS) -shared $(INC) surfaces/lens-array-hex.cpp -o surfaces/lib/$(ARCH)/lens-array-hex.so
+
+surfaces/lib/$(ARCH)/QE.so : surfaces/QE.cpp acorn.h $(ACORN_UTIL)
+	@mkdir -p surfaces/lib/$(ARCH)
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/QE.cpp -o surfaces/lib/$(ARCH)/QE.so -L/data/mmti/src/fitsy -lfitsy
+
+
+
 
 tpool/lib/$(ARCH)/tpool.o : tpool/tpool.c
 	@mkdir -p tpool/lib/$(ARCH)
