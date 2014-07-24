@@ -216,10 +216,27 @@ proc trace-slits { mask spectra image { this 0 } } {
 
 switch $action {
 
- image {
-    set spectra [lassign $argv mask tag slit scale]
+ noise {
+    set tag {}
 
-    set spectra [load-spectra $spectra $scale]
+    lassign $argv mask label tag
+
+    set image   [acorn::malloc [expr { 2*4096*4096 }]]
+
+    acorn::noise   ushort $image 4096 4096 1000 3
+    acorn::fits    ushort $image 4096 4096
+
+    if { $tag ne {} } {
+        set label $label.$tag
+    }
+
+    echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > [file tail [file root $mask]]-$label.X.fits b
+ }
+
+ image {
+    set spectra [lassign $argv mask tag slit sScale]
+
+    set spectra [load-spectra $spectra $sScale]
     set image   [acorn::malloc [expr { 2*4096*4096 }]]
 
     set label   [trace-slits $mask $spectra $image $slit]

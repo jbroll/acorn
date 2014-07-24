@@ -5,6 +5,7 @@ import sys
 import random
 
 sys.path.append("/home/john/src/jbr.py")
+sys.path.append("/home/jroll/src/jbr.py")
 
 import fits
 
