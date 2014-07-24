@@ -1,0 +1,16 @@
+
+type=$1
+sequ=$2
+
+if [ "$type" = "" ] ; then
+    echo make-image what 1>&2
+    exit 1
+fi
+
+touch $type.Start
+
+qsub -terse -N trace-$type 				./trace-spectra $type
+qsub -terse -N noise-$type				./make-noise 	$type
+qsub -terse -N   sum-$type -hold_jid trace-$type	./sum-images 	kurtz2-Mask1b.$type
+qsub -terse -N  shot-$type -hold_jid   sum-$type	./shotgun	$type kurtz2-Mask1b.$type
+
