@@ -2,6 +2,30 @@
 action=$1;	shift
 
 case $action in
+ object)
+    cd ..; ./xbino image bino/kurtz2.msk 0001 bino/objects/*
+    $0 shotgun kurtz2-Mask1b.0001.fits 3600 
+
+    cd ..; ./xbino image bino/kurtz2.msk 0002 bino/objects/*
+    $0 shotgun kurtz2-Mask1b.0001.fits 3600 
+
+    cd ..; ./xbino image bino/kurtz2.msk 0003 bino/objects/*
+    $0 shotgun kurtz2-Mask1b.0001.fits 3600 
+    ;;
+
+ comp)
+    cd ..; ./xbino image bino/kurtz2.msk 0004.comp bino/CRframes/arc.txt
+    ./Notes shotgun CRframes/bino0/kurtz2-Mask1b.0004.comp.fits CRframes 360
+    ;;
+
+ sky)
+    cd ..; ./xbino image bino/kurtz2.msk 0005.flat bino/CRframes/sflat.txt
+    ./Notes shotgun CRframes/bino0/kurtz2-Mask1b.0005.flat.fits CRframes 7
+
+ dome)
+    cd ..; ./xbino image bino/kurtz2.msk 0005.flat bino/CRframes/dflat.txt	;;
+    ./Notes shotgun CRframes/bino0/kurtz2-Mask1b.0005.dome.fits CRframes 60
+
  sextract)
     for file in CR*.fits ; do
 	base=`basename $file .fits`

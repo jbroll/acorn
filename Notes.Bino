@@ -1,0 +1,49 @@
+#!/bin/sh
+#
+
+action=$1;		shift
+
+
+case $action in
+ object)
+    ./xbino image kurtz2.msk 0001 bino/objects/*
+    ./xbino image kurtz2.msk 0002 bino/objects/*
+    ./xbino image kurtz2.msk 0003 bino/objects/*
+    ;;
+
+ comp) ./xbino image kurtz2.msk 0004.comp bino/CRframes/arc.txt		;;
+ sky)  ./xbino image kurtz2.msk 0005.flat bino/CRframes/sflat.txt	;;
+ dome) ./xbino image kurtz2.msk 0005.flat bino/CRframes/dflat.txt	;;
+
+esac
+
+exit
+
+Current Binospec data simulation generation and parameters.
+
+
+
+# xxx ----------------
+    #!/usr/bin/env tclkit8.6.1
+    #
+    lappend auto_path ./lib arec/lib
+
+    package require acorn
+    package require rays
+
+    set rays [acorn::Rays new 10000]
+       $rays angles : 0 0 normal 1 1 box 1 5
+
+    acorn::prays $rays
+
+# xxx ----------------
+
+#./xxx | compute "x=atan2(l,n)*3600*57.3; y=atan2(m,n)*3600*57.3" | histtable x | less
+#./xxx | compute "x=atan2(l,n)*3600*57.3; y=atan2(m,n)*3600*57.3" | histtable x -n 50 | plottable center,count
+#./xxx | compute "x=atan2(l,n)*3600*57.3; y=atan2(m,n)*3600*57.3" | plottable size 8 8 x,y marker circle
+
+#./xxx | compute "x=atan2(l,n)*3600*57.3; y=atan2(m,n)*3600*57.3; .r=sqrt(x*x+y*y)" |			# Get the rays and conver back to radial arcsec
+#histtable r -min 0 -n 50 |										# Make a histogram
+#compute "count=count/(3.14*(right*right-left*left))" |							# Normalize by the annular area
+#plottable center,count											# Plot
+

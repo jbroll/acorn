@@ -12,6 +12,7 @@ set mm2inch 25.4
 set seeing 0.7
 set scale [expr { 1.0/($mm2inch*1000/15) }]
 
+set chunksize 30000000
 
 set slitX aper_min 
 set slitY aper_max 
@@ -149,7 +150,7 @@ proc trace-slits { mask spectra image } {
 	    set slitheight [expr { $height / 0.168 }]
 
 	    set objsum [expr { $objsum * ( $slitwidth*$slitheight ) / ( $specwidth*$specheight ) }]
-	    set objsum [expr int(min($objsum, 30000000))]
+	    set objsum [expr int(min($objsum, 100000000))]
 
 	    puts -nonewline "$file $objsum";	flush stdout
 
@@ -172,28 +173,32 @@ proc trace-slits { mask spectra image } {
 
 	    rename rays {}
 
-	    set skysum [expr { $skysum * ( $slitwidth*$slitheight ) / ( $specwidth*$specheight ) }]
-	    set skysum [expr int(min($skysum, 30000000))]
+	    set skysum [expr { int($skysum * ( $slitwidth*$slitheight ) / ( $specwidth*$specheight )) }]
 
-	    puts -nonewline "	sky $skysum"; flush stdout
+	    while { $skysum > 0 } {
+	        set chunk [expr { min($skysum, 20000000) }]
 
-	    # Create, trace and bin the sky spectrum
-	    #
-	    acorn::mkrays rays dist uniform n $skysum radius0 15 radius 128
-			  rays angles : $ax $ay uniform [expr $slitwidth*1.01] [expr $slitheight*1.01]
-	    puts -nonewline "	waves"; flush stdout
-	    rays waves $sky
+		puts -nonewline "	sky $skysum"; flush stdout
 
-	    puts -nonewline "	trace"; flush stdout
-	    B trace rays {} $wave 16
+		# Create, trace and bin the sky spectrum
+		#
+		acorn::mkrays rays dist uniform n $chunk radius0 15 radius 128
+			      rays angles : $ax $ay uniform [expr $slitwidth*1.01] [expr $slitheight*1.01]
+		puts -nonewline "	waves"; flush stdout
+		rays waves $sky
 
-
-
-	    puts -nonewline "	bin"; flush stdout
-	    puts -nonewline "	v [rays bin ushort $image 4096 4096 $::scale $::scale]"; flush stdout
+		puts -nonewline "	trace"; flush stdout
+		B trace rays {} $wave 16
 
 
-	    rename rays {}
+
+		puts -nonewline "	bin"; flush stdout
+		puts -nonewline "	v [rays bin ushort $image 4096 4096 $::scale $::scale]"; flush stdout
+
+		set skysum [expr { $skysum-$::chunksize }]
+
+		rename rays {}
+	    }
 
 	    puts ""
 	#if { $row > 4 } { break }
