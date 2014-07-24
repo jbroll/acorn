@@ -378,7 +378,7 @@ if { [::critcl::compiled] } {
 
 	void    *data = Tcl_GetByteArrayFromObj(Data, &length);
 
-        float    cx, cy, h;
+        float   cx, cy, h;
         int      x, y, r = radius;
 
 	Ray *rays = (Ray *)path->recs;
@@ -443,7 +443,19 @@ if { [::critcl::compiled] } {
 
 		if ( ix >= 0 && ix < nx && iy >= 0 && iy < ny ) {
 		    switch ( type ) {
-		     case TY_USHORT : ((unsigned short *) data)[iy*nx + ix] += h; break;
+		     case TY_USHORT :
+			double count;
+			double extra = modf(h, &count);
+			
+			((unsigned short *) data)[iy*nx + ix] += count;
+
+
+			if ( extra != 0.0 ) {
+			    ((unsigned short *) data)[iy*nx + ix] += (extra < genunf(0, 1.0)); 
+			}
+
+			break;
+		
 		    }
 		}
 	    }
