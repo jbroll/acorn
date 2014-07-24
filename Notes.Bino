@@ -13,7 +13,7 @@ case $action in
 
  comp) ./xbino image kurtz2.msk 0004.comp bino/CRframes/arc.txt		;;
  sky)  ./xbino image kurtz2.msk 0005.flat bino/CRframes/sflat.txt	;;
- dome) ./xbino image kurtz2.msk 0005.flat bino/CRframes/dflat.txt	;;
+ dome) ./xbino image kurtz2.msk 0005.flat 1 0.25 bino/CRframes/dflat.txt	;;
 
 esac
 
