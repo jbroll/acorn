@@ -92,9 +92,8 @@ set argv [lassign $argv action]
     proc vnorm { v { sum {} } } {
 	if { $sum eq {} } { set sum [sum $v] }
 
-
 	if { $sum } {
-	    set v [lmap x $v { expr { $x/$sum } }]
+	    set v [lmap x $v { expr { $x/double($sum) } }]
 	}
 
 	return $v
@@ -210,7 +209,7 @@ proc trace-slits { mask spectra image { this 0 } } {
 		rays waves $sky
 
 		puts -nonewline "	trace"; flush stdout
-		B trace rays {} $wave 16
+		B trace rays {} $wave [nproc]
 
 
 
@@ -524,10 +523,22 @@ switch $action {
     }
  }
  longslit {
-    set wave     { 4500 5000 5500 6000 6500 7000 7500 8000 8500 }
 
-    set spectrum [lrepeat [llength $wave] 1.0]
-    set sum [sum $spectrum]
+    lassign $argv type
+
+    switch $type  {
+	11 { set waves    {   4000   4500   5000   5500   6000   6500   7000   7500   8000   8500   9000 }
+	     set spectrum { 190000 190000 190000 190000 190000 190000 190000 190000 190000 190000 190000 }
+	}
+	wide {
+	    foreach wave [iota 3500 9500] {
+		lappend waves    $wave
+		lappend spectrum 500000
+	    }
+	}
+    }
+
+    set sum      [sum   $spectrum]
     set spectrum [vnorm $spectrum $sum]
 
     set ax [B get field 1 x]
@@ -539,23 +550,35 @@ switch $action {
     B 21 set aper_yoff $my
 
     B 21 set $slitX [expr { 0.168/$mm2inch }]
-    B 21 set $slitY 7.0
+    B 21 set $slitY 8.0
 
     set image [acorn::malloc [expr { 2*4096*4096 }]]
 
-    acorn::mkrays rays nx 1000 x0 -128 x1 128 ny 1000 y0 -128 y1 128 circle 1 intensity 1
-		  rays angles : $ax $ay uniform 1.0 [expr 14.0*60]
+    set slitwidth  1.0
+    set slitheight [expr 15.0*60]
 
-    rays waves $spectrum	 		; # Add wavelength numbers to rays from spectrum probability function
+    while { $sum > 0 } {
+	puts "[clock format [clock seconds]]	$sum"
 
-    B trace rays {} $wave [nproc]
-    rays bin ushort $image 4096 4096 $scale $scale
-    rename rays {}
+	set chunk [expr { min($sum, 20000000) }]
+
+	# Create, trace and bin the sky spectrum
+	#
+	acorn::mkrays rays dist uniform n $chunk radius0 15 radius 128
+		      rays angles : $ax $ay uniform [expr $slitwidth*1.01] [expr $slitheight*1.01]
+	rays waves $spectrum
+
+	B trace rays {} $waves [nproc]
+	rays bin ushort $image 4096 4096 $::scale $::scale
+
+	set sum [expr { $sum-$::chunksize }]
+
+	rename rays {}
+    }
 
     acorn::fits    ushort $image 4096 4096
 
     echo [fits 16 { 4096 4096 } { 1 1 } { 0 0 } $image {}] > longslit.fits b
  }
-
 }
 
