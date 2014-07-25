@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+#$ -N noise
+#
+#$ -o io/$JOB_NAME.o
+#$ -e io/$JOB_NAME.e
+#$ -S /bin/sh
+#$ -cwd -terse
+#
+
+export PATH=/home/jroll/bin:$PATH
+
+
+action=$1;			shift
+
+xbino noise kurtz2 Mask1b $action
+

@@ -46,6 +46,7 @@ typedef struct _Surface {
     char*	comment;
     TraceFunc   traverse;
     InfosFunc   info;
+    TraceFunc   inits;
 
     char*	aper_type;
     char*	aper_param;
@@ -63,6 +64,7 @@ typedef struct _Surface {
 
     long	enable;
     long	annote;
+    void	*data;
 } Surface;
 
 typedef struct _SurfaceList {
@@ -75,6 +77,7 @@ typedef struct _MData {
     double z;
     double *indicies;
     double *wavelength;
+    int     nwave;
 } MData;
 
 void aper_init(Surface *s, Affine3d transform);

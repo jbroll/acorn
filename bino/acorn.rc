@@ -1,0 +1,3 @@
+
+set env(ACORN) 		/pool/sao/jroll/acorn
+set env(ACORN_QEMAPS)	/pool/sao/jroll/acorn/bino/QE

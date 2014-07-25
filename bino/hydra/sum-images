@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+#$ -N job
+#
+#$ -o io/$JOB_NAME.o
+#$ -e io/$JOB_NAME.e
+#$ -S /bin/sh
+#$ -cwd -terse
+#
+
+export PATH=/home/jroll/bin:$PATH
+
+image=$1;			shift
+
+imrpn $image.*.fits .. + > $image.fits
+rm $image.*.fits
+

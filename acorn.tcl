@@ -4,7 +4,7 @@
 ::critcl::config language c++ 
 
 critcl::cflags -O3
-critcl::cheaders -I/Users/john/include -I/home/john/include
+critcl::cheaders -I/Users/john/include -I/home/john/include -I/home/jroll/include
 critcl::cheaders arec/arec.h acorn.h rays.h xtypes.h
 
 critcl::tsources jbr.tcl/func.tcl jbr.tcl/tcloo.tcl			\
@@ -30,6 +30,7 @@ if { ![::critcl::compiled] } {
 namespace eval acorn {
     variable SurfaceTypes
     variable SurfaceInfos
+    variable SurfaceInits
 
     critcl::ccode {
 	#include <dlfcn.h>
@@ -93,7 +94,10 @@ namespace eval acorn {
 		error "Cannot load traverse from $type"
 	    }
 	    if { ![set ::acorn::SurfaceInfos([file rootname [file tail $type]]) [acorn::getsymbol $type info]] } {
-		error "Cannot load traverse from $type"
+		error "Cannot load info from $type"
+	    }
+	    if { ![set ::acorn::SurfaceInits([file rootname [file tail $type]]) [acorn::getsymbol $type inits]] } {
+		set ::acorn::SurfaceInits([file rootname [file tail $type]]) 0
 	    }
 	}
 
@@ -102,6 +106,7 @@ namespace eval acorn {
 	arec::typedef ::acorn::ModelData {
 	    double	z
 	    long        indicies, wavelengths;
+	    int		nwave;
 	}
 
 	arec::typedef ::acorn::Surfs {
@@ -110,6 +115,7 @@ namespace eval acorn {
 	    string	comment
 	    long	traverse
 	    long	infos
+	    long	inits
 
 	    string	aper_type;
 	    string	aper_param;
@@ -127,6 +133,7 @@ namespace eval acorn {
 
 	    long	enable
 	    long	annot
+	    long	data
 	}
 	arec::typedef ::acorn::SurfaceList {
 	    long 	 surf;
@@ -153,26 +160,49 @@ namespace eval acorn {
     }
 
     critcl::cproc infos { Tcl_Interp* ip int info long infos } ok {
-    	char   **str;
-	double *val;
-
-	int n = ((InfosFunc) infos)(info, &str, &val);
 
 	Tcl_Obj *result = Tcl_GetObjResult(ip);
 	Tcl_Obj  	 *strs = Tcl_NewObj();
 	Tcl_Obj  	 *vals = Tcl_NewObj();
 	int i;
 
-	for ( i = 0; i < n; i++ ) {
-	    Tcl_ListObjAppendElement(ip, strs , Tcl_NewStringObj(str[i], -1));
-	    Tcl_ListObjAppendElement(ip, vals , Tcl_NewDoubleObj(val[i]));
-	}	
+	if ( info == 1 ) {
+	    char   **str;
+	    double *val;
+
+	    int n = ((InfosFunc) infos)(info, &str, &val);
+
+
+	    for ( i = 0; i < n; i++ ) {
+		Tcl_ListObjAppendElement(ip, strs , Tcl_NewStringObj(str[i], -1));
+		Tcl_ListObjAppendElement(ip, vals , Tcl_NewDoubleObj(val[i]));
+	    }	
+	}
+	if ( info == 2 ) {
+	    char   **str;
+	    char   **val;
+
+	    int n = ((InfosFunc) infos)(info, &str, (double **)&val);
+
+	    for ( i = 0; i < n; i++ ) {
+		Tcl_ListObjAppendElement(ip, strs , Tcl_NewStringObj(str[i], -1));
+		Tcl_ListObjAppendElement(ip, vals , Tcl_NewStringObj(val[i], -1));
+	    }	
+	}
+
 
 	Tcl_ListObjAppendElement(ip, result, strs);
 	Tcl_ListObjAppendElement(ip, result, vals);
 
 	return TCL_OK;
     }
+
+    critcl::cproc inits { Tcl_Interp* ip long inits long model long surface long ray } ok {
+	    ((TraceFunc) inits)((MData *) model, (Surface *) surface, (Ray *) ray);
+
+	    return TCL_OK;
+    }
+
     critcl::cproc trace_rays { long m long s int nsurf long r int nray int rsize int nthread long xray } void {
                   trace_rays((void *) m, (void *) s, nsurf, (void *) r, nray, rsize, nthread, (char *) xray); 
     }
@@ -215,7 +245,7 @@ namespace eval acorn {
 	for ( y = 0; y < ny; y++ ) {
 	    for ( x = 0; x < nx; x++ ) {
 		switch ( type ) {
-		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] += gennor(bias, noise); break;
+		 case TY_USHORT : ((unsigned short *) data)[y*nx + x] += (short unsigned int) gennor(bias, noise); break;
 		}
 	    }
 	}

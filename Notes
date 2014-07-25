@@ -1,13 +1,4 @@
 
-./xbino image kurtz2.msk 0001 bino/objects/*
-./xbino image kurtz2.msk 0002 bino/objects/*
-./xbino image kurtz2.msk 0003 bino/objects/*
-
-./xbino image kurtz2.msk 0004.comp bino/CRframes/arc.txt
-./xbino image kurtz2.msk 0005.flat bino/CRframes/sflat.txt
-
-exit
-
 
 ( time ./xbino image kurtz2.msk 2>&1 > kurtz2-Mask1b.log ) >> kurtz2-Mask1b.log 2>&1
 

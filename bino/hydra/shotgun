@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+#$ -N job
+#
+#$ -o io/$JOB_NAME.o
+#$ -e io/$JOB_NAME.e
+#$ -S /bin/sh
+#$ -cwd -terse
+#
+
+export PATH=/home/jroll/bin:$PATH
+
+action=$1;
+image=$2;
+
+    rays=/pool/sao/jroll/acorn/bino/CRframes
+
+    case $action in 
+	object*)	secs=3600 ;;
+	  comp*)	secs=7    ;;
+	 sflat*)	secs=7	  ;;
+	 dflat*)	secs=30	  ;;
+    esac
+
+    rate=0.000413824			# per mm^2 per second
+    area=3775				# mm^2
+
+    count=`awk "BEGIN { print int($rate*$area*$secs) }"`
+    scale=5.98				# 13u/15u * 90u/13u
+
+
+    /pool/sao/jroll/acorn/bino/shotgun.py $image.fits $rays $count $scale
+
+touch $action.Stop

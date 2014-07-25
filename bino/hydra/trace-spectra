@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+#$ -N job
+#
+#$ -o io/$JOB_NAME.o$TASK_ID
+#$ -e io/$JOB_NAME.e$TASK_ID
+#$ -S /bin/sh
+#$ -t 1:50
+#$ -pe openmp 8
+#$ -cwd -terse
+#
+# qsub Notes
+
+export PATH=/home/jroll/bin:$PATH
+
+action=$1;			shift
+
+
+case $action in 
+    object*)	xbino image /pool/sao/jroll/acorn/kurtz2.msk $action $SGE_TASK_ID 1.0 /pool/sao/jroll/acorn/bino/objects/* ;;
+      comp*)	xbino image /pool/sao/jroll/acorn/kurtz2.msk $action $SGE_TASK_ID 0.5 /pool/sao/jroll/acorn/bino/CRframes/arc.txt ;;
+     sflat*)	xbino image /pool/sao/jroll/acorn/kurtz2.msk $action $SGE_TASK_ID 1.0 /pool/sao/jroll/acorn/bino/CRframes/sflat.txt ;;
+     dflat*)	xbino image /pool/sao/jroll/acorn/kurtz2.msk $action $SGE_TASK_ID 1.0 /pool/sao/jroll/acorn/bino/CRframes/dflat.txt ;;
+esac
+

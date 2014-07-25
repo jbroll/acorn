@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+
+./make-image object.0001
+./make-image object.0002
+./make-image object.0003
+./make-image comp.0004
+./make-image sflat.0005
+./make-image dflat.0006

@@ -4,7 +4,7 @@
 ::critcl::config language c++ 
 
 critcl::cflags -O3
-critcl::cheaders -I/Users/john/include -I/home/john/include
+critcl::cheaders -I/Users/john/include -I/home/john/include -I/home/jroll/include
 critcl::cheaders rays.h arec/arec.h xtypes.h
 
 critcl::tsources rays.tcl
@@ -396,7 +396,7 @@ if { [::critcl::compiled] } {
 
 	void    *data = Tcl_GetByteArrayFromObj(Data, &length);
 
-        float    cx, cy, h;
+        float   cx, cy, h;
         int      x, y, r = radius;
 
 	Ray *rays = (Ray *)path->recs;
@@ -461,7 +461,18 @@ if { [::critcl::compiled] } {
 
 		if ( ix >= 0 && ix < nx && iy >= 0 && iy < ny ) {
 		    switch ( type ) {
-		     case TY_USHORT : ((unsigned short *) data)[iy*nx + ix] += h; break;
+		     case TY_USHORT :
+			double count;
+			double extra = modf(h, &count);
+			
+			((unsigned short *) data)[iy*nx + ix] += (unsigned short) count;
+
+			if ( extra != 0.0 && extra > genunf(0.0, 1.0) ) {
+			    ((unsigned short *) data)[iy*nx + ix] += 1; 
+			}
+
+			break;
+		
 		    }
 		}
 	    }
