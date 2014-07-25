@@ -4,7 +4,7 @@ OS  =$(shell uname)
 
 
 INC= -I/Users/john/include -I/home/john/include -I/home/jroll/include
-JLIBS= -L/data/mmti/lib -L/home/jroll/lib
+JLIBS= -L/Users/john/lib   -L/data/mmti/lib     -L/home/jroll/lib
 
 CRITCL=./critcl31.kit
 

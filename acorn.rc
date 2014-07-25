@@ -1,0 +1,3 @@
+
+set env(ACORN) 		/Users/john/src/acorn
+set env(ACORN_QEMAPS)	/Users/john/src/acorn/bino/QE

@@ -75,9 +75,9 @@ if { [::critcl::compiled] } {
 
 	switch $dist {
 	 grid 	 {
-	     puts "Rays? $ray0 [$name length]"
+	     #puts "Rays? $ray0 [$name length]"
 	     $name length = [expr $ray0+[$name mkrays-grid   $ray0 end : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle]]
-	     puts "Rays? $ray0 [$name length]"
+	     #puts "Rays? $ray0 [$name length]"
 	 }
  	 uniform {
 			set width  [expr {  $width/2 }]

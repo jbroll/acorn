@@ -77,21 +77,21 @@ extern "C" {
 		    Vector3d saveP = ray->p;
 		    Vector3d saveK = ray->k;
 
-			printf("Ray  ");
-			prays(ray, 1);
+			//printf("Ray  ");
+			//prays(ray, 1);
 
 		    if ( ray->vignetted ) { continue; }
 
 		    ray->p = txforward * ray->p;		// Put the ray into the surface cs.
 		    ray->k = rtforward * ray->k;
 
-			printf("Conv ");
-			prays(ray, 1);
+			//printf("Conv ");
+			//prays(ray, 1);
 
 		    ray->vignetted = surf[i].traverse(m, &surf[i], ray);
 
-			printf("Trav ");
-			prays(ray, 1);
+			//printf("Trav ");
+			//prays(ray, 1);
 
 		    if ( ray->vignetted == 2 ) {		// Coordbreak returns 2
 			ray->vignetted = 0;
