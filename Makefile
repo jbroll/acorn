@@ -129,7 +129,7 @@ surfaces/lib/$(ARCH)/lens-array-hex.so : surfaces/lens-array-hex.cpp acorn.h $(A
 
 surfaces/lib/$(ARCH)/QE.so : surfaces/QE.cpp acorn.h $(ACORN_UTIL)
 	@mkdir -p surfaces/lib/$(ARCH)
-	$(CXX) $(CFLAGS) -shared $(INC) surfaces/QE.cpp -o surfaces/lib/$(ARCH)/QE.so -L$(JLIBS) -lfitsy
+	$(CXX) $(CFLAGS) -shared $(INC) surfaces/QE.cpp -o surfaces/lib/$(ARCH)/QE.so $(JLIBS) -lfitsy
 
 
 

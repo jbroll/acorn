@@ -543,7 +543,7 @@ switch $action {
 
     set image [acorn::malloc [expr { 2*4096*4096 }]]
 
-    acorn::mkrays rays nx 100 x0 -128 x1 128 ny 100 y0 -128 y1 128 circle 1 intensity 1
+    acorn::mkrays rays nx 1000 x0 -128 x1 128 ny 1000 y0 -128 y1 128 circle 1 intensity 1
 		  rays angles : $ax $ay uniform 1.0 [expr 14.0*60]
 
     rays waves $spectrum	 		; # Add wavelength numbers to rays from spectrum probability function
