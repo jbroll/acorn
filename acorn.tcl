@@ -97,6 +97,8 @@ namespace eval acorn {
 	    }
 	}
 
+	puts [array get ::acorn::SurfaceTypes]
+
 	arec::typedef ::acorn::ModelData {
 	    double	z
 	    long        indicies, wavelengths;

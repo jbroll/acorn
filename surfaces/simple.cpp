@@ -43,6 +43,8 @@ extern "C" {
     double K = s.p[Pm_K];
     double n = s.indicies[r.wave];
 
+
+
     Vector3d nhat;
 
     //

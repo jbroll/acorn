@@ -194,25 +194,37 @@ oo::class create ::acorn::BaseModel {
 	if { $wave eq "current" } {
 	    set wave [my get wavelength current]
 	}
-	mdata set n 1
 	mdata set z $z
+	mdata set indicies    [acorn::doubleList 1.0]
 	mdata set wavelengths [acorn::doubleList $wave]
 
 	foreach { type surf } $surfaces {			# Find the surface to trace
 	    foreach j [iota 0 [$surf length]-1] {
-		if { [$surf $j get name] eq $surface } { break }
+		if { [$surf get $j name] eq $surface } { break }
 	    }
-	    if { [$surf $j get name] eq $surface } { break }
+	    if { [$surf get $j name] eq $surface } { break }
 	}
 
-	set aper [lindex [lindex [$surf $j get aperture] 0] 0]
+	set aper [lindex [lindex [$surf get $j aperture] 0] 0]
 
 	if { $aper ne {} && $aper ne "(null)" } {
-	    $surf $j set aper_data [$aper getptr]
-	    $surf $j set aper_leng [$aper length]
+	    $surf set $j aper_data [$aper getptr]
+	    $surf set $j aper_leng [$aper length]
 	}
-	slist 0 set surf [expr { [$surf getptr]+[acorn::Surfs size]*$j }] nsurf 1 type 0
 
+	if { [$surf get $j glass] ne {} && [$surf get $j glass] ne "(null)" } {
+	    if { [$surf get $j glass_ptr] == -1 } {
+		my [$surf get $j name] set indicies [acorn::doubleList -1]
+		my [$surf get $j name] set n -1
+	    } else {
+		my [$surf get $j name] set indicies [acorn::glass_indicies [$surf get $j glass_ptr] $wave]
+		my [$surf get $j name] set n        [acorn::glass_indx     [$surf get $j glass_ptr] [lindex $wave 0]]
+	    }
+	} else {
+	    $surf set $j indicies [acorn::doubleList [lrepeat [llength $wave] [my [$surf get $j name] get n]]]
+	}
+
+	slist set 0 surf [expr { [$surf getptr]+[acorn::Surfs size]*$j }] nsurf 1 type 0
 
 	acorn::trace_rays [mdata getptr] [slist getptr] [slist length] [$rays getptr] [$rays length] [$rays size] 0 0
     }

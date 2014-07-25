@@ -27,7 +27,7 @@ if { [::critcl::compiled] } {
     }
 
     proc ::acorn::mkrays { name args } {
-	set args [dict merge { type acorn::Rays dist grid nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - intensity 1 x 0 y 0 circle 0 radius0 0 } $args]
+	set args [dict merge { type acorn::Rays dist grid nx 11 ny 11 x0 -5 x1 5 y0 -5 y1 5 xi - yi - intensity 1 x 0 y 0 circle 0 radius0 0 append 0 } $args]
 
 	dict with args {}
 
@@ -35,8 +35,22 @@ if { [::critcl::compiled] } {
 	    set n [expr { $nx*$ny }]
 	}
 
-	if { $name eq "-" } 		   { set name [$type new $n] }
-	if { [info commands $name] eq {} } { $type create $name  $n  }
+	if { $append } {
+	    set n [expr [$name length]+$n]
+	}
+
+	set ray0 0
+
+	if { $name eq "-" } {
+	    set name [$type new $n] 
+	} else {
+	    if { [info commands $name] eq {} } {
+		$type create $name  $n  
+	    } else {
+		set ray0 [$name length]
+		$name length = $n
+	    }
+	}
 
 
 	if { [info exists diameter] } {
@@ -60,13 +74,17 @@ if { [::critcl::compiled] } {
 	if { $yi eq "-" } { set yi [expr { ($y1-$y0)/($ny-1.0) }] }
 
 	switch $dist {
-	 grid 	 { $name length = [$name mkrays-grid   : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle] }
+	 grid 	 {
+	     puts "Rays? $ray0 [$name length]"
+	     $name length = [expr $ray0+[$name mkrays-grid   $ray0 end : $nx $x0 $x1 $xi $ny $y0 $y1 $yi $intensity $circle]]
+	     puts "Rays? $ray0 [$name length]"
+	 }
  	 uniform {
 			set width  [expr {  $width/2 }]
 			set height [expr { $height/2 }]
 
 
-		                  $name mkrays-uniform : $x $y $width $height $circle $radius0 $radius }
+		                  $name mkrays-uniform $ray0 end : $x $y $width $height $circle $radius0 $radius }
 	 normal	 { $name mkrays-normal }
 	}
 

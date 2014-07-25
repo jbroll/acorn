@@ -18,7 +18,7 @@ extern "C" {
     {
 	for ( int i = 0; i < n; i++ ) {
 	    printf("%5d\t%10.6f\t%10.6f\t%10.6f\t", i, ray[i].p(X), ray[i].p(Y), ray[i].p(Z));
-	    printf("%10.6f\t%10.6f\t%10.6f\t%d\n",     ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].vignetted);
+	    printf("%10.6f\t%10.6f\t%10.6f\t%d\t%d\n",     ray[i].k(X), ray[i].k(Y), ray[i].k(Z), ray[i].wave, ray[i].vignetted);
 	}
     }
 
@@ -71,27 +71,27 @@ extern "C" {
 		txreverse 	= txforward.inverse();
 		rtreverse 	= rtforward.inverse();
 
-		//printf("Surface %s %d %d: %f %f %f	%d\n", surf[i].type, h, i, -surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz], once);
+		//printf("Surface %s %d %d: %f %f %f	%d %ld\n", surf[i].type, h, i, -surf[i].p[Px_px], -surf[i].p[Px_py], -surf[i].p[Px_pz], once, surf[i].traverse);
 
 		for ( j = 0, ray = R; j < nray; j++, ray = (Ray *) (((char *) ray) + rsize) ) {
 		    Vector3d saveP = ray->p;
 		    Vector3d saveK = ray->k;
 
-			//printf("Ray  ");
-			//prays(ray, 1);
+			printf("Ray  ");
+			prays(ray, 1);
 
 		    if ( ray->vignetted ) { continue; }
 
 		    ray->p = txforward * ray->p;		// Put the ray into the surface cs.
 		    ray->k = rtforward * ray->k;
 
-			//printf("Conv ");
-			//prays(ray, 1);
+			printf("Conv ");
+			prays(ray, 1);
 
 		    ray->vignetted = surf[i].traverse(m, &surf[i], ray);
 
-			//printf("Trav ");
-			//prays(ray, 1);
+			printf("Trav ");
+			prays(ray, 1);
 
 		    if ( ray->vignetted == 2 ) {		// Coordbreak returns 2
 			ray->vignetted = 0;

@@ -11,7 +11,7 @@ package require acorn
 package require tripack
 
 
-ZMX create GMT source zmx-models/GMT-1-AcOWFS-2.ZMX
+acorn::ZMX create GMT source zmx-models/GMT-1-AcOWFS-2.ZMX
 
 
 
@@ -39,7 +39,7 @@ proc surface-polygon { m s { zz 0 } } {
     if { [$m $s get aper_type] ne "UDA" } {
 	set P [map { x y } [polygon 0 0 [$m $s get aper_max] [$m $s get aper_max] -sides 64] { list $x $y 0 }]
     } else {
-	set P [[$m $s get aperture] 1 end-2 get x y z]
+	set P [[$m $s get aperture] get 1 end-2 x y z]
     }
 
     # Transform the aperture to the surface position
@@ -53,17 +53,23 @@ proc surface-polygon { m s { zz 0 } } {
     set R [acorn::Rays create R 0]
 
     foreach { px py pz } [join $P] {						; # Put the aperture points in a Rays array
-	$R [$R length] set px $px py $py pz $pz kx 0 ky 0 kz 1
+	$R set [$R length] px $px py $py pz $pz kx 0 ky 0 kz 1
     }
 
-    acorn::mkrays R nx 10 ny 10 pz $zz {*}[3d::bbox $P]				; # ray box of interior points
+
+    acorn::mkrays R append yes nx 10 ny 10 pz $zz {*}[3d::bbox $P]		; # ray box of interior points
+	puts [3d::bbox $P]
+	puts "trace1 [R length]"
+	#acorn::prays R
+	exit
 
     $m trace1 $s R $zz								; # Trace the rays to the surface.
+	puts trace1Done
 
     # Remove vignetted points that are not part of the aperture polygon
     #
     set i 0
-    set p [map { x y z v } [join [R 0 end get px py pz vignetted]] { if { [incr i] > $N && $v } { continue };  list $x $y $z }]
+    set p [map { x y z v } [join [R get 0 end px py pz vignetted]] { if { [incr i] > $N && $v } { continue };  list $x $y $z }]
     rename R {}	
 
     trimesh $p
@@ -76,17 +82,22 @@ proc display { m } {
     set c 0
 
     foreach { type surf } [$m surfaces] {
+	puts $surf
 	foreach j [iota 0 [$surf length]-1] {
 	    set color [lindex $colors [expr $c%[llength $colors]]]
 
-	    set name [$surf $j get name]
+	    set name [$surf get $j name]
+
+	    puts $name
 
 	    switch [$m $name get aper_type] {
 	     UDA -
 	     circular {
 		try {
 		    if { [$m $name get aper_max] != 0 } {
-			.win create polygon [set x [surface-polygon $m $name $z]] -color $color   -style outline 
+
+			puts ".win create polygon [set x [surface-polygon $m $name $z]] -color $color   -style outline"
+			.win create polygon [set x [surface-polygon $m $name $z]] -color $color   -style outline
 		    }
 		} on error message {
 		    puts "$m $name : $message"
@@ -98,6 +109,8 @@ proc display { m } {
 
 	     }
 	    }
+
+	    puts HERE
 
 	    if { $type eq "sequential" && [$m $name get thickness] ne "Inf" } {
 		set z [expr { $z + [$m $name get thickness] }]
@@ -111,7 +124,7 @@ proc display { m } {
     }
 }
 
-GMT print
+#GMT print
 display GMT
 
 .win transform -camera {} "lookat all"
