@@ -170,7 +170,6 @@ def cat(filename) :
 Surfaces = {}
 
 def NewSurfaceType(name):
-
     Name = "Surface" + name.title()
     def __init__(self, *args): Surface.__init__(self, Name, *args)
 
