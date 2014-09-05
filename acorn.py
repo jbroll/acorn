@@ -145,7 +145,9 @@ class Surface(Typedef):
     def __init__(self, name, *args): Typedef.__init__(self, name, *args)
 
     def traverse(self, model, ray):
+	print "HERE"
 	self.so.traverse(model._data, cffi.cast("Surface *", self._data), cffi.cast("Ray *", ray._data))
+	print "THERE"
 
     def foo(self, x): return self.so.foo(x)
 
