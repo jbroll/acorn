@@ -145,6 +145,8 @@ class Typedef(object) :
 class Surface(Typedef):
     def __init__(self, *args): Typedef.__init__(self, "Surface", *args)
 
+    def foo(self, x): return self.so.foo(x)
+
 
 class Ray(Typedef):
     def __init__(self, *args): Typedef.__init__(self, "Ray", *args)
@@ -160,16 +162,14 @@ s1 = Surface(1)
 s2 = Surface(1)
 
 def cat(filename) :
-    file = open('newfile.txt', 'r')
+    file = open(filename, 'r')
     data = file.read()
-    close(file)
+    file.close()
 
     return data
 
 def NewSurfaceType(name):
-    def __init__(self, *args): Typedef.__init__(self, name, *args)
-    def traverse(self, rays):  self.so.traverse(rays)
-    def foo(self, n):  return self.so.foo(n)
+    def __init__(self, *args): Surface.__init__(self, name, *args)
 
 
     cffi.cdef(cat(name + ".h"))
@@ -187,9 +187,11 @@ def NewSurfaceType(name):
     return cls
     
 
-s3 = Surface()
+Simple = NewSurfaceType("simple")
+s3 = Simple()
 x = 4;
-s3.traverse(x)
+print s3.foo(x)
+
 
 rays = Ray(100)
 rays.trace1(s1[0])
