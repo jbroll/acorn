@@ -34,8 +34,12 @@ extern "C" {
 
   int traverse(MData *m, Surface &s, Ray &r)
   {
+fprintf(stderr, "HERE!!!!!!!!!!\n");
+return 0;
+
 	double n0 = m->indicies[r.wave];
 	double  z = m->z;
+
 
     double d;
 

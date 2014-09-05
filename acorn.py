@@ -1,5 +1,8 @@
 
 import sys
+import platform
+
+
 
 from cffi import FFI
 cffi = FFI()
@@ -53,8 +56,6 @@ cffi.cdef("""
 
     """)
 
-Simple  = cffi.dlopen("surfaces/lib/Darwin.x86_64/simple.so") 
-Zerkike = cffi.dlopen("surfaces/lib/Darwin.x86_64/zernike.so") 
 
 # CFFI Proxy to allow set/get of a char* to/from a python string
 #
@@ -139,8 +140,14 @@ class Typedef(object) :
 # us to add methods that will be implimented in C.
 #
 class Surface(Typedef):
-    def __init__(self, *args): Typedef.__init__(self, "Surface", *args)
+    def __init__(self, name, *args): Typedef.__init__(self, name, *args)
 
+    def traverse(self, model, ray):
+	self.so.traverse(model._data, cffi.cast("Surface *", self._data), cffi.cast("Ray *", ray._data))
+
+
+class MData(Typedef):
+    def __init__(self, *args): Typedef.__init__(self, "MData", *args)
 
 class Ray(Typedef):
     def __init__(self, *args): Typedef.__init__(self, "Ray", *args)
@@ -152,33 +159,49 @@ class Ray(Typedef):
 	acorn.trace1(self._data, self._length, surf._data, surf._length)
 
 
-s1 = Surface(1)
-s2 = Surface(1)
 
 def cat(filename) :
-    file = open('newfile.txt', 'r')
+    file = open(filename, 'r')
     data = file.read()
-    close(file)
+    file.close()
 
     return data
 
+Surfaces = {}
+
 def NewSurfaceType(name):
-    def __init__(self, *args): Typedef.__init__(self, name, *args)
 
-    cffi.cdef(cat(name + ".h"))
-    so = cffi.dlopen(name + ".so")
+    Name = "Surface" + name.title()
+    def __init__(self, *args): Surface.__init__(self, Name, *args)
 
-    cls = type("Surface" + name.title(), [Typedef], {
-	  so: so
-	, __init__: __init__
+    cffi.cdef(cat("surfaces/" + name + ".hh"))
+    so = cffi.dlopen("surfaces/lib/" + platform.system() + "." + platform.machine() + "/" + name + ".so")
+
+
+    cls = type("Surface" + name.title(), (Surface,), {
+	  'so': so
+	, '__init__': __init__
     })
 
-    Surfaces[name] = cls
+    Surfaces[Name] = cls
 
     return cls
     
 
-s3 = Surface()
+model  = MData()
+ray    = Ray()
+simple = NewSurfaceType("simple")
+
+
+s3 = simple()
+s3.x = 1
+s3.x += 3
+s3.traverse(model, ray)
+
+
+print s3.x
+
+sys.exit()
 
 rays = Ray(100)
 rays.trace1(s1[0])
