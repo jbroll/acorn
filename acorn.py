@@ -51,10 +51,14 @@ cffi.cdef("""
 	TraceFunc traverse;
 	int (*trace)(Surface *s, int nsurf);
 
+	int foo(int x);
+
     """)
 
 Simple  = cffi.dlopen("surfaces/lib/Darwin.x86_64/simple.so") 
 Zerkike = cffi.dlopen("surfaces/lib/Darwin.x86_64/zernike.so") 
+
+print Simple.foo(5)
 
 # CFFI Proxy to allow set/get of a char* to/from a python string
 #
@@ -165,6 +169,7 @@ def cat(filename) :
 def NewSurfaceType(name):
     def __init__(self, *args): Typedef.__init__(self, name, *args)
     def traverse(self, rays):  self.so.traverse(rays)
+    def foo(self, n):  return self.so.foo(n)
 
 
     cffi.cdef(cat(name + ".h"))
@@ -183,12 +188,12 @@ def NewSurfaceType(name):
     
 
 s3 = Surface()
+x = 4;
+s3.traverse(x)
 
 rays = Ray(100)
 rays.trace1(s1[0])
 
-x = 4;
-#s3.traverse(x)
 
 s3.aper_data = 4
 s3.name = "ddd"

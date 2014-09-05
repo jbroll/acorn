@@ -18,6 +18,10 @@ extern "C" {
   static const double MyParamValue[] = { 0.0, 0.0 };
 
 
+  int foo(int x) {
+      return x+4;
+  }
+
   int info(int command, char **strings, double **values) 
   {
     switch ( command ) {
