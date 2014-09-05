@@ -164,13 +164,17 @@ def cat(filename) :
 
 def NewSurfaceType(name):
     def __init__(self, *args): Typedef.__init__(self, name, *args)
+    def traverse(self, rays):  self.so.traverse(rays)
+
 
     cffi.cdef(cat(name + ".h"))
     so = cffi.dlopen(name + ".so")
 
     cls = type("Surface" + name.title(), [Typedef], {
 	  so: so
+
 	, __init__: __init__
+	, traverse: traverse
     })
 
     Surfaces[name] = cls
