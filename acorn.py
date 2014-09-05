@@ -51,7 +51,7 @@ cffi.cdef("""
 	    long	annote;
 	} Surface;
 
-	TraceFunc traverse;
+	int traverse(MData *, Surface *, Ray *ray);
 	int (*trace)(Surface *s, int nsurf);
 
 	int foo(int x);
@@ -142,11 +142,25 @@ class Typedef(object) :
 # us to add methods that will be implimented in C.
 #
 class Surface(Typedef):
-    def __init__(self, name, *args): Typedef.__init__(self, name, *args)
+    def __init__(self, name, *args):
+	Typedef.__init__(self, name, *args)
+
+	print self._data
+	self._data.traverse = self.so.traverse
 
     def traverse(self, model, ray):
+	print model._data
+	print self._data
+	print ray._data
+	print self.so
+
+	print self.so.traverse
+	print cffi.cast("Surface *", self._data)
+
 	print "HERE"
-	self.so.traverse(model._data, cffi.cast("Surface *", self._data), cffi.cast("Ray *", ray._data))
+
+	# return self.so.traverse(model._data, cffi.cast("Surface *", self._data), cffi.cast("Ray *", ray._data))
+	return self.so.traverse(model._data, cffi.cast("Surface *", self._data), cffi.cast("Ray *", ray._data))
 	print "THERE"
 
     def foo(self, x): return self.so.foo(x)
@@ -198,11 +212,15 @@ ray    = Ray()
 
 Simple = NewSurfaceType("simple")
 
+
+
 s3 = Simple()
 x = 4;
-print s3.foo(x)
+print "foo", s3.foo(x)
 
-s3.traverse(model, ray)
+print "trav", s3.traverse(model, ray)
+
+sys.exit(1)
 
 
 
