@@ -119,9 +119,9 @@ class ZMX(AcornModel):
 
     def  SURF { id } { set Id $id;  set comment {} }
 
-     # Common surface definition commands
-     #
-     def TYPE { type args } { 
+    # Common surface definition commands
+    #
+    def TYPE { type args } { 
 
 	# Move on to a new surface group?
 	#
@@ -145,9 +145,9 @@ class ZMX(AcornModel):
 
 	set grouptype sequential
 	my Process-Type $type $comment $args
-     }
+    }
 
-     def Process-Type { type comm args } {
+    def Process-Type { type comm args } {
 
 	if type eq "USERSURF":
 	    set args [lassign $args type]
@@ -199,18 +199,18 @@ class ZMX(AcornModel):
 	}
 
 	$surftype [self] $Id
-     }
-     def CURV(self, curv, *line):
+    }
+    def CURV(self, curv, *line):
 	 if $grouptype ne "non-sequential":
 	     if $curv:
 		 surf.R = 1.0/curv
 
-     def CONI(self, conic, *line):
+    def CONI(self, conic, *line):
 	     surf.K = conic
 
-     def COMM(self, *line): self.state.comment = " ".join(*line)
+    def COMM(self, *line): self.state.comment = " ".join(*line)
 
-     def PARM { n value } {
+    def PARM { n value } {
 	 if { $grouptype ne "non-sequential" } {
 	     try { my [$current get $surf name] set $::acorn::ZMXParmMap($surftype,$n) $value
 	     } on error message {
@@ -219,40 +219,40 @@ class ZMX(AcornModel):
 	 } else {
 	     $current set $surf p$n $value
 	 }
-     }
-     def DISZ(self, thick, *line):
+    }
+    def DISZ(self, thick, *line):
 	 if self.state.grouptype == "non-sequential": self.surf.param.thickness = thick
  
-     def DIAM(self, diam, *line): self.param.semi = diam	; # This is Zemax computed semi-diameter, not the aperture size.
+    def DIAM(self, diam, *line): self.param.semi = diam	; # This is Zemax computed semi-diameter, not the aperture size.
 
-     def SQAP(self, w, h, *line):
+    def SQAP(self, w, h, *line):
 	self.surf.aper_type = "rectangle"
      	self.surf.aper_min  = w 
      	self.surf.aper_max  = h 
 
-     def ELAP(self, w, h, *line):
+    def ELAP(self, w, h, *line):
 	self.surf.aper_type = "eliptical"
      	self.surf.aper_min  = w/2.0
      	self.surf.aper_max  = h/2.0 
  
-     def CLAP(self, rad, *line):
+    def CLAP(self, rad, *line):
 	self.surf.aper_type = "circular"
      	self.surf.aper_max  = rad
 
-     def FLAP(self, n, rad, *line):
+    def FLAP(self, n, rad, *line):
 	self.surf.aper_type = "circular"
      	self.aper_max  = rad
 
-     def OBSC(self, n, rad, *line):
+    def OBSC(self, n, rad, *line):
 	self.surf.aper_type = "obstruction"
      	self.surf.aper_min  = rad
 
-     def OBDC(self, x y, *line):	 					# aperture decenter 
+    def OBDC(self, x y, *line):	 					# aperture decenter 
      	self.surf.aper_xoff = x
      	self.surf.aper_yoff = y
-     }
+    }
 
-     def GLAS(self, name, *line): 
+    def GLAS(self, name, *line): 
 	 self.surf.glass = GlassIndex(name)
 
      # NonSequential surface commands
@@ -276,8 +276,8 @@ class ZMX(AcornModel):
 	    my [$current get $surf name] set thickness [lindex $nsoexit 3]
 	 }
 	}
-     }
-     def NSOA { n aperture } {
+    }
+    def NSOA { n aperture } {
 
 	if { $aperture eq  {}  } {
 	    $current set $surf aper_type  circular
@@ -289,21 +289,21 @@ class ZMX(AcornModel):
 
 	lappend objects [set aper [::acorn::Aperture [$current get $surf aper_type] [$current get $surf aper_param]]]
 	$current set $surf aperture [$aper polygon]
-     }
-     def NSCS { args } {}
-     def NSOD { n value a b c d e f } {
+    }
+    def NSCS { args } {}
+    def NSOD { n value a b c d e f } {
 	 try { my [$current get $surf name] set $::acorn::ZMXNSODMap($surftype,$n) $value 
 	 } on error message {
 	     my [$current get $surf type] $n $value $a $b $c $d $e $f
 	 }
-     }
-     def NSOP { dx dy dz rx ry rz args } {
+    }
+    def NSOP { dx dy dz rx ry rz args } {
 	 my [$current get $surf name] set x $dx y $dy z $dz rx $rx ry $ry rz $rz
 
 	 if { [lindex $args 0] eq "MIRROR" } {
 	     my [$current get $surf name] set n -1 
 	 }
-     }
+    }
     def NSCD(self, *line): pass
     def NSOO(self, *line): pass
     def NSOQ(self, *line): pass
@@ -418,5 +418,4 @@ class ZMX(AcornModel):
     def xXFIE { field value args } 	     { 	my set field $field x $value }
     def xYFIE { field value args } 	     { 	my set field $field y $value }
     def xWAVE { wave  value args } 	     {  my set wavelength $wave wave $value }
-}
 
