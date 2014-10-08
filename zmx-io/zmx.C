@@ -81,20 +81,11 @@ typedef struct _VarMap {
     int offset;
 } VarMap;
 
-class ZMX {
+class Scripted {
   public:
-
-    int a;
-    int b;
-
-
-    Param int 	 ik;
-    Param string sk;
-    Param double dk;
-
-
     static std::map<std::string, void (ZMX::*)(void)> mtable;
     static std::map<std::string, VarMap> vtable;
+
 
     void invoke(const char *method) {
 	if ( mtable.count(method) == 1 ) {
@@ -124,6 +115,17 @@ class ZMX {
 	}
 
     }
+}
+
+class ZMX : public Scripted { 
+
+    int a;
+    int b;
+
+    Param int 	 ik;
+    Param string sk;
+    Param double dk;
+
     Keyword fluff () {
 	printf("Here\n");
 	return;
