@@ -25,6 +25,12 @@ typedef struct _VarMap {
 } VarMap;
 
 
+static std::map<const char *, VarMap> *AcornSurfGrp_vtable = {
+#	include "zmx.vtable"
+};
+
+
+
 typedef std::string string;
 
 
@@ -110,11 +116,19 @@ class AcornRay {
 enum AcornSurfGrpType { AcornSequential, AcornNonSequential };
 
 class AcornSurface {
+	
   public:
-	string type;
+      	AcornSurface() {
+	    
+	}
 
-	virtual int setparam(int set, const char* name, void *value) = 0;
-	virtual int traverse(AcornRay *rays) = 0;
+	string type;
+        std::map<const char *, VarMap> *vtable;
+
+	int (*setparam)(void *, int set, const char* name, void *value);
+	int (*traverse)(AcornRay *rays) = 0;
+
+	int setset(void);
 };
 
 
@@ -124,18 +138,18 @@ class AcornSurfGrp : public AcornSurface {
     AcornSurfGrpType seqtype;
 
     AcornSurfGrp () { 
+	vtable  = AcornSurfGrp_vtable;
+
 	type    = "non-sequential";
 	seqtype = AcornSequential;
+
+	printf("%ld\n", offsetof(AcornSurface, type));
     }
-    AcornSurfGrp (AcornSurfGrpType Type) {
-	
+    AcornSurfGrp (AcornSurfGrpType Type) : AcornSurfGrp() {
 	seqtype = Type;
     }
 
     std::vector<AcornSurface *> surf;
-
-    int setparam(int set, const char* name, void *value) { return 0; };
-    int traverse(AcornRay *rays) { return 1; }
 };
 
 
@@ -355,7 +369,7 @@ class ZMX  {
 	surfaces->surf.push_back(AcornSurfaces[type]());
 	current = model->surfaces.surf.back();
 
-	current->setparam(1, "comment", comm);
+	current->setparam(this, 1, "comment", comm);
 
 	if ( !strcmp(type, "NONSEQCO") ) {
 	    surf_stack.push(&model->surfaces);
@@ -364,7 +378,6 @@ class ZMX  {
   	}
      }
 };
-
 
 std::map<std::string, void (ZMX::*)(std::vector<char*>)> ZMX::mtable = {
 #	include "zmx.mtable"
