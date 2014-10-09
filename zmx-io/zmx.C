@@ -55,7 +55,7 @@ std::vector<char> cat(const std::string& filename)
     std::ifstream inp(filename.c_str(), std::ios::in | std::ios_base::binary);
 
 
-    if ( (ch0 = inp.get()) != -1 && ch0 == 0xFE || ch0 == 0xFF ) {
+    if ( (ch0 = inp.get()) != -1 && (ch0 == 0xFE || ch0 == 0xFF) ) {
 	if ( (ch1 = inp.get()) != -1  && ((ch0 == 0xFF && ch1 == 0xFE) || (ch0 == 0xFE && ch1 == 0xFF)) ) {
 	    skip = 1;
 
@@ -134,7 +134,7 @@ class AcornSurfGrp : public AcornSurface {
 
     std::vector<AcornSurface *> surf;
 
-    int setparam(int set, const char* name, void *value) {};
+    int setparam(int set, const char* name, void *value) { return 0; };
     int traverse(AcornRay *rays) { return 1; }
 };
 
@@ -146,7 +146,7 @@ class AcornSurfaceCoordBrk : public AcornSurface {
 	type    = "coordbrk";
     }
 
-    int setparam(int set, const char* name, void *value) {};
+    int setparam(int set, const char* name, void *value) { return 0; };
     int traverse(AcornRay *rays) { return 1; }
 };
 

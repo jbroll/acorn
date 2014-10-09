@@ -1,5 +1,6 @@
 
-typedef struct _SurfaceSimple {
-	int x;
-} SurfaceSimple;
+class SurfaceSimple : struct AcornSurface {
+    double R;
+    double K;
+};;
 
