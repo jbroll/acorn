@@ -4,9 +4,11 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
+
 #include <string>
 #include <vector>
-#include <fstream>
+#include <stack>
 #include <map>
 
 
@@ -97,71 +99,83 @@ void SetVar(int set, char *that, VarMap v, void *value) {
     }
 }
 
-class AcornModel {
-	int x;
+
+class AcornRay {
+  public:
+    int x;
+    int y;
+    int z;
 };
 
-class ZMX  { 
-    static std::map<std::string, void (ZMX::*)(std::vector<char*>)> mtable;
-    static std::map<std::string, VarMap> vtable;
+enum AcornSurfGrpType { AcornSequential, AcornNonSequential };
 
+class AcornSurface {
+  public:
+	string type;
+
+	virtual int setparam(int set, const char* name, void *value) = 0;
+	virtual int traverse(AcornRay *rays) = 0;
+};
+
+
+class AcornSurfGrp : public AcornSurface {
 
   public:
+    AcornSurfGrpType seqtype;
 
-    AcornModel Read(string filename) {
-	AcornModel *model = new AcornModel();
-
-	std::vector<char*> list = split(&cat(filename)[0], "\n");
-
-        for ( auto &i : list ) {
-	    std::vector<char*> line = split(i, " \t");
-
-	    invoke(line[0], line);
-        }
+    AcornSurfGrp () { 
+	type    = "non-sequential";
+	seqtype = AcornSequential;
+    }
+    AcornSurfGrp (AcornSurfGrpType Type) {
+	
+	seqtype = Type;
     }
 
-    void invoke(const char *method, std::vector<char*> argv) {
-	if ( mtable.count(method) == 1 ) {
-	    (this->*mtable[method])(argv);
-	} else {
-	     fprintf(stderr, "unknown method ZMX::%s\n", method);
-	}
-    }
+    std::vector<AcornSurface *> surf;
 
-    void setvar(const char *varname, int set, void *value) {
-	if ( vtable.count(varname) == 1 ) {
-	    SetVar(set, (char *) this, vtable[varname], value);
-	} else {
-	     fprintf(stderr, "unknown param ZMX::%s\n", varname);
-	}
-    }
-
-    int a;
-    int b;
-
-    Param int 	 ik;
-    Param string sk;
-    Param double dk;
-
-    Keyword fluff (std::vector<char*> argv) {
-	printf("Here\n");
-	return;
-    }
-
-    Keyword zmx_simple   (std::vector<char*> argv) {};
-    Keyword zmx_coordbrk (std::vector<char*> argv) {};
-    Keyword zmx_zernike  (std::vector<char*> argv) {};
-    Keyword zmx_dgrating (std::vector<char*> argv) {};
-    Keyword zmx_lens_array_rect (std::vector<char*> argv) {}
-    Keyword zmx_evenasph (std::vector<char*> argv) {
-	int eight = 8;
-
-	surf.setvar("nterms", 1, (void *) &eight);
-    }
+    int setparam(int set, const char* name, void *value) {};
+    int traverse(AcornRay *rays) { return 1; }
 };
 
 
-    static std::map<std::string, std::string> ZMXSurfaceMap = {
+class AcornSurfaceCoordBrk : public AcornSurface {
+
+  public:
+    AcornSurfaceCoordBrk () { 
+	type    = "coordbrk";
+    }
+
+    int setparam(int set, const char* name, void *value) {};
+    int traverse(AcornRay *rays) { return 1; }
+};
+
+class AcornModel {
+  public:
+
+    AcornSurfGrp surfaces;
+    int x;
+};
+
+
+AcornSurface *AcornSurfGrpNonSeqConstructor() {
+    return (AcornSurface *) new AcornSurfGrp(AcornNonSequential);
+}
+
+AcornSurface *AcornSurfaceCoordBrkConstructor() {
+
+    return (AcornSurface *) new AcornSurfaceCoordBrk();
+}
+
+
+    std::map<const char*, AcornSurface *(*)(void)> AcornSurfaces = {
+	{ "NONSEQCO", 	&AcornSurfGrpNonSeqConstructor	 } ,
+	{ "coordbrk", 	&AcornSurfaceCoordBrkConstructor }
+    };
+
+
+    static std::map<std::string, const char*> ZMXSurfaceMap = {
+	{ "NONSEQCO",	 	"NONSEQCO"	}, 
 
 	{ "standard",	 	"simple"	}, 
 	{ "coordbrk",	 	"coordbrk"	}, 
@@ -217,468 +231,143 @@ class ZMX  {
 	}
     };
 
+class ZMX  { 
 
-#if 0
-namespace eval acorn {
+    static std::map<std::string, void (ZMX::*)(std::vector<char*>)> mtable;
+
+  public:
+    std::stack<AcornSurface *> surf_stack;
 
 
-}
+    AcornModel	 *model;
+    AcornSurfGrp *surfaces;
+    AcornSurface *current;
 
-oo::class create ::acorn::ZMX {
-    superclass ::acorn::BaseModel
+    int surftype;
 
-    variable grouptype current surf surftype surfaces default basedef basemap basepar anonsurf surfdefs 
-    variable pup     
-    variable mce mce_current
-    variable objects
+ 
+    std::vector<char *> pup;
+    std::vector<char *> mce;
+    int mce_current;
 
-    variable Id Name Notes 			 					\
-	comment nonseqid nonseq nsoexit							\
-	debug 
+    int Id;
+    std::string Name;
+    std::string Notes;
+    std::string	comment;
+    std::string nonseqid;
+    std::string nonseq;
+    std::string nsoexit;
+    int debug;
 
-    variable float semi
-    variable fieldx fieldy
-    variable aray
+    int floating; double semi;
+    double fieldx;
+    double fieldy;
 
-    accessor grouptype current surfaces default debug
+    AcornRay aray[1];
 
-    constructor { type args } {
-	next
 
-	set aray    [acorn::Rays create [namespace current]::ZMX-RAY1]
+    AcornModel *Read(string filename) {
+	model = new AcornModel();
 
-	set objects     {}
-	set pup         {}
-	set mce(1)      {}
-	set mce_current 1
-	set semi 	{}
-	set float	0
+	surfaces = &model->surfaces;
 
-	set debug 0
+	current = NULL;
 
-	switch $type {
-	    source { eval [string map { $ \\$ ; \\; [ \\[ } [cat [lindex $args 0]]] }
-	    string { eval {*}$args }
-	    default { error "Unknown constructor type : $type" }
-	}
 
-	if { [$current length] } {
-	    lappend surfaces $grouptype $current
+	std::vector<char*> list = split(&cat(filename)[0], "\n");
+
+        for ( auto &i : list ) {
+	    std::vector<char*> line = split(i, " \t");
+
+	    invoke(line[0], line);
+        }
+
+	return model;
+    }
+
+    void invoke(const char *method, std::vector<char*> argv) {
+	if ( mtable.count(method) == 1 ) {
+	    (this->*mtable[method])(argv);
 	} else {
-	    rename $current {}
-	}
-
-	set i 1
-	foreach x $fieldx y $fieldy {
-	    my set field $i [list x $x y $y]
-	    incr i
-	}
-
-	try { my get wavelength current 
-	} on error message {
-	    my set wavelength current [my get wavelength 1 wave]
-	}
-
-	if { $float } {
-	    my set pupilDiameter [expr { [dict get $semi [my get stop]] * 2.0 }]
-	}
-
-	eval $pup
-	eval $mce($mce_current)
-    }
-
-    method simple { args } {}
-    method zernike { n value a b c d e f } {
-	if { $n == 3 } {
-	    my [$current get $surf name] set aper_max $value
-	    my [$current get $surf name] set nradius  $value
-	}
-	if { $n > 15 } {
-	    my [$current get $surf name] set z[expr $n-15] $value
+	     fprintf(stderr, "unknown method ZMX::%s\n", method);
 	}
     }
 
-    method print {} {
-	next
 
-	#puts "wavelengths $wavelength"
-	#puts "mce {"
-	#puts [array get mce]
-	#puts "}"
+    Keyword zmx_simple   (std::vector<char*> argv) {};
+    Keyword zmx_coordbrk (std::vector<char*> argv) {};
+    Keyword zmx_zernike  (std::vector<char*> argv) {};
+    Keyword zmx_dgrating (std::vector<char*> argv) {};
+    Keyword zmx_lens_array_rect (std::vector<char*> argv) {}
+    Keyword zmx_evenasph (std::vector<char*> argv) {
+	int eight = 8;
 
+	//surf.setvar("nterms", 1, (void *) &eight);
     }
 
-    method update {} {
-	my config $mce_current
-	next
+    Keyword ZVAN (std::vector<char*> argv) {}
+    Keyword ZVCX (std::vector<char*> argv) {}
+    Keyword ZVCY (std::vector<char*> argv) {}
+    Keyword ZVDX (std::vector<char*> argv) {}
+    Keyword ZVDY (std::vector<char*> argv) {}
+    Keyword VERS (std::vector<char*> argv) {}
+    Keyword UNIT (std::vector<char*> argv) {
+	 // lens_unit src_prefix src_unit anal_prefix anal_unit args
+    }
+    Keyword ENVD (std::vector<char*> argv) {
+	// temp pres args }	{ my set temperature $temp; my set presure $pres 
+    }
+    Keyword ENPD (std::vector<char*> argv) {
+	//{ size args }		{ my set pupilDiameter $size
+    }
+    Keyword GCAT (std::vector<char*> argv)	{}
+
+    Keyword PRIM (std::vector<char*> argv) {}
+
+    Keyword NAME (std::vector<char*> argv) { 
+	//set     Name $args
+    }
+    Keyword NOTE (std::vector<char*> argv) {
+	// lappend Notes $args
     }
 
-    method pickup {} { eval $pup }
-
-    method config { { config {} } } {
-	if { $config eq {} } { 
-	    return $mce_current
-	} else {
-	    set mce_current $config
-	    eval $mce($config)
-	    my pickup
-	}
+    Keyword  SURF (std::vector<char*> argv) {
+	Id 	= atoi(argv[1]);
+	comment = "";
     }
 
-    method ZVAN { args } {}
-    method ZVCX { args } {}
-    method ZVCY { args } {}
-    method ZVDX { args } {}
-    method ZVDY { args } {}
-    method VERS { args } {}
-    method UNIT { lens_unit src_prefix src_unit anal_prefix anal_unit args }	{}
-    method ENVD { temp pres args }	{ my set temperature $temp; my set presure $pres }
-    method ENPD { size args }		{ my set pupilDiameter $size }
-    method GCAT { args }	{}
+    Keyword TYPE (std::vector<char*> argv) {
 
-    method PRIM { args } {}
+	char *type = argv[1];
+	char *comm = argv[2];
 
-    method NAME { args } { set     Name $args }
-    method NOTE { args } { lappend Notes $args }
-
-    method  SURF { id } { set Id $id;  set comment {} }
-
-    method xNOP { args } {
-	#puts "NOP $args"
-    } 
-
-     # Common surface definition commands
-     #
-     method TYPE { type args } { 
-
-	# Move on to a new surface group?
-	#
-	if { [$current length] && ( $grouptype eq "non-sequential" || $type eq "NONSEQCO" ) } {
-	    lappend surfaces $grouptype $current 
-
-	    set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
-	    set surf   0
+	if ( !strcmp(type, "USERSURF") ) {
+	    type = argv[2];
+	    comm = argv[3];
 	}
 
-	if { $type eq "NONSEQCO" } {
-	    set grouptype non-sequential
 
-	    ::oo::objdefine [self] [list forward $Id [self] xNOP $Id]
-	    ::oo::objdefine [self] [list export  $Id]
+	if ( ZMXSurfaceMap.count(type) != 1 || AcornSurfaces.count(ZMXSurfaceMap[type]) != 1 ) {
+	    fprintf(stderr, "zmx: unknown surface type : %s\n", type);
+	    exit(1);
+	} 
 
-	    set nonseqid $Id
-	    set nonseq   0
-	    return
-	}
+	surfaces->surf.push_back(AcornSurfaces[type]());
+	current = model->surfaces.surf.back();
 
-	set grouptype sequential
-	my Process-Type $type $comment $args
+	current->setparam(1, "comment", comm);
+
+	if ( !strcmp(type, "NONSEQCO") ) {
+	    surf_stack.push(&model->surfaces);
+	    surfaces = static_cast<AcornSurfGrp *>(model->surfaces.surf.back());
+	    return;
+  	}
      }
+};
 
-     method Process-Type { type comm args } {
-
-	if { $type eq "USERSURF" } {
-	    set args [lassign $args type]
-	}
-	set args {}
-
-	set type $::acorn::ZMXSurfaceMap([string tolower $type])		; # Map Zemax surface type in to acorn.
-
-
-	set surf [$current length]
-
-	set surftype $type
-
-	# Get the surface traverse and infos functions
-	#
-	$current set $surf type     $type
-	$current set $surf traverse $::acorn::SurfaceTypes($type)
-	$current set $surf infos    $::acorn::SurfaceInfos($type)
-
-	if { [$current get $surf infos] != -1 } {
-	    lassign [::acorn::infos 1 [$current get $surf infos]] dparams dvalues
-	    lassign [::acorn::infos 2 [$current get $surf infos]] sparams svalues
-	} else {
-	    set dparams {}
-	    set dvalues {}
-	    set sparams {}
-	    set svalues {}
-	}
-
-	set surfdefs($surftype,pdef) [dict merge $basedef [zip $dparams $dvalues]]
-	set surfdefs($surftype,sdef) [dict merge [zip $sparams $svalues]]
-
-	set k [llength $basepar]
-	set parmap {}
-	foreach param $dparams { lappend parmap $param p$k; incr k }	; # Query for and map parameters
-
-
-	set k 0
-	foreach param $sparams { lappend parmap $param s$k; incr k }	; # Query for and map strings
-
-	set parmap [dict merge $basemap $parmap]
-
-	set surfdefs($surftype,pmap) $parmap
-	set surfdefs($surftype,smap) {}
-
-	$current set $surf {*}[mappair $parmap [dict merge $basedef $default [join $args] [list name $Id type $surftype comment $comm]]]
-
-	::oo::objdefine [self] [list forward $Id [self] surfset1 $current $surf $parmap]
-	::oo::objdefine [self] [list export  $Id]
-
-
-	if { $comment ne {} } {
-	    set name [string map { { } {} } [join [map word $comment { string totitle $word }]]]
-
-	    ::oo::objdefine [self] [list forward $name [self] surfset1 $current $surf $parmap]
-	    ::oo::objdefine [self] [list export  $name]
-
-	}
-
-	::acorn::zmx-$surftype [self] $Id
-     }
-     method CURV { curv  args } {
-	 if { $grouptype ne "non-sequential" } {
-	     if { $curv } {
-		 my [$current get $surf name] set R [expr { 1.0/$curv }]
-	     } 
-	 }
-     }
-     method CONI { conic args } {                my [$current get $surf name] set K $conic 	 }
-     method COMM { args }  { set comment $args }
-
-     method PARM { n value } {
-	 if { $grouptype ne "non-sequential" } {
-	     try { my [$current get $surf name] set $::acorn::ZMXParmMap($surftype,$n) $value
-	     } on error message {
-		 if { $debug } { puts stderr "PARM $surftype $n $value : $message" }
-	     }
-	 } else {
-	     $current set $surf p$n $value
-	 }
-     }
-     method DISZ { thick } { 
-	 if { $grouptype ne "non-sequential" } { $current set $surf {*}[mappair $basemap [list thickness $thick]] }
-     }
-     method DIAM { diam args } { dict set semi $Id $diam	; # This is Zemax computed semi-diameter, not the aperture size.  }
-     method SQOB { args } { # aperture obscuration is true }
-     method OBSC { args } { # aperture obscuration is true }
-     method ELOB { args } { # aperture obscuration is true }
-
-     linked method SQAP { w h args  } { 
-     	$current set $surf aper_type rectangular 
-     	my [$current get $surf name] set aper_min  $w 
-     	my [$current get $surf name] set aper_max  $h 
-     }
-
-     method ELAP { w h  } {
-     	$current set $surf aper_type eliptical 
-	my [$current get $surf name] set aper_max  [expr $w/2.0] 
-	my [$current get $surf name] set aper_min  [expr $h/2.0] 
-     }
-     method CLAP { n rad args  } {
-	$current set $surf aper_type circular 
-	my [$current get $surf name] set aper_max  $rad 
-     }
-     method FLAP { n rad args  } {
-     	$current set $surf aper_type circular 
-	my [$current get $surf name] set aper_max  $rad 
-     }
-     method OBSC { x rad args } {
-     	$current set $surf aper_type obstruction 
-	my [$current get $surf name] set aper_min  $rad 
-     }
-     method OBDC { x y  } { 					# aperture decenter 
-	my [$current get $surf name] set aper_xoff  $x aper_yoff $y 
-     }
-
-     method GLAS { name args } {
-	 $current set $surf glass $name
-	 try {
-	     $current set $surf glass_ptr [glass-lookup $name]
-	 } on error message {
-	     puts "missing glass : $name"
-	 }
-     }
-
-     method BLNK { args } {}
-     method TRAC { args } {}
-     method MOFF { args } {}
-     method GLCZ { args } {}
-     method RSCE { args } {}
-     method RWRE { args } {}
-
-
-     # NonSequential surface commands
-     #
-     method NSOH { type args } {
-	switch $type {
-	 default {
-	    if { $nonseq == 0 } {
-		set nsoexit [$current get 0 p0 p1 p2 p3 p4 p5 p6]
-		$current set 0 p0 0 p1 0 p2 0 p3 0 p4 0 p5 0 p6 0
-	    }
-
-	    $current length = $nonseq
-
-	    my SURF $nonseqid-[incr nonseq]
-
-	    lassign $args a b comment
-
-	    my Process-Type $type $comment
-
-	    my [$current get $surf name] set thickness [lindex $nsoexit 3]
-	 }
-	}
-     }
-     method NSOA { n aperture } {
-
-	if { $aperture eq  {}  } {
-	    $current set $surf aper_type  circular
-	    return
-	}
-
-	$current set $surf aper_type  UDA
-	$current set $surf aper_param [string map { {"} {} } $aperture]
-
-	lappend objects [set aper [::acorn::Aperture [$current get $surf aper_type] [$current get $surf aper_param]]]
-	$current set $surf aperture [$aper polygon]
-     }
-     method NSCS { args } {}
-     method NSOD { n value a b c d e f } {
-	 try { my [$current get $surf name] set $::acorn::ZMXNSODMap($surftype,$n) $value 
-	 } on error message {
-	     my [$current get $surf type] $n $value $a $b $c $d $e $f
-	 }
-     }
-     method NSOP { dx dy dz rx ry rz args } {
-	 my [$current get $surf name] set x $dx y $dy z $dz rx $rx ry $ry rz $rz
-
-	 if { [lindex $args 0] eq "MIRROR" } {
-	     my [$current get $surf name] set n -1 
-	 }
-     }
-     method NSCD { args } {}
-     method NSOO { args } {}
-     method NSOQ { args } {}
-     method NSOS { args } {}
-     method NSOU { args } {}
-     method NSOV { args } {}
-     method NSOW { args } {}
-
-
-    method EFFL { args } {}
-    method COAT { args } {}
-    method COFN { args } {}
-    method CONF { args } {}
-    method DMFS { args } {}
-    method FLOA { args } { set float 1 }
-    method FTYP { a b nfield nwave args } { my set nfield $nfield; my set nwave $nwave }
-    method FWGT { args } {}
-    method FWGN { args } {}
-    method GFAC { args } {}
-    method GLRS { args } {}
-    method GSTD { args } {}
-    method HIDE { args } {}
-    method MAZH { args } {}
-    method MIRR { args } {}
-    method MODE { args } {}
-
-    method PFIL { args } {}
-    method PICB { args } {}
-    method POLS { args } {}
-    method POPS { args } {}
-    method PUSH { args } {}
-    method PUPD { args } {}
-    method PWAV { args } {}
-    method RAIM { args } {}
-    method ROPD { args } {}
-    method SCOL { args } {}
-    method SDMA { args } {}
-    method SLAB { args } {}
-    method STOP { args } { my set stop $Id }
-    method TOL  { args } {}
-    method TOLE { args } {}
-    method VANN { args } {}
-    method VCXN { args } {}
-    method VCYN { args } {}
-    method VDSZ { args } {}
-    method VDXN { args } {}
-    method VDYN { args } {}
-
-    method WAVL { wave }          { my set wavelength current [expr $wave*10000] }
-    method WAVM { n wave weight } {
-				    my set wavelength $n wave    [expr $wave*10000]
-				    my set wavelength $n weight  $weight
-    }
-    method WWGT { weight } {	    my set wavelength weight  $weight }
-    method WAVN { args } {
-	foreach wave   $args {	    my set wavelength [incr n] wave    [expr $wave*10000] }
-    }
-    method WWGN { args } {
-	foreach weight $args {      my set wavelength [incr n] weight  $weight }
-    }
-
-    method XDAT { args } {}
-    method XFLN { args } { set fieldx $args }
-    method YFLN { args } { set fieldy $args }
-    method XFLD { args } {}
-    method YFLD { args } {}
-
-    # Pickups
-    #
-    method PZUP {       from scale offset { column 0 } } { append pup "my xPZUP $Id [expr int($from)] $scale $offset $column\n" }
-    method PPAR { param from scale offset { column 0 } } { append pup "my xPPAR $Id [expr int($from)] $scale $offset $column $param\n" }
-
-    method xPZUP { surf from scale offset column } { my $surf thickness set [expr [my $from get thickness]*$scale] }
-    method xPPAR { surf from scale offset column param } {
-	if { $from <= 0 } { 
-	    
-	    # Try a chief ray solve
-	    #
-	    lassign [my get field 1] x fx y fy			; # Get the current field angles
-	    $aray set px 0 py 0 pz 0 vignetted 0		; # Set up aray.
-	    $aray angles : $fx $fy
-
-	    my  $surf set $acorn::ZMXParmMap([my $surf get type],$param) 0.0			; # Set the parameter to be solved to 0
-
-	    [self] trace $aray [list 1 $surf] [my get wavelength current] 			; # Trace to the surface.
-
-	    set value [$aray get p$acorn::ZMXParmMap([my $surf get type],$param)]		; # Copy the parameter from the ray to the surface.
-	} else {
-	    set value [expr { [my $from get $acorn::ZMXParmMap([my $surf get type],$param)]*$scale+$offset }]
-	}
-
-	my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value
-    }
-
-
-    # Multi Configuration Editor
-    #
-    linked method MNUM { n { curr 1 } } { set mce_current $curr }				; # Multi Configure Number of configs
-
-    linked method WAVE { wave  config args } { append mce($config) "my xWAVE $wave  $args\n" }	; # Set Wavelength
-    linked method IGNR { surf  config args } { append mce($config) "my xIGNR $surf  $args\n" }	; # Ignore surface
-    linked method PRAM { surf  config args } { append mce($config) "my xPRAM $surf  $args\n" }	; # Set Parameter
-    linked method XFIE { field config args } { append mce($config) "my xXFIE $field $args\n" }	; # Set X Field
-    linked method YFIE { field config args } { append mce($config) "my xYFIE $field $args\n" }
-    linked method THIC { surf  config args } { append mce($config) "my xTHIC $surf  $args\n" }
-
-    private method xIGNR { surf  value args }         { my $surf set enable [expr !int($value)] }
-    private method xPRAM { surf  value x param args } { my $surf set $acorn::ZMXParmMap([my $surf get type],$param) $value }
-    private method xTHIC { surf  value args }         { my $surf set thickness                                      $value }
-    private method xXFIE { field value args } 	     { 	my set field $field x $value }
-    private method xYFIE { field value args } 	     { 	my set field $field y $value }
-    private method xWAVE { wave  value args } 	     {  my set wavelength $wave wave $value }
-}
-
-#endif
 
 std::map<std::string, void (ZMX::*)(std::vector<char*>)> ZMX::mtable = {
 #	include "zmx.mtable"
-};
-std::map<std::string, VarMap> ZMX::vtable = {
-#	include "zmx.vtable"
 };
 
 
@@ -686,15 +375,7 @@ int main(int argc, char** argv) {
 
     ZMX zmx = ZMX();
 
-    AcornModel model = zmx.Read(argv[1]);
-
-    int four = 4;
-    int dour = 5;
-
-    printf("%p %p %d\n", &zmx.ik, &four, four);
-    zmx.setvar("ik", 1, &four);
-    zmx.setvar("ik", 0, &dour);
-    printf("%p %p %d\n", &zmx.ik, &dour, dour);
+    AcornModel *model = zmx.Read(argv[1]);
 
     return 0;
 }

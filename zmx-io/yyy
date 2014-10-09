@@ -1,0 +1,279 @@
+	# Move on to a new surface group?
+	#
+	if { [$current length] && ( $grouptype eq "non-sequential" || $type eq "NONSEQCO" ) } {
+	    lappend surfaces $grouptype $current 
+
+	    set current [::acorn::Surfs create [namespace current]::surfs[incr [namespace current]::SURFS] 0]
+	    set surf   0
+	}
+
+	if { $type eq "NONSEQCO" } {
+	    set grouptype non-sequential
+
+	    ::oo::objdefine [self] [list forward $Id [self] xNOP $Id]
+	    ::oo::objdefine [self] [list export  $Id]
+
+	    set nonseqid $Id
+	    set nonseq   0
+	    return
+	}
+
+	set grouptype sequential
+	my Process-Type $type $comment $args
+    }
+
+    Keyword Process-Type { type comm args } {
+
+	if { $type eq "USERSURF" } {
+	    set args [lassign $args type]
+	}
+	set args {}
+
+	set type $::acorn::ZMXSurfaceMap([string tolower $type])		; # Map Zemax surface type in to acorn.
+
+
+	set surf [$current length]
+
+	set surftype $type
+
+	# Get the surface traverse and infos functions
+	#
+	$current set $surf type     $type
+	$current set $surf traverse $::acorn::SurfaceTypes($type)
+	$current set $surf infos    $::acorn::SurfaceInfos($type)
+
+	if { [$current get $surf infos] != -1 } {
+	    lassign [::acorn::infos 1 [$current get $surf infos]] dparams dvalues
+	    lassign [::acorn::infos 2 [$current get $surf infos]] sparams svalues
+	} else {
+	    set dparams {}
+	    set dvalues {}
+	    set sparams {}
+	    set svalues {}
+	}
+
+	set surfdefs($surftype,pdef) [dict merge $basedef [zip $dparams $dvalues]]
+	set surfdefs($surftype,sdef) [dict merge [zip $sparams $svalues]]
+
+	set k [llength $basepar]
+	set parmap {}
+	foreach param $dparams { lappend parmap $param p$k; incr k }	; # Query for and map parameters
+
+
+	set k 0
+	foreach param $sparams { lappend parmap $param s$k; incr k }	; # Query for and map strings
+
+	set parmap [dict merge $basemap $parmap]
+
+	set surfdefs($surftype,pmap) $parmap
+	set surfdefs($surftype,smap) {}
+
+	$current set $surf {*}[mappair $parmap [dict merge $basedef $default [join $args] [list name $Id type $surftype comment $comm]]]
+
+	::oo::objdefine [self] [list forward $Id [self] surfset1 $current $surf $parmap]
+	::oo::objdefine [self] [list export  $Id]
+
+
+	if { $comment ne {} } {
+	    set name [string map { { } {} } [join [map word $comment { string totitle $word }]]]
+
+	    ::oo::objdefine [self] [list forward $name [self] surfset1 $current $surf $parmap]
+	    ::oo::objdefine [self] [list export  $name]
+
+	}
+
+	::acorn::zmx-$surftype [self] $Id
+    }
+
+     Keyword CURV { curv  args } {
+	 if { $grouptype ne "non-sequential" } {
+	     if { $curv } {
+		 my [$current get $surf name] set R [expr { 1.0/$curv }]
+	     } 
+	 }
+     }
+     Keyword CONI { conic args } {                my [$current get $surf name] set K $conic 	 }
+     Keyword COMM std::vector<char*> argv  { set comment $args }
+
+     Keyword PARM { n value } {
+	 if { $grouptype ne "non-sequential" } {
+	     try { my [$current get $surf name] set $::acorn::ZMXParmMap($surftype,$n) $value
+	     } on error message {
+		 if { $debug } { puts stderr "PARM $surftype $n $value : $message" }
+	     }
+	 } else {
+	     $current set $surf p$n $value
+	 }
+     }
+     Keyword DISZ { thick } { 
+	 if { $grouptype ne "non-sequential" } { $current set $surf {*}[mappair $basemap [list thickness $thick]] }
+     }
+     Keyword DIAM { diam args } { dict set semi $Id $diam	; # This is Zemax computed semi-diameter, not the aperture size.  }
+     Keyword SQOB std::vector<char*> argv { # aperture obscuration is true }
+     Keyword OBSC std::vector<char*> argv { # aperture obscuration is true }
+     Keyword ELOB std::vector<char*> argv { # aperture obscuration is true }
+
+     linked Keyword SQAP { w h args  } { 
+     	$current set $surf aper_type rectangular 
+     	my [$current get $surf name] set aper_min  $w 
+     	my [$current get $surf name] set aper_max  $h 
+     }
+
+     Keyword ELAP { w h  } {
+     	$current set $surf aper_type eliptical 
+	my [$current get $surf name] set aper_max  [expr $w/2.0] 
+	my [$current get $surf name] set aper_min  [expr $h/2.0] 
+     }
+     Keyword CLAP { n rad args  } {
+	$current set $surf aper_type circular 
+	my [$current get $surf name] set aper_max  $rad 
+     }
+     Keyword FLAP { n rad args  } {
+     	$current set $surf aper_type circular 
+	my [$current get $surf name] set aper_max  $rad 
+     }
+     Keyword OBSC { x rad args } {
+     	$current set $surf aper_type obstruction 
+	my [$current get $surf name] set aper_min  $rad 
+     }
+     Keyword OBDC { x y  } { 					# aperture decenter 
+	my [$current get $surf name] set aper_xoff  $x aper_yoff $y 
+     }
+
+     Keyword GLAS { name args } {
+	 $current set $surf glass $name
+	 try {
+	     $current set $surf glass_ptr [glass-lookup $name]
+	 } on error message {
+	     puts "missing glass : $name"
+	 }
+     }
+
+     Keyword BLNK std::vector<char*> argv {}
+     Keyword TRAC std::vector<char*> argv {}
+     Keyword MOFF std::vector<char*> argv {}
+     Keyword GLCZ std::vector<char*> argv {}
+     Keyword RSCE std::vector<char*> argv {}
+     Keyword RWRE std::vector<char*> argv {}
+
+
+     # NonSequential surface commands
+     #
+     Keyword NSOH { type args } {
+	switch $type {
+	 default {
+	    if { $nonseq == 0 } {
+		set nsoexit [$current get 0 p0 p1 p2 p3 p4 p5 p6]
+		$current set 0 p0 0 p1 0 p2 0 p3 0 p4 0 p5 0 p6 0
+	    }
+
+	    $current length = $nonseq
+
+	    my SURF $nonseqid-[incr nonseq]
+
+	    lassign $args a b comment
+
+	    my Process-Type $type $comment
+
+	    my [$current get $surf name] set thickness [lindex $nsoexit 3]
+	 }
+	}
+     }
+     Keyword NSOA { n aperture } {
+
+	if { $aperture eq  {}  } {
+	    $current set $surf aper_type  circular
+	    return
+	}
+
+	$current set $surf aper_type  UDA
+	$current set $surf aper_param [string map { {"} {} } $aperture]
+
+	lappend objects [set aper [::acorn::Aperture [$current get $surf aper_type] [$current get $surf aper_param]]]
+	$current set $surf aperture [$aper polygon]
+     }
+     Keyword NSCS std::vector<char*> argv {}
+     Keyword NSOD { n value a b c d e f } {
+	 try { my [$current get $surf name] set $::acorn::ZMXNSODMap($surftype,$n) $value 
+	 } on error message {
+	     my [$current get $surf type] $n $value $a $b $c $d $e $f
+	 }
+     }
+     Keyword NSOP { dx dy dz rx ry rz args } {
+	 my [$current get $surf name] set x $dx y $dy z $dz rx $rx ry $ry rz $rz
+
+	 if { [lindex $args 0] eq "MIRROR" } {
+	     my [$current get $surf name] set n -1 
+	 }
+     }
+     Keyword NSCD std::vector<char*> argv {}
+     Keyword NSOO std::vector<char*> argv {}
+     Keyword NSOQ std::vector<char*> argv {}
+     Keyword NSOS std::vector<char*> argv {}
+     Keyword NSOU std::vector<char*> argv {}
+     Keyword NSOV std::vector<char*> argv {}
+     Keyword NSOW std::vector<char*> argv {}
+
+
+    Keyword EFFL std::vector<char*> argv {}
+    Keyword COAT std::vector<char*> argv {}
+    Keyword COFN std::vector<char*> argv {}
+    Keyword CONF std::vector<char*> argv {}
+    Keyword DMFS std::vector<char*> argv {}
+    Keyword FLOA std::vector<char*> argv { set float 1 }
+    Keyword FTYP { a b nfield nwave args } { my set nfield $nfield; my set nwave $nwave }
+    Keyword FWGT std::vector<char*> argv {}
+    Keyword FWGN std::vector<char*> argv {}
+    Keyword GFAC std::vector<char*> argv {}
+    Keyword GLRS std::vector<char*> argv {}
+    Keyword GSTD std::vector<char*> argv {}
+    Keyword HIDE std::vector<char*> argv {}
+    Keyword MAZH std::vector<char*> argv {}
+    Keyword MIRR std::vector<char*> argv {}
+    Keyword MODE std::vector<char*> argv {}
+
+    Keyword PFIL std::vector<char*> argv {}
+    Keyword PICB std::vector<char*> argv {}
+    Keyword POLS std::vector<char*> argv {}
+    Keyword POPS std::vector<char*> argv {}
+    Keyword PUSH std::vector<char*> argv {}
+    Keyword PUPD std::vector<char*> argv {}
+    Keyword PWAV std::vector<char*> argv {}
+    Keyword RAIM std::vector<char*> argv {}
+    Keyword ROPD std::vector<char*> argv {}
+    Keyword SCOL std::vector<char*> argv {}
+    Keyword SDMA std::vector<char*> argv {}
+    Keyword SLAB std::vector<char*> argv {}
+    Keyword STOP std::vector<char*> argv { my set stop $Id }
+    Keyword TOL  std::vector<char*> argv {}
+    Keyword TOLE std::vector<char*> argv {}
+    Keyword VANN std::vector<char*> argv {}
+    Keyword VCXN std::vector<char*> argv {}
+    Keyword VCYN std::vector<char*> argv {}
+    Keyword VDSZ std::vector<char*> argv {}
+    Keyword VDXN std::vector<char*> argv {}
+    Keyword VDYN std::vector<char*> argv {}
+
+    Keyword WAVL { wave }          { my set wavelength current [expr $wave*10000] }
+    Keyword WAVM { n wave weight } {
+				    my set wavelength $n wave    [expr $wave*10000]
+				    my set wavelength $n weight  $weight
+    }
+    Keyword WWGT { weight } {	    my set wavelength weight  $weight }
+    Keyword WAVN std::vector<char*> argv {
+	foreach wave   $args {	    my set wavelength [incr n] wave    [expr $wave*10000] }
+    }
+    Keyword WWGN std::vector<char*> argv {
+	foreach weight $args {      my set wavelength [incr n] weight  $weight }
+    }
+
+    Keyword XDAT std::vector<char*> argv {}
+    Keyword XFLN std::vector<char*> argv { set fieldx $args }
+    Keyword YFLN std::vector<char*> argv { set fieldy $args }
+    Keyword XFLD std::vector<char*> argv {}
+    Keyword YFLD std::vector<char*> argv {}
+
+    # Pickups
+    #
+    Keyword PZUP {       from scale offset { column 0 } } { append pup "my xPZUP $Id [expr int($from)] $scale $offset $column\n" }
+    Keyword PPAR { param from scale offset { column 0 } } { append pup "my xPPAR $Id [expr int($from)] $scale $offset $column $param\n" }
