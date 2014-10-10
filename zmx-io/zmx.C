@@ -82,7 +82,7 @@ std::vector<char> cat(const std::string& filename)
     return reply;
 }
 
-void SetVar(int set, char *that, VarMap v, void *value) {
+void SetVar(int set, char *that, VarMap &v, const char *name, void *value) {
 
     if ( set ) {
 	switch ( v.type ) {
@@ -117,6 +117,19 @@ struct AcornSurface {
 
 	int (*setparam)(void *, int set, const char* name, void *value);
 	int (*traverse)(AcornRay *rays);
+
+	void setvar(const char *name, void *value) {
+	    if ( vtable->count(name) == 1 ) {
+		SetVar(1, (char *)this, (*vtable)[name], name, value);
+	    } else {
+		fprintf(stderr, "No param %s\n", name);
+	    }
+	}
+
+	void setvar(const char *name, double value) { setvar(name, (void *) &value); }
+	void setvar(const char *name, int    value) { setvar(name, (void *) &value); }
+	void setvar(const char *name, string value) { setvar(name,           value); }
+
 };
 
 struct AcornSurfGrp {
@@ -276,6 +289,8 @@ class ZMX  {
     std::string nsoexit;
     int debug;
 
+    AcornSurfGrpType grouptype = AcornSequential;
+
     int floating; double semi;
     double fieldx;
     double fieldy;
@@ -379,6 +394,29 @@ class ZMX  {
 	    surfaces = (AcornSurfGrp *)(model->surfaces.surf.back());
 	    return;
   	}
+     }
+
+    Keyword CURV (std::vector<char*> argv) {
+	double curv = atof(argv[1]);
+
+	if ( grouptype == AcornSequential && curv != 0.0 ) {
+	    current->setvar("R", 1.0/curv);
+	}
+     }
+     Keyword CONI (std::vector<char*> argv) { current->setvar("K",  atof(argv[1])); 	 }
+     Keyword COMM (std::vector<char*> argv) { current->setvar("comment", argv[1]); }
+
+     Keyword PARM (std::vector<char*> argv) {
+	 int n		= atoi(argv[1]);
+	 double	value	= atof(argv[2]);
+
+	if ( grouptype == AcornSequential ) {
+	    if ( ZMXParmMap.count(current->type) == 1 && ZMXParmMap[current->type].count(n) == 1 ) {
+	        current->setvar(ZMXParmMap[current->type][n].c_str(), value);
+	    }
+	} else {
+	     current->setvar("p$n", value);
+	}
      }
 };
 
