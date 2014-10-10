@@ -375,8 +375,8 @@ class ZMX  {
 	current->setparam(this, 1, "comment", comm);
 
 	if ( !strcmp(type, "NONSEQCO") ) {
-	    surf_stack.push(&model->surfaces);
-	    surfaces = static_cast<AcornSurfGrp *>(model->surfaces.surf.back());
+	    surf_stack.push((AcornSurface *)&model->surfaces);
+	    surfaces = (AcornSurfGrp *)(model->surfaces.surf.back());
 	    return;
   	}
      }
