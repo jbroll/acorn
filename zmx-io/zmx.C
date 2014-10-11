@@ -102,8 +102,7 @@ void SetVar(int set, char *that, VarMap &v, const char *name, void *value) {
 }
 
 
-class AcornRay {
-  public:
+struct AcornRay {
     int x;
     int y;
     int z;
@@ -111,12 +110,15 @@ class AcornRay {
 
 enum AcornSurfGrpType { AcornSequential, AcornNonSequential };
 
-struct AcornSurface {
-	Param string type;
-        std::map<const char *, VarMap> *vtable;
-
-	int (*setparam)(void *, int set, const char* name, void *value);
+#define ACORNSURFACE 								\
+	Param string type;							\
+        std::map<const char *, VarMap> *vtable;					\
+										\
+	int (*setparam)(void *, int set, const char* name, void *value);	\
 	int (*traverse)(AcornRay *rays);
+
+struct AcornSurface {
+       ACORNSURFACE
 
 	void setvar(const char *name, void *value) {
 	    if ( vtable->count(name) == 1 ) {
@@ -133,14 +135,10 @@ struct AcornSurface {
 };
 
 struct AcornSurfGrp {
-	Param string type;
-        std::map<const char *, VarMap> *vtable;
-
-	int (*setparam)(void *, int set, const char* name, void *value);
-	int (*traverse)(AcornRay *rays);
-
+   ACORNSURFACE
 
     AcornSurfGrpType seqtype;
+    std::vector<AcornSurface *> surf;
 
     AcornSurfGrp () { 
 	type    = "non-sequential";
@@ -150,7 +148,6 @@ struct AcornSurfGrp {
 	seqtype = Type;
     }
 
-    std::vector<AcornSurface *> surf;
 };
 
 static std::map<const char *, VarMap> vtable = {

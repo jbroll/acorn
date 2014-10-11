@@ -1,6 +1,8 @@
 
+CXX=/usr/local/bin/g++
+
 zmx.o : zmx.C
-	c++ -std=c++0x $<
+	$(CXX) -std=c++0x $<
 
 zmx.C : FORCE
 	grep Keyword zmx.C | grep -v define | awk '{ print comma, "{ \""$$2"\", &ZMX::"$$2" }"; comma="," }' > zmx.mtable
