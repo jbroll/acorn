@@ -286,7 +286,7 @@ class ZMX  {
     std::string nsoexit;
     int debug;
 
-    AcornSurfGrpType grouptype = AcornSequential;
+    AcornSurfGrpType grouptype;
 
     int floating; double semi;
     double fieldx;
@@ -296,7 +296,8 @@ class ZMX  {
 
 
     AcornModel *Read(string filename) {
-	model = new AcornModel();
+	model 	  = new AcornModel();
+	grouptype = AcornSequential;
 
 	surfaces = &model->surfaces;
 
