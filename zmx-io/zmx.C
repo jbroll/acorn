@@ -112,6 +112,13 @@ enum AcornSurfGrpType { AcornSequential, AcornNonSequential };
 
 #define ACORNSURFACE 								\
 	Param string type;							\
+	Param double semi;							\
+	Param double thickness;							\
+	Param string aper_type;							\
+	Param double aper_min;							\
+	Param double aper_max;							\
+	Param double aper_xoff;							\
+	Param double aper_yoff;							\
         std::map<const char *, VarMap> *vtable;					\
 										\
 	int (*setparam)(void *, int set, const char* name, void *value);	\
@@ -404,7 +411,7 @@ class ZMX  {
      Keyword CONI (std::vector<char*> argv) { current->setvar("K",  atof(argv[1])); 	 }
      Keyword COMM (std::vector<char*> argv) { current->setvar("comment", argv[1]); }
 
-     Keyword PARM (std::vector<char*> argv) {
+    Keyword PARM (std::vector<char*> argv) {
 	 int n		= atoi(argv[1]);
 	 double	value	= atof(argv[2]);
 
@@ -415,7 +422,121 @@ class ZMX  {
 	} else {
 	     current->setvar("p$n", value);
 	}
+    }
+
+    Keyword DISZ (std::vector<char*> argv) {
+	 double thick 	= atof(argv[1]);
+
+	if ( grouptype == AcornSequential ) {
+	    current->thickness = thick;
+	}
+    }
+    Keyword DIAM (std::vector<char*> argv) { 
+	 double semi = atof(argv[1]);
+	 
+	// This is Zemax computed semi-diameter, not the aperture size. 
+	//
+	current->semi = semi;
+    }
+    Keyword SQOB (std::vector<char*> argv) { // aperture obscuration is true
      }
+     Keyword ELOB (std::vector<char*> argv) { // aperture obscuration is true
+     }
+
+    Keyword SQAP (std::vector<char*> argv) {
+	double w = atof(argv[1]);
+	double h = atof(argv[2]);
+
+	current->aper_min = w;
+	current->aper_max = h;
+     }
+
+     Keyword ELAP (std::vector<char*> argv) {
+	double w = atof(argv[1]);
+	double h = atof(argv[2]);
+
+	current->aper_type = "eliptical";
+
+	current->aper_min = w/2.0;
+	current->aper_max = h/2.0;
+     }
+
+     Keyword CLAP (std::vector<char*> argv) {
+	double rad = atof(argv[2]);
+
+	current->aper_type = "circular";
+	current->aper_max  = rad;
+     }
+     Keyword FLAP (std::vector<char*> argv) {
+	double rad = atof(argv[2]);
+
+	current->aper_type = "circular";
+	current->aper_max  = rad;
+     }
+     Keyword OBSC (std::vector<char*> argv) {
+	double rad = atof(argv[2]);
+
+	current->aper_type = "obstruction";
+	current->aper_min = rad;
+     }
+    Keyword OBDC (std::vector<char*> argv) {
+	double x = atof(argv[1]);
+	double y = atof(argv[2]);
+
+	current->aper_xoff = x;
+	current->aper_xoff = y;
+     }
+     Keyword BLNK (std::vector<char*> argv) {}
+     Keyword TRAC (std::vector<char*> argv) {}
+     Keyword MOFF (std::vector<char*> argv) {}
+     Keyword GLCZ (std::vector<char*> argv) {}
+     Keyword RSCE (std::vector<char*> argv) {}
+     Keyword RWRE (std::vector<char*> argv) {}
+
+     Keyword NSCD (std::vector<char*> argv) {}
+     Keyword NSOO (std::vector<char*> argv) {}
+     Keyword NSOQ (std::vector<char*> argv) {}
+     Keyword NSOS (std::vector<char*> argv) {}
+    Keyword NSOU (std::vector<char*> argv) {}
+    Keyword NSOV (std::vector<char*> argv) {}
+    Keyword NSOW (std::vector<char*> argv) {}
+
+    Keyword EFFL (std::vector<char*> argv) {}
+    Keyword COAT (std::vector<char*> argv) {}
+    Keyword COFN (std::vector<char*> argv) {}
+    Keyword CONF (std::vector<char*> argv) {}
+    Keyword DMFS (std::vector<char*> argv) {}
+    Keyword FWGT (std::vector<char*> argv) {}
+    Keyword FWGN (std::vector<char*> argv) {}
+    Keyword GFAC (std::vector<char*> argv) {}
+    Keyword GLRS (std::vector<char*> argv) {}
+    Keyword GSTD (std::vector<char*> argv) {}
+    Keyword HIDE (std::vector<char*> argv) {}
+    Keyword MAZH (std::vector<char*> argv) {}
+    Keyword MIRR (std::vector<char*> argv) {}
+    Keyword MODE (std::vector<char*> argv) {}
+
+    Keyword PFIL (std::vector<char*> argv) {}
+    Keyword PICB (std::vector<char*> argv) {}
+    Keyword POLS (std::vector<char*> argv) {}
+    Keyword POPS (std::vector<char*> argv) {}
+    Keyword PUSH (std::vector<char*> argv) {}
+    Keyword PUPD (std::vector<char*> argv) {}
+    Keyword PWAV (std::vector<char*> argv) {}
+    Keyword RAIM (std::vector<char*> argv) {}
+    Keyword ROPD (std::vector<char*> argv) {}
+    Keyword SCOL (std::vector<char*> argv) {}
+    Keyword SDMA (std::vector<char*> argv) {}
+    Keyword SLAB (std::vector<char*> argv) {}
+    Keyword TOL  (std::vector<char*> argv) {}
+    Keyword TOLE (std::vector<char*> argv) {}
+    Keyword VANN (std::vector<char*> argv) {}
+    Keyword VCXN (std::vector<char*> argv) {}
+    Keyword VCYN (std::vector<char*> argv) {}
+    Keyword VDSZ (std::vector<char*> argv) {}
+    Keyword VDXN (std::vector<char*> argv) {}
+    Keyword VDYN (std::vector<char*> argv) {}
+
 };
 
 std::map<std::string, void (ZMX::*)(std::vector<char*>)> ZMX::mtable = {

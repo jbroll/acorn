@@ -1,39 +1,5 @@
 
 
-     Keyword DISZ { thick } { 
-	 if { $grouptype ne "non-sequential" } { $current set $surf {*}[mappair $basemap [list thickness $thick]] }
-     }
-     Keyword DIAM { diam args } { dict set semi $Id $diam	; # This is Zemax computed semi-diameter, not the aperture size.  }
-     Keyword SQOB std::vector<char*> argv { # aperture obscuration is true }
-     Keyword OBSC std::vector<char*> argv { # aperture obscuration is true }
-     Keyword ELOB std::vector<char*> argv { # aperture obscuration is true }
-
-     linked Keyword SQAP { w h args  } { 
-     	$current set $surf aper_type rectangular 
-     	my [$current get $surf name] set aper_min  $w 
-     	my [$current get $surf name] set aper_max  $h 
-     }
-
-     Keyword ELAP { w h  } {
-     	$current set $surf aper_type eliptical 
-	my [$current get $surf name] set aper_max  [expr $w/2.0] 
-	my [$current get $surf name] set aper_min  [expr $h/2.0] 
-     }
-     Keyword CLAP { n rad args  } {
-	$current set $surf aper_type circular 
-	my [$current get $surf name] set aper_max  $rad 
-     }
-     Keyword FLAP { n rad args  } {
-     	$current set $surf aper_type circular 
-	my [$current get $surf name] set aper_max  $rad 
-     }
-     Keyword OBSC { x rad args } {
-     	$current set $surf aper_type obstruction 
-	my [$current get $surf name] set aper_min  $rad 
-     }
-     Keyword OBDC { x y  } { 					# aperture decenter 
-	my [$current get $surf name] set aper_xoff  $x aper_yoff $y 
-     }
 
      Keyword GLAS { name args } {
 	 $current set $surf glass $name
@@ -43,13 +9,6 @@
 	     puts "missing glass : $name"
 	 }
      }
-
-     Keyword BLNK std::vector<char*> argv {}
-     Keyword TRAC std::vector<char*> argv {}
-     Keyword MOFF std::vector<char*> argv {}
-     Keyword GLCZ std::vector<char*> argv {}
-     Keyword RSCE std::vector<char*> argv {}
-     Keyword RWRE std::vector<char*> argv {}
 
 
      # NonSequential surface commands
@@ -101,53 +60,11 @@
 	     my [$current get $surf name] set n -1 
 	 }
      }
-     Keyword NSCD std::vector<char*> argv {}
-     Keyword NSOO std::vector<char*> argv {}
-     Keyword NSOQ std::vector<char*> argv {}
-     Keyword NSOS std::vector<char*> argv {}
-     Keyword NSOU std::vector<char*> argv {}
-     Keyword NSOV std::vector<char*> argv {}
-     Keyword NSOW std::vector<char*> argv {}
-
-
-    Keyword EFFL std::vector<char*> argv {}
-    Keyword COAT std::vector<char*> argv {}
-    Keyword COFN std::vector<char*> argv {}
-    Keyword CONF std::vector<char*> argv {}
-    Keyword DMFS std::vector<char*> argv {}
-    Keyword FLOA std::vector<char*> argv { set float 1 }
     Keyword FTYP { a b nfield nwave args } { my set nfield $nfield; my set nwave $nwave }
-    Keyword FWGT std::vector<char*> argv {}
-    Keyword FWGN std::vector<char*> argv {}
-    Keyword GFAC std::vector<char*> argv {}
-    Keyword GLRS std::vector<char*> argv {}
-    Keyword GSTD std::vector<char*> argv {}
-    Keyword HIDE std::vector<char*> argv {}
-    Keyword MAZH std::vector<char*> argv {}
-    Keyword MIRR std::vector<char*> argv {}
-    Keyword MODE std::vector<char*> argv {}
+    Keyword STOP (std::vector<char*> argv { my set stop $Id }
+    Keyword FLOA (std::vector<char*> argv { set float 1 }
 
-    Keyword PFIL std::vector<char*> argv {}
-    Keyword PICB std::vector<char*> argv {}
-    Keyword POLS std::vector<char*> argv {}
-    Keyword POPS std::vector<char*> argv {}
-    Keyword PUSH std::vector<char*> argv {}
-    Keyword PUPD std::vector<char*> argv {}
-    Keyword PWAV std::vector<char*> argv {}
-    Keyword RAIM std::vector<char*> argv {}
-    Keyword ROPD std::vector<char*> argv {}
-    Keyword SCOL std::vector<char*> argv {}
-    Keyword SDMA std::vector<char*> argv {}
-    Keyword SLAB std::vector<char*> argv {}
-    Keyword STOP std::vector<char*> argv { my set stop $Id }
-    Keyword TOL  std::vector<char*> argv {}
-    Keyword TOLE std::vector<char*> argv {}
-    Keyword VANN std::vector<char*> argv {}
-    Keyword VCXN std::vector<char*> argv {}
-    Keyword VCYN std::vector<char*> argv {}
-    Keyword VDSZ std::vector<char*> argv {}
-    Keyword VDXN std::vector<char*> argv {}
-    Keyword VDYN std::vector<char*> argv {}
+
 
     Keyword WAVL { wave }          { my set wavelength current [expr $wave*10000] }
     Keyword WAVM { n wave weight } {
