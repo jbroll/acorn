@@ -11,76 +11,11 @@
 #include <stack>
 #include <map>
 
+#include "../AcornUtil.hh"
 
-#define Keyword void
-#define Param
+#include "../AcornRay.hh"
+#include "../AcornSurface.hh"
 
-#define Type_int       1
-#define Type_string    2
-#define Type_double    3
-
-typedef struct _VarMap {
-    int type;
-    int offset;
-} VarMap;
-
-
-
-
-typedef std::string string;
-
-
-
-std::vector<char*> split(char *str, const char* delim) {
-    std::vector<char*> list;
-
-    char *here = strtok(str, delim);
-
-    list.push_back(here);
-
-    while ( (here = strtok(NULL, delim)) != NULL ) {
-	list.push_back(here);
-    }
-
-    return list;
-}
-
-std::vector<char> cat(const std::string& filename) 
-{
-    int  	ch;
-    bool	skip = 0;
-
-    std::vector<char> reply;
-
-    int ch0, ch1;
-
-    std::ifstream inp(filename.c_str(), std::ios::in | std::ios_base::binary);
-
-
-    if ( (ch0 = inp.get()) != -1 && (ch0 == 0xFE || ch0 == 0xFF) ) {
-	if ( (ch1 = inp.get()) != -1  && ((ch0 == 0xFF && ch1 == 0xFE) || (ch0 == 0xFE && ch1 == 0xFF)) ) {
-	    skip = 1;
-
-
-	    if ( ch0 == 0xFE && ch1 == 0xFF ) {
-		inp.get();
-	    }
-	} else {
-	    reply.push_back(ch0);
-	    reply.push_back(ch1);
-	}
-    } else {
-	reply.push_back(ch0);
-    }
-
-    while ( (ch = inp.get()) != -1  && !inp.eof() ) {
-	if ( skip ) inp.get();
-
-	reply.push_back(ch);
-    }
-
-    return reply;
-}
 
 void SetVar(int set, char *that, VarMap &v, const char *name, void *value) {
 
@@ -101,81 +36,9 @@ void SetVar(int set, char *that, VarMap &v, const char *name, void *value) {
     }
 }
 
+struct AcornSurfaceCoordBrk {
+    ACORN_SURFACE
 
-struct AcornRay {
-    int x;
-    int y;
-    int z;
-};
-
-enum AcornSurfGrpType { AcornSequential, AcornNonSequential };
-
-#define ACORNSURFACE 								\
-	Param string type;							\
-	Param double semi;							\
-	Param double thickness;							\
-	Param string aper_type;							\
-	Param double aper_min;							\
-	Param double aper_max;							\
-	Param double aper_xoff;							\
-	Param double aper_yoff;							\
-        std::map<const char *, VarMap> *vtable;					\
-										\
-	int (*setparam)(void *, int set, const char* name, void *value);	\
-	int (*traverse)(AcornRay *rays);
-
-struct AcornSurface {
-       ACORNSURFACE
-
-	void setvar(const char *name, void *value) {
-	    if ( vtable->count(name) == 1 ) {
-		SetVar(1, (char *)this, (*vtable)[name], name, value);
-	    } else {
-		fprintf(stderr, "No param %s\n", name);
-	    }
-	}
-
-	void setvar(const char *name, double value) { setvar(name, (void *) &value); }
-	void setvar(const char *name, int    value) { setvar(name, (void *) &value); }
-	void setvar(const char *name, string value) { setvar(name,           value); }
-
-};
-
-struct AcornSurfGrp {
-   ACORNSURFACE
-
-    AcornSurfGrpType seqtype;
-    std::vector<AcornSurface *> surf;
-
-    AcornSurfGrp () { 
-	type    = "non-sequential";
-	seqtype = AcornSequential;
-    }
-    AcornSurfGrp (AcornSurfGrpType Type) {
-	seqtype = Type;
-    }
-
-};
-
-static std::map<const char *, VarMap> vtable = {
-#	include "zmx.vtable"
-};
-
-static int traverse(AcornRay *rays) { return 0; }
-
-AcornSurfGrp *AcornSurfGrpConstructor(void) {
-    AcornSurfGrp *surf = new AcornSurfGrp();
-    surf->traverse = traverse;
-    surf->vtable   = &vtable;
-
-    return surf;
-}
-
-
-
-class AcornSurfaceCoordBrk : public AcornSurface {
-
-  public:
     AcornSurfaceCoordBrk () { 
 	type    = "coordbrk";
     }
@@ -184,29 +47,16 @@ class AcornSurfaceCoordBrk : public AcornSurface {
     int traverse(AcornRay *rays) { return 1; }
 };
 
-class AcornModel {
-  public:
 
-    AcornSurfGrp surfaces;
-    int x;
-};
+AcornSurface *AcornSurfGrpNonSeqConstructor()   { return (AcornSurface *) new AcornSurfGrp(AcornNonSequential); }
 
-
-AcornSurface *AcornSurfGrpNonSeqConstructor() {
-    return (AcornSurface *) new AcornSurfGrp(AcornNonSequential);
-}
-
-AcornSurface *AcornSurfaceCoordBrkConstructor() {
-
-    return (AcornSurface *) new AcornSurfaceCoordBrk();
-}
+AcornSurface *AcornSurfaceCoordBrkConstructor() { return (AcornSurface *) new AcornSurfaceCoordBrk(); }
 
 
     std::map<const char*, AcornSurface *(*)(void)> AcornSurfaces = {
 	{ "NONSEQCO", 	&AcornSurfGrpNonSeqConstructor	 } ,
 	{ "coordbrk", 	&AcornSurfaceCoordBrkConstructor }
     };
-
 
     static std::map<std::string, const char*> ZMXSurfaceMap = {
 	{ "NONSEQCO",	 	"NONSEQCO"	}, 
@@ -330,7 +180,6 @@ class ZMX  {
 	}
     }
 
-
     Keyword zmx_simple   (std::vector<char*> argv) {};
     Keyword zmx_coordbrk (std::vector<char*> argv) {};
     Keyword zmx_zernike  (std::vector<char*> argv) {};
@@ -355,7 +204,7 @@ class ZMX  {
 	// temp pres args }	{ my set temperature $temp; my set presure $pres 
     }
     Keyword ENPD (std::vector<char*> argv) {
-	//{ size args }		{ my set pupilDiameter $size
+	//{ size args }		// my set pupilDiameter $size
     }
     Keyword GCAT (std::vector<char*> argv)	{}
 
@@ -478,25 +327,25 @@ class ZMX  {
 
 	current->aper_type = "obstruction";
 	current->aper_min = rad;
-     }
+    }
     Keyword OBDC (std::vector<char*> argv) {
 	double x = atof(argv[1]);
 	double y = atof(argv[2]);
 
 	current->aper_xoff = x;
 	current->aper_xoff = y;
-     }
-     Keyword BLNK (std::vector<char*> argv) {}
-     Keyword TRAC (std::vector<char*> argv) {}
-     Keyword MOFF (std::vector<char*> argv) {}
-     Keyword GLCZ (std::vector<char*> argv) {}
-     Keyword RSCE (std::vector<char*> argv) {}
-     Keyword RWRE (std::vector<char*> argv) {}
+    }
+    Keyword BLNK (std::vector<char*> argv) {}
+    Keyword TRAC (std::vector<char*> argv) {}
+    Keyword MOFF (std::vector<char*> argv) {}
+    Keyword GLCZ (std::vector<char*> argv) {}
+    Keyword RSCE (std::vector<char*> argv) {}
+    Keyword RWRE (std::vector<char*> argv) {}
 
-     Keyword NSCD (std::vector<char*> argv) {}
-     Keyword NSOO (std::vector<char*> argv) {}
-     Keyword NSOQ (std::vector<char*> argv) {}
-     Keyword NSOS (std::vector<char*> argv) {}
+    Keyword NSCD (std::vector<char*> argv) {}
+    Keyword NSOO (std::vector<char*> argv) {}
+    Keyword NSOQ (std::vector<char*> argv) {}
+    Keyword NSOS (std::vector<char*> argv) {}
     Keyword NSOU (std::vector<char*> argv) {}
     Keyword NSOV (std::vector<char*> argv) {}
     Keyword NSOW (std::vector<char*> argv) {}
@@ -536,7 +385,6 @@ class ZMX  {
     Keyword VDSZ (std::vector<char*> argv) {}
     Keyword VDXN (std::vector<char*> argv) {}
     Keyword VDYN (std::vector<char*> argv) {}
-
 };
 
 std::map<std::string, void (ZMX::*)(std::vector<char*>)> ZMX::mtable = {
