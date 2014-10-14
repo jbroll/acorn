@@ -1,9 +1,10 @@
 
-static int traverse(AcornRay *rays) { return 0; }
+static int Traverse(AcornRay *rays) { return 0; }
 
 AcornSurfGrp *AcornSurfGrpConstructor(void) {
     AcornSurfGrp *surf = new AcornSurfGrp();
-    surf->traverse = traverse;
+
+    surf->traverse = Traverse;
     surf->vtable   = &vtable;
 
     return surf;

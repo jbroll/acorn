@@ -40,7 +40,7 @@ enum PX_Param {
 };
 
 
-typedef struct _AcornSurface {
+typedef struct _Surface {
     char*	name;
     char*	type;
     char*	comment;
@@ -65,7 +65,7 @@ typedef struct _AcornSurface {
     long	enable;
     long	annote;
     void	*data;
-} AcornSurface;
+} Surface;
 
 typedef struct _SurfaceList {
     Surface 	*surf;

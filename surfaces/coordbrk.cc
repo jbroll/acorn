@@ -3,46 +3,51 @@
 using namespace std;
 using namespace Eigen;
 
-#include "../acorn.h"
+#include "../Acorn.hh"
+#include "../AcornSurface.hh"
+#include "../AcornSurfGrp.hh"
+#include "../AcornModel.hh"
 
-    enum Px_Local { Pm_R = Px_NParams, Pm_K };
+#include "acorn-utils.hh"
 
-#include "acorn-utils.h"
+struct AcornSurfaceCoordBrk {
+    ACORN_SURFACE
+
+    Param double R;
+    Param double K;
+
+    AcornSurfaceCoordBrk();
+};
+
+static std::map<const char *, VarMap> VTable = {
+#	include "coordbrk.vtable"
+};
+
+static int Traverse(AcornModel *m, AcornSurface *S, AcornRay &r)
+{
+    AcornSurfaceCoordBrk *s = (AcornSurfaceCoordBrk *) S;
+
+    double	z = m->z;
+    double 	R = s->R;
+    double	K = s->K;
+
+    double d = AcornSimpleSurfaceDistance(r, z, R, K);
+    r.p += d * r.k; 					// Ray/Surface Intersection position
+
+    return 2;
+}
+
+AcornSurfaceCoordBrk::AcornSurfaceCoordBrk() {
+    R = 0;
+    K = 0;
+
+    traverse = Traverse;
+    initials = NULL;
+    vtable   = &VTable;
+}
 
 
 extern "C" {
-
-
-  static const char  *MyParamNames[] = { "R", "K" };
-  static const double MyParamValue[] = { 0.0, 0.0 };
-
-
-  int info(int command, char **strings, double **values) 
-  {
-    switch ( command ) {
-	case ACORN_PARAMETERS: {
-
-	    *strings = (char *)   MyParamNames;
-	    *values  = (double *) MyParamValue;
-
-	    return sizeof(MyParamNames)/sizeof(char *);
-        }
-    }
-    return 0;
-  }
-
-  int traverse(MData *m, Surface &s, Ray &r)
-  {
-	double  z = m->z;
-
-    double d;
-
-    double R = s.p[Pm_R];
-    double K = s.p[Pm_K];
-
-    d = AcornSimpleSurfaceDistance(r, z, R, K);
-    r.p += d * r.k; 				// Ray/Surface Intersection position
-
-    return 2;
-  }
+    AcornSurface *AcornSurfConstructor() { return (AcornSurface *) new AcornSurfaceCoordBrk(); }
 }
+

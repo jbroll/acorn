@@ -18,6 +18,7 @@ using namespace Eigen;
 
 #define NZernike	104
 
+
 struct AcornSurfaceZernike {
     ACORN_SURFACE
 
@@ -35,7 +36,7 @@ struct AcornSurfaceZernike {
 };
 
 static std::map<const char *, VarMap> VTable = {
-#	include "zernikz.vtable"
+#	include "zernike.vtable"
 };
 
 
@@ -50,7 +51,7 @@ static std::map<const char *, VarMap> VTable = {
 
 	double zdz, zdx, zdy;
 
-	zernikz_std((x - xdecenter)/nradius, (y - ydecenter)/nradius, nzterms, s->z, &zdz, &zdx, &zdy);
+	zernike_std((x - xdecenter)/nradius, (y - ydecenter)/nradius, nzterms, s->z, &zdz, &zdx, &zdy);
 
 	zdx /= nradius;
 	zdy /= nradius;
@@ -109,7 +110,8 @@ extern "C" {
     AcornSurface *AcornSurfConstructor()   { return (AcornSurface *) new AcornSurfaceZernike(); }
 }
 
-__attribute__((constructor)) static void AcornSurfaceZernikzInit() {
+
+__attribute__((constructor)) static void AcornSurfaceZernikeInit() {
 
     for ( int i = 0; i < NZernike; i++ ) {
 	char *name = (char *) malloc(10);

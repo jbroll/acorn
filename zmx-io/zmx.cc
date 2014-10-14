@@ -17,40 +17,9 @@
 #include "../AcornSurface.hh"
 
 
-void SetVar(int set, char *that, VarMap &v, const char *name, void *value) {
-
-    if ( set ) {
-	switch ( v.type ) {
-	    case Type_int:	*((int *)((char*)that+v.offset)) = *((int *) value);				break;
-	    case Type_string:	*((string *)((char*)that+v.offset)) = (char *) value;				break;
-	    case Type_double:	*((double *)((char*)that+v.offset)) = *((double *) value);			break;
-	    default : ;
-	}
-    } else {
-	switch ( v.type ) {
-	    case Type_int:	*((int *) value)          = *((int *)((char*)that+v.offset));			break;
-	    case Type_string:	(*(const char **) value)  = (*((string *)((char*)that+v.offset))).c_str();	break;
-	    case Type_double:	*((double *) value)       = *((double *)((char*)that+v.offset));		break;
-	    default : ;
-	}
-    }
-}
-
-struct AcornSurfaceCoordBrk {
-    ACORN_SURFACE
-
-    AcornSurfaceCoordBrk () { 
-	type    = "coordbrk";
-    }
-
-    int setparam(int set, const char* name, void *value) { return 0; };
-    int traverse(AcornRay *rays) { return 1; }
-};
-
 
 AcornSurface *AcornSurfGrpNonSeqConstructor()   { return (AcornSurface *) new AcornSurfGrp(AcornNonSequential); }
-
-AcornSurface *AcornSurfaceCoordBrkConstructor() { return (AcornSurface *) new AcornSurfaceCoordBrk(); }
+AcornSurface *AcornSurfGrpConstructor()   	{ return (AcornSurface *) new AcornSurfGrp(AcornSequential); }
 
 
     std::map<const char*, AcornSurface *(*)(void)> AcornSurfaces = {

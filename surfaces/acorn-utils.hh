@@ -1,6 +1,6 @@
 
 
-double AcornSimpleSurfaceDistance(Ray &r, double z, double R, double K)
+double AcornSimpleSurfaceDistance(AcornRay &r, double z, double R, double K)
 {
     double d;
 
@@ -34,7 +34,7 @@ double AcornSimpleSurfaceDistance(Ray &r, double z, double R, double K)
 }
 
 
-Vector3d AcornSimpleSurfaceNormal(Ray &r, double R, double K)
+Vector3d AcornSimpleSurfaceNormal(AcornRay &r, double R, double K)
 {
     double Dsign = r.k(Z)/fabs(r.k(Z));
     Vector3d nhat;
@@ -55,7 +55,7 @@ Vector3d AcornSimpleSurfaceNormal(Ray &r, double R, double K)
 }
 
 
-void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
+void AcornRefract(AcornRay &r, Vector3d &nhat, double n0, double n)
 {
     double Dsign = r.k(Z)/fabs(r.k(Z));
 
@@ -77,7 +77,7 @@ void AcornRefract(Ray &r, Vector3d &nhat, double n0, double n)
     }
 }
 
-int AcornSimpleIterativeIntersect(double R, double K, double n, Surface &s, Ray &r, double z, Vector3d &nhat, SagittaFunc sagitta) 
+int AcornSimpleIterativeIntersect(double R, double K, double n, AcornSurface &s, AcornRay &r, double z, Vector3d &nhat, SagittaFunc sagitta) 
 {
     int i;
 
@@ -95,7 +95,7 @@ int AcornSimpleIterativeIntersect(double R, double K, double n, Surface &s, Ray 
     for ( i = 0; i < ACORN_ITER; i++ ) {
 	double zdx, zdy, zdz;
 
-	sagitta(s, r.p(X), r.p(Y), &zdz, &zdx, &zdy);
+	sagitta(&s, r.p(X), r.p(Y), &zdz, &zdx, &zdy);
 
 	Vector3d P = Vector3d(r.p(X), r.p(Y), Az+zdz);		// Estimate point on the surface.
 

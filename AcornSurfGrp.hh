@@ -1,10 +1,8 @@
 
-#include "AcornSurface.hh"
-
 enum AcornSurfGrpType { AcornSequential, AcornNonSequential };
 
 struct AcornSurfGrp {
-   ACORNSURFACE
+   ACORN_SURFACE
 
     AcornSurfGrpType seqtype;
     std::vector<AcornSurface *> surf;
