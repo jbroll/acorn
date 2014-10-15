@@ -7,12 +7,12 @@ using namespace Eigen;
 #include <sys/mman.h>
 
 #include "../acorn.h"
-#include <fitsy.h>
 
 #include "acorn-utils.h"
 
 
 extern "C" {
+    int ft_simpleimageread (char *filename, void *headptr, void **dataptr, void ***data2dptr, int pixtype);
 
   enum Px_Local { Pm_nx = Px_NParams, Pm_ny, Pm_sx, Pm_sy, Pm_w0 };
 
