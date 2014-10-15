@@ -4,7 +4,8 @@
 using namespace std;
 using namespace Eigen;
 
-#include <sys/mman.h>
+#include <map>
+#include <vector>
 
 #include "../Acorn.hh"
 #include "../AcornSurface.hh"

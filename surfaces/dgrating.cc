@@ -1,10 +1,11 @@
-#include <iostream>
+#include <stdio.h>
 #include <Eigen/Dense>
 
 using namespace std;
 using namespace Eigen;
 
-#include <stdio.h>
+#include <map>
+#include <vector>
 
 #include "../Acorn.hh"
 #include "../AcornSurface.hh"

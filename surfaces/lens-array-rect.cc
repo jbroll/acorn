@@ -4,6 +4,9 @@
 using namespace std;
 using namespace Eigen;
 
+#include <map>
+#include <vector>
+
 #include "../Acorn.hh"
 #include "../AcornSurface.hh"
 #include "../AcornSurfGrp.hh"
