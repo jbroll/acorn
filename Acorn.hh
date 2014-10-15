@@ -27,7 +27,7 @@ struct VarMap {
     VarMap();
 
     VarMap(int Type, int Offset) {
-	type   = type;
+	type   = Type;
 	offset = Offset;
     };
 };

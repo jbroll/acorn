@@ -15,7 +15,7 @@ using namespace Eigen;
 #include "acorn-utils.hh"
 
 extern "C" {
-#include <fitsy.h>
+    int ft_simpleimageread (char *filename, void *headptr, void **dataptr, void ***data2dptr, int pixtype);
 }
 
 #define NMap 10
@@ -70,12 +70,12 @@ static int Traverse(AcornModel *m, AcornSurface *S, AcornRay &r)
     int iy = (int) (cy + 0.5);
 
     if ( ix >= 0 && ix < nx && iy >= 0 && iy < ny ) {
-	double    QE1 = s.mapdata->maps[qemap][iy*nx + ix];
+	double    QE1 = s->mapdata->maps[qemap][iy*nx + ix];
 
 	if ( ratio == 1.0 ) {
 	    r.intensity *= QE1;
 	} else {
-	    double    QE2 = s.mapdata->maps[qemap+1][iy*nx + ix];
+	    double    QE2 = s->mapdata->maps[qemap+1][iy*nx + ix];
 
 	    r.intensity *= QE1*ratio + QE2*(1.0-ratio);
 	}
@@ -92,20 +92,20 @@ int qe_init(AcornModel *m, AcornSurface *S) {
 	char  path[1024];
 	char *qemaps = getenv("ACORN_QEMAPS");
 
-    if ( !s.mapdata ) {
+    if ( !s->mapdata ) {
 	s->mapdata = (QEMap *) calloc(sizeof(QEMap), 1);
 
 	s->mapdata->maps  = (double **) calloc(sizeof(double *), NMap);
 
 	for ( nmap = 0; nmap < NMap; nmap++ ) {
-	    if ( s.wave[nmap] == 0.0 ) { break; }
+	    if ( s->wave[nmap] == 0.0 ) { break; }
 
 	    path[0] = '\0';
 	    if ( qemaps ) {
 		strncpy(path, qemaps, sizeof(path)-1);
 		strcat(path, "/");
 	    }
-	    strcat(path, s.mapfile[nmap].c_str());
+	    strcat(path, s->mapfile[nmap].c_str());
 
 	    if ( !ft_simpleimageread(path, NULL, (void **) &s->mapdata->maps[nmap], NULL, -64) ) {
 		fprintf(stderr, "Cannot load QE map : %s\n", path);
