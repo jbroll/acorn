@@ -35,7 +35,12 @@ ACORN_OBJS = $(SURFS)
 ACORN_UTIL = surfaces/acorn-utils.h
 
 
-all: acorn.$(OS)
+all: acorn.$(OS) acorn
+
+acorn : acorn.o
+
+acorn.o : acorn.cc
+	g++ -std=c++0x -o acorn $(INC) acorn.cc
 
 acorn.Darwin :
 	#@$(MAKE) ARCH=Darwin.i386	BITS=-m32	acorn.Darwin.i386   rays.Darwin.i386   nproc.Darwin.i386   arec.Darwin.i386
