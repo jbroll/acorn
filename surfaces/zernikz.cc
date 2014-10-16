@@ -18,7 +18,9 @@ using namespace Eigen;
 
 #include "acorn-utils.hh" 
 
-#include "../zernike/zernike.h"
+extern "C" {
+#   include "../zernike/zernike.h"
+}
 
 #define NZernike	104
 

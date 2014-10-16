@@ -17,15 +17,15 @@ class AcornModel {
 	
     };
 
-    AcornModel& set(char *param, void *value) {
-    	;
+    AcornModel *set(char *param, void *value) {
+    	return this;
     }
 
     AcornSurfGrp *crgroup;			// Model construction management
     AcornSurface *current;
 
     template <typename T>
-    AcornModel& setsurf(const char *surf, const char *param, T value) {
+    AcornModel *setsurf(const char *surf, const char *param, T value) {
 	AcornSurface *s;
 
 	if ( *surf == '\0') { s = current;
@@ -41,12 +41,14 @@ class AcornModel {
 	return this;
     }
 
-    AcornModel& appSurface(char *name, char *type) {
+    AcornModel *appSurface(char *name, char *type) {
 	AcornSurface *surf = AcornSurfaceConstructor(type);
 
 	surf->name = name;
 
 	current = crgroup->append(surf);
+
+	return this;
     }
 
 };

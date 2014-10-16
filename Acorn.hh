@@ -24,8 +24,10 @@ struct VarMap {
     int type;
     int offset;
 
-    VarMap();
-
+    VarMap() {
+	type   = 0;
+	offset = 0;
+    }
     VarMap(int Type, int Offset) {
 	type   = Type;
 	offset = Offset;

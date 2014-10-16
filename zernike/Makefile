@@ -4,7 +4,8 @@ OS  =$(shell uname)
 CFLAGS= -fPIC -O3 $(BITS) 
 
 
-ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernikx.o lib/$(ARCH)/zernikz.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
+ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernikx.o lib/$(ARCH)/zernikz.o  
+#ZOBJ = lib/$(ARCH)/zernike.o lib/$(ARCH)/zernik_std.o lib/$(ARCH)/zernikx.o lib/$(ARCH)/zernikz.o lib/$(ARCH)/zernik.o lib/$(ARCH)/annulr.o 
 
 all: zernike.$(OS)
 

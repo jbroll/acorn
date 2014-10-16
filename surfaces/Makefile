@@ -70,7 +70,7 @@ zernike.vtable : zernike.cc ../AcornSurface.hh
 
 lib/$(ARCH)/zernike.so : zernike.cc zernike.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@ ../zernike/zernike.a
 
 
 
@@ -81,7 +81,7 @@ zernikz.vtable : zernikz.cc ../AcornSurface.hh
 
 lib/$(ARCH)/zernikz.so : zernikz.cc zernikz.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@ ../zernike/zernike.a
 
 
 lens-array-rect.vtable : lens-array-rect.cc ../AcornSurface.hh

@@ -18,7 +18,9 @@ using namespace Eigen;
 
 #include "acorn-utils.hh" 
 
-#include "../zernike/zernike.h"
+extern "C" {
+#   include "../zernike/zernike.h"
+}
 
 #define NZernike	104
 
@@ -122,6 +124,6 @@ __attribute__((constructor)) static void AcornSurfaceZernikeInit() {
 
 	sprintf(name, "z%d", i);
 
-	VTable[name]  = VarMap(Type_double, offsetof(AcornSurfaceZernike, z)+1);
+	VTable[name]  = VarMap(Type_double, offsetof(AcornSurfaceZernike, z));
     }
 }

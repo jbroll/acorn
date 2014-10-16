@@ -75,6 +75,8 @@ std::map<const char*, AcornSurface *(*)()> *AcornLoadSurfaces() {
     for (size_t i = 0; i < filelist.gl_pathc; i++) {
 
 
+	fprintf(stderr, "load : %s\n", filelist.gl_pathv[i]);
+
 	void *lib 		= dlopen(filelist.gl_pathv[i], RTLD_NOW);
 	if ( !lib ) {
 	    fprintf(stderr, "Cannot load surface lib: %s : %s\n", filelist.gl_pathv[i], dlerror());
@@ -88,7 +90,6 @@ std::map<const char*, AcornSurface *(*)()> *AcornLoadSurfaces() {
 	    continue;
 	}
 
-
 	char *here; 
 
 	if ( (here = strrchr(filelist.gl_pathv[i], '/')) ) {
@@ -98,6 +99,8 @@ std::map<const char*, AcornSurface *(*)()> *AcornLoadSurfaces() {
 	}
 
 	*strrchr(here, '.') = '\0';
+
+	fprintf(stderr, "loaded : %s\n", here);
 	
 	(*constructors)[here] = NULL;
     }
