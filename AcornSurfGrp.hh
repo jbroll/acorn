@@ -5,7 +5,7 @@ struct AcornSurfGrp {
    ACORN_SURFACE
 
     AcornSurfGrpType seqtype;
-    std::vector<AcornSurface *> surf;
+    std::vector<AcornSurface *> surfaces;
 
     AcornSurfGrp () { 
 	type    = "non-sequential";
@@ -13,6 +13,12 @@ struct AcornSurfGrp {
     }
     AcornSurfGrp (AcornSurfGrpType Type) {
 	seqtype = Type;
+    }
+
+    AcornSurface *append(AcornSurface *surf) {
+	surfaces.push_back(surf);
+
+	reutrn surf;
     }
 
 };

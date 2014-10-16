@@ -45,8 +45,8 @@ void SetVar(char *that, const char *name, int from_type, std::map<const char *, 
 struct AcornSurface {
 	ACORN_SURFACE
 
-	AcornSurface* setparam(const char *name, double value) { SetVar((char *) this, name, Type_double, vtable, (void *) &value); return this; }
 	AcornSurface* setparam(const char *name, int    value) { SetVar((char *) this, name, Type_int   , vtable, (void *) &value); return this; }
+	AcornSurface* setparam(const char *name, double value) { SetVar((char *) this, name, Type_double, vtable, (void *) &value); return this; }
 	AcornSurface* setparam(const char *name, string value) { SetVar((char *) this, name, Type_string, vtable, (void *) &value); return this; }
 };
 

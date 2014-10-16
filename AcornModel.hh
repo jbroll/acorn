@@ -6,7 +6,7 @@ class AcornModel {
     double	  z;
     AcornSurfGrp  surfaces;
 
-    map<char *, AcornSurface *> names;		// Lookup surfaces by name.
+    std::map<const char *, AcornSurface *> names;		// Lookup surfaces by name.
 
 
     int		 nwave;
@@ -18,16 +18,22 @@ class AcornModel {
     };
 
     AcornModel& set(char *param, void *value) {
-	SetVar...
+    	;
     }
 
-    AcornModel& setsurf(const char *surf, const char *param, void *value) {
-	try {
-	    if ( *surf == '\0') { s = current;
-	    } else { 		  s = names.at(surf); }
-	} catch ( const std::out_of_range& oor ) {
-	    std::cerr << "Out of Range error: " << oor.what() << '\n';
-	    
+    AcornSurfGrp *crgroup;			// Model construction management
+    AcornSurface *current;
+
+    template <type T>
+    AcornModel& setsurf(const char *surf, const char *param, T value) {
+	AcornSurface *s;
+
+	if ( *surf == '\0') { s = current;
+	} else {
+	    if ( names.count(surf) != 1 ) {
+		fprintf(stderr, "No surface of type : %s\n", surf);
+	    }
+	    s = names.at(surf);
 	}
 
 	s->setparam(param, value);
@@ -35,13 +41,12 @@ class AcornModel {
 	return this;
     }
 
-    AcornSurfGrp *curgroup;			// Model construction management
-    AcornSurface *currrent;
-
     AcornModel& appSurface(char *name, char *type) {
-	
-	curgroup.push_back(
-	
+	AcornSurface *surf = AcornSurfaceConstructor(type);
+
+	surf->name = name;
+
+	current = crgroup->append(surf);
     }
 
 };
