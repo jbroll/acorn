@@ -2,7 +2,6 @@
 CXX=/usr/local/bin/g++
 CXX=/usr/bin/g++
 
-CXXFLAGS= -std=c++0x
 
 OS  =$(shell uname)
 
@@ -11,6 +10,7 @@ INC= -I/Users/john/include -I/home/john/include -I/home/jroll/include
 JLIBS= -L/Users/john/lib   -L/data/mmti/lib     -L/home/jroll/lib
 
 CFLAGS=$(INC) -msse -fPIC -O3 $(BITS) 
+CXXFLAGS= -std=c++0x -msse -fPIC -O3
 
 SRC	= acorn.cpp acorn.h aperture.cpp glass/glass.c glass/acorn-glass.cpp tpool/tpool.c
 
@@ -40,7 +40,7 @@ simple.vtable : simple.cc ../AcornSurface.hh
 
 lib/$(ARCH)/simple.so : simple.cc simple.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) -c $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 
 
 coordbrk.vtable : coordbrk.cc ../AcornSurface.hh
@@ -50,7 +50,7 @@ coordbrk.vtable : coordbrk.cc ../AcornSurface.hh
 
 lib/$(ARCH)/coordbrk.so : coordbrk.cc coordbrk.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) -c $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 
 
 tilted.vtable : tilted.cc ../AcornSurface.hh
@@ -60,7 +60,7 @@ tilted.vtable : tilted.cc ../AcornSurface.hh
 
 lib/$(ARCH)/tilted.so : tilted.cc tilted.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) -c $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 
 
 zernike.vtable : zernike.cc ../AcornSurface.hh
@@ -70,7 +70,7 @@ zernike.vtable : zernike.cc ../AcornSurface.hh
 
 lib/$(ARCH)/zernike.so : zernike.cc zernike.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) -c $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 
 
 
@@ -81,7 +81,7 @@ zernikz.vtable : zernikz.cc ../AcornSurface.hh
 
 lib/$(ARCH)/zernikz.so : zernikz.cc zernikz.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) -c $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 
 
 lens-array-rect.vtable : lens-array-rect.cc ../AcornSurface.hh
@@ -91,7 +91,7 @@ lens-array-rect.vtable : lens-array-rect.cc ../AcornSurface.hh
 
 lib/$(ARCH)/lens-array-rect.so : lens-array-rect.cc lens-array-rect.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) -c $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 
 
 lens-array-hex.vtable : lens-array-hex.cc ../AcornSurface.hh
@@ -101,7 +101,7 @@ lens-array-hex.vtable : lens-array-hex.cc ../AcornSurface.hh
 
 lib/$(ARCH)/lens-array-hex.so : lens-array-hex.cc lens-array-hex.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) -c $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 
 
 evenasph.vtable : evenasph.cc ../AcornSurface.hh
@@ -111,7 +111,7 @@ evenasph.vtable : evenasph.cc ../AcornSurface.hh
 
 lib/$(ARCH)/evenasph.so : evenasph.cc evenasph.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) -c $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 
 
 dgrating.vtable : dgrating.cc ../AcornSurface.hh
@@ -121,7 +121,7 @@ dgrating.vtable : dgrating.cc ../AcornSurface.hh
 
 lib/$(ARCH)/dgrating.so : dgrating.cc dgrating.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) -c $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 
 QE.vtable : QE.cc ../AcornSurface.hh
 	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceQE, "$$3") } }" ; comma="," }' >  $@
@@ -130,5 +130,5 @@ QE.vtable : QE.cc ../AcornSurface.hh
 
 lib/$(ARCH)/QE.so : QE.cc QE.vtable ../Acorn.hh $(ACORN_UTIL) 
 	@mkdir -p lib/$(ARCH)
-	$(CXX) -c $(CXXFLAGS) -shared $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 

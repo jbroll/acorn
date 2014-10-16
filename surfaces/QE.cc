@@ -8,6 +8,7 @@ using namespace Eigen;
 #include <vector>
 
 #include "../Acorn.hh"
+#include "../AcornRay.hh"
 #include "../AcornSurface.hh"
 #include "../AcornSurfGrp.hh"
 #include "../AcornModel.hh"

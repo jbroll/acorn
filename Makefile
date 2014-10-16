@@ -34,13 +34,13 @@ ACORN_SRCS = $(SRC) $(TCL)
 ACORN_OBJS = $(SURFS) 
 ACORN_UTIL = surfaces/acorn-utils.h
 
+CXXFLAGS = -std=c++0x $(INC) -msse -fPIC -O3
+
 
 all: acorn.$(OS) acorn
 
-acorn : acorn.o
-
-acorn.o : acorn.cc
-	g++ -std=c++0x -o acorn $(INC) acorn.cc
+acorn : acorn.cc AcornSurface.o
+	g++ -std=c++0x -o acorn $(INC) acorn.cc AcornSurface.o -ldl
 
 acorn.Darwin :
 	#@$(MAKE) ARCH=Darwin.i386	BITS=-m32	acorn.Darwin.i386   rays.Darwin.i386   nproc.Darwin.i386   arec.Darwin.i386

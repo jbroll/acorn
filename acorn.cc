@@ -16,6 +16,10 @@ using namespace Eigen;
 #include "AcornModel.hh"
 
 int main(int argc, char **argv) {
+
+fprintf(stderr, "HERE\n");
+
+    AcornSurface *surf = AcornSurfaceConstructor("simple");
     
 
     return 0;

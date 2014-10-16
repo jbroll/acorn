@@ -18,7 +18,7 @@ struct AcornSurfGrp {
     AcornSurface *append(AcornSurface *surf) {
 	surfaces.push_back(surf);
 
-	reutrn surf;
+	return surf;
     }
 
 };

@@ -24,7 +24,7 @@ class AcornModel {
     AcornSurfGrp *crgroup;			// Model construction management
     AcornSurface *current;
 
-    template <type T>
+    template <typename T>
     AcornModel& setsurf(const char *surf, const char *param, T value) {
 	AcornSurface *s;
 
