@@ -40,12 +40,19 @@ void SetVar(char *that, const char *name, int from_type, std::map<const char *, 
     }
 }
 
+struct cstrcmp {
+    bool operator()(const char *a, const char *b) const {
+	return strcmp(a, b) < 0;
+    }
+};
 
-static std::map<const char*, AcornSurface *(*)()> *Surfaces = NULL;
+#define CStrMap std::map<const char*, AcornSurface *(*)(), cstrcmp>
 
-std::map<const char*, AcornSurface *(*)()> *AcornLoadSurfaces() {
+static std::map<const char*, AcornSurface *(*)(), cstrcmp> *Surfaces = NULL;
 
-    std::map<const char*, AcornSurface *(*)()> *constructors = new std::map<const char*, AcornSurface *(*)()>;
+std::map<const char*, AcornSurface *(*)(), cstrcmp> *AcornLoadSurfaces() {
+
+    std::map<const char*, AcornSurface *(*)(), cstrcmp> *constructors = new std::map<const char*, AcornSurface *(*)(), cstrcmp>;
     std::string surfdir;
 
     if ( std::getenv("ACORN_SURFACES") ) {
@@ -77,13 +84,18 @@ std::map<const char*, AcornSurface *(*)()> *AcornLoadSurfaces() {
 
 	fprintf(stderr, "load : %s\n", filelist.gl_pathv[i]);
 
+	fprintf(stderr, "open\n");
+
 	void *lib 		= dlopen(filelist.gl_pathv[i], RTLD_NOW);
+	fprintf(stderr, "opened\n");
 	if ( !lib ) {
 	    fprintf(stderr, "Cannot load surface lib: %s : %s\n", filelist.gl_pathv[i], dlerror());
 	    continue;
 	}
 
+	fprintf(stderr, "sym\n");
 	AcornSurface *(*fun)()  = (AcornSurface *(*)()) dlsym(lib, "AcornSurfConstructor");
+	fprintf(stderr, "symed\n");
 
 	if ( !fun ) {
 	    fprintf(stderr, "Cannot load surface sym: %s : %s\n", filelist.gl_pathv[i], dlerror());
@@ -102,7 +114,7 @@ std::map<const char*, AcornSurface *(*)()> *AcornLoadSurfaces() {
 
 	fprintf(stderr, "loaded : %s\n", here);
 	
-	(*constructors)[here] = NULL;
+	(*constructors)[strdup(here)] = NULL;
     }
     globfree(&filelist);
 

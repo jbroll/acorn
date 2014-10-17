@@ -118,13 +118,20 @@ extern "C" {
 }
 
 __attribute__((constructor)) static void AcornSurfaceEvenASphereInit() {
-    VTable["a2"]  = { Type_double, offsetof(AcornSurfaceEvenASphere, a[0]) };
-    VTable["a4"]  = { Type_double, offsetof(AcornSurfaceEvenASphere, a[1]) };
-    VTable["a6"]  = { Type_double, offsetof(AcornSurfaceEvenASphere, a[2]) };
-    VTable["a8"]  = { Type_double, offsetof(AcornSurfaceEvenASphere, a[3]) };
-    VTable["a10"] = { Type_double, offsetof(AcornSurfaceEvenASphere, a[4]) };
-    VTable["a12"] = { Type_double, offsetof(AcornSurfaceEvenASphere, a[5]) };
-    VTable["a14"] = { Type_double, offsetof(AcornSurfaceEvenASphere, a[6]) };
-    VTable["a16"] = { Type_double, offsetof(AcornSurfaceEvenASphere, a[7]) };
+    fprintf(stderr, "evenasphere init\n");
+    fprintf(stderr, "evenasphere init %d\n", VTable.size());
+
+    std::map<const char *, VarMap> *vTable = new std::map<const char *, VarMap>;
+
+    (*vTable)["a2"]  = { Type_double, offsetof(AcornSurfaceEvenASphere, a[0]) };
+    (*vTable)["a4"]  = { Type_double, offsetof(AcornSurfaceEvenASphere, a[1]) };
+    (*vTable)["a6"]  = { Type_double, offsetof(AcornSurfaceEvenASphere, a[2]) };
+    (*vTable)["a8"]  = { Type_double, offsetof(AcornSurfaceEvenASphere, a[3]) };
+    (*vTable)["a10"] = { Type_double, offsetof(AcornSurfaceEvenASphere, a[4]) };
+    (*vTable)["a12"] = { Type_double, offsetof(AcornSurfaceEvenASphere, a[5]) };
+    (*vTable)["a14"] = { Type_double, offsetof(AcornSurfaceEvenASphere, a[6]) };
+    (*vTable)["a16"] = { Type_double, offsetof(AcornSurfaceEvenASphere, a[7]) };
+    fprintf(stderr, "evenasphere init %d\n", (*vTable).size());
+    fprintf(stderr, "evenasphere init-ed\n");
 }
 
