@@ -1,3 +1,5 @@
+#ifndef Acorn_HH
+#define Acorn_HH
 
 #define X__PI	3.14159265358979323846
 #define X_2PI	( 2 * X__PI )
@@ -45,3 +47,10 @@ typedef std::string string;
 
 typedef void (*SagittaFunc)(struct AcornSurface *s, double x, double y, double *dz, double *dx, double *dy);
 
+#include "AcornRay.hh"
+#include "AcornSurface.hh"
+#include "AcornGlass.hh"
+#include "AcornSurfGrp.hh"
+#include "AcornModel.hh"
+
+#endif

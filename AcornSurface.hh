@@ -1,3 +1,9 @@
+#ifndef AcornSurface_HH
+#define AcornSurface_HH
+
+#include <map>
+#include "Acorn.hh"
+#include "AcornGlass.hh"
 
 typedef std::map<const char*, VarMap, cstrcmp> CStrVarMapMap;
 
@@ -34,3 +40,4 @@ struct AcornSurface {
 
 AcornSurface *AcornSurfaceConstructor(const char *type);
 
+#endif

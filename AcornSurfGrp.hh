@@ -1,3 +1,7 @@
+#ifndef AcornSurfGrp_HH
+#define AcornSurfGrp_HH
+
+#include <vector>
 
 enum AcornSurfGrpType { AcornSequential, AcornNonSequential };
 
@@ -22,3 +26,4 @@ struct AcornSurfGrp {
     }
 
 };
+#endif

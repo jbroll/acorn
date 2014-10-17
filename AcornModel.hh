@@ -1,3 +1,5 @@
+#ifndef AcornModel_HH
+#define AcornModel_HH
 
 
 class AcornModel {
@@ -72,3 +74,4 @@ class AcornModel {
 
 };
 
+#endif

@@ -13,8 +13,6 @@
 using namespace Eigen;
 
 #include "Acorn.hh"
-#include "AcornRay.hh"
-#include "AcornSurface.hh"
 
 void SetVar(char *that, const char *name, int from_type, CStrVarMapMap *vtable, void *value) {
 

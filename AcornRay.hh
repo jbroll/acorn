@@ -1,3 +1,5 @@
+#ifndef AcornRay_HH
+#define AcornRay_HH
 
 #define X	0
 #define Y	1
@@ -10,3 +12,4 @@ struct AcornRay {
     int		vignetted;
     float	intensity;
 };
+#endif

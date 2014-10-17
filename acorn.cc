@@ -11,10 +11,6 @@
 using namespace Eigen;
 
 #include "Acorn.hh"
-#include "AcornRay.hh"
-#include "AcornSurface.hh"
-#include "AcornSurfGrp.hh"
-#include "AcornModel.hh"
 
 int main(int argc, char **argv) {
 
