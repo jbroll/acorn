@@ -14,7 +14,10 @@ void SetVar(char *that, const char *name, int from_type, CStrVarMapMap *vtable, 
 	Param double aper_xoff;							\
 	Param double aper_yoff;							\
 	Param int    annote;							\
-	double	*indicies;							\
+										\
+	double	   *indicies;							\
+	string	   *glass;							\
+	AcornGlass *glass_ptr;							\
 										\
         CStrVarMapMap *vtable;							\
 										\

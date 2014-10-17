@@ -39,7 +39,7 @@ CXXFLAGS = -std=c++0x $(INC) -msse -fPIC -O3
 
 all: acorn.$(OS) acorn
 
-acorn : acorn.cc AcornSurface.o
+acorn : acorn.cc AcornSurface.o AcornModel.hh 
 	g++ -std=c++0x -o acorn $(INC) acorn.cc AcornSurface.o -ldl
 
 acorn.Darwin :
