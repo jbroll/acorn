@@ -60,7 +60,7 @@ class AcornModel {
 
 	current = crgroup->append(surf);
 
-	if ( grp ) {
+//	if ( grp ) {
 	    
 
 	return this;

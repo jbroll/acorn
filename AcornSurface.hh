@@ -17,7 +17,6 @@ void SetVar(char *that, const char *name, int from_type, CStrVarMapMap *vtable, 
 										\
 	double	   *indicies;							\
 	string	   *glass;							\
-	AcornGlass *glass_ptr;							\
 										\
         CStrVarMapMap *vtable;							\
 										\
