@@ -25,7 +25,7 @@ struct AcornSurfaceTilted {
     AcornSurfaceTilted();
 };
 
-static std::map<const char *, VarMap> VTable = {
+static CStrVarMapMap VTable = {
 #	include "tilted.vtable"
 };
 

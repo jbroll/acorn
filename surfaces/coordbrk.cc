@@ -23,7 +23,7 @@ struct AcornSurfaceCoordBrk {
     AcornSurfaceCoordBrk();
 };
 
-static std::map<const char *, VarMap> VTable = {
+static CStrVarMapMap VTable = {
 #	include "coordbrk.vtable"
 };
 

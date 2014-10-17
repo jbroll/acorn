@@ -18,10 +18,13 @@ using namespace Eigen;
 
 int main(int argc, char **argv) {
 
-fprintf(stderr, "HERE\n");
-
     AcornSurface *surf = AcornSurfaceConstructor("simple");
-    
+
+    fprintf(stderr, "Got : %s %ld\n", surf->type.c_str(), surf->vtable->size());
+
+    surf->setparam("aper_min", 4.0);
+
+    fprintf(stderr, "%f\n", surf->aper_min);
 
     return 0;
 }

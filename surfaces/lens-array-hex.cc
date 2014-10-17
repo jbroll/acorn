@@ -27,7 +27,7 @@ struct AcornSurfaceLensArrayHex {
     AcornSurfaceLensArrayHex();
 };
 
-static std::map<const char *, VarMap> VTable = {
+static CStrVarMapMap VTable = {
 #	include "lens-array-hex.vtable"
 };
 

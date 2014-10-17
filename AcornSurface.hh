@@ -1,4 +1,7 @@
 
+typedef std::map<const char*, VarMap, cstrcmp> CStrVarMapMap;
+
+void SetVar(char *that, const char *name, int from_type, CStrVarMapMap *vtable, void *value);
 
 #define ACORN_SURFACE 								\
 	Param string type;							\
@@ -13,7 +16,7 @@
 	Param int    annote;							\
 	double	*indicies;							\
 										\
-        std::map<const char *, VarMap> *vtable;					\
+        CStrVarMapMap *vtable;							\
 										\
 	int (*traverse)(struct AcornModel *m, AcornSurface *s, AcornRay &rays);	\
 	int (*initials)(struct AcornModel *m, AcornSurface *s);			\

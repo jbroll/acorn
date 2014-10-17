@@ -27,7 +27,7 @@ struct AcornSurfaceDGrating {
     AcornSurfaceDGrating();
 };
 
-static std::map<const char *, VarMap> VTable = {
+static CStrVarMapMap VTable = {
 #	include "dgrating.vtable"
 };
 

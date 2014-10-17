@@ -34,9 +34,14 @@ struct VarMap {
     };
 };
 
+struct cstrcmp {
+    bool operator()(const char *a, const char *b) const {
+	return strcmp(a, b) < 0;
+    }
+};
+
 
 typedef std::string string;
 
 typedef void (*SagittaFunc)(struct AcornSurface *s, double x, double y, double *dz, double *dx, double *dy);
 
-void SetVar(char *that, const char *name, int from_type, std::map<const char *, VarMap> *vtable, void *value);

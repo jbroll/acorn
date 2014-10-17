@@ -41,7 +41,7 @@ struct AcornSurfaceZernike {
     AcornSurfaceZernike();
 };
 
-static std::map<const char *, VarMap> VTable = {
+static CStrVarMapMap VTable = {
 #	include "zernike.vtable"
 };
 

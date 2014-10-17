@@ -27,7 +27,7 @@ struct AcornSurfaceLensArrayRect {
     AcornSurfaceLensArrayRect();
 };
 
-static std::map<const char *, VarMap> VTable = {
+static CStrVarMapMap VTable = {
 #	include "lens-array-rect.vtable"
 };
 

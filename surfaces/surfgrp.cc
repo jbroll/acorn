@@ -10,6 +10,6 @@ AcornSurfGrp *AcornSurfGrpConstructor(void) {
     return surf;
 }
 
-static std::map<const char *, VarMap> vtable = {
+static CStrVarMapMap VTable = {
 #	include "AcornSurfGrp.vtable"
 };

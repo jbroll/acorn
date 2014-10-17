@@ -16,7 +16,7 @@ using namespace Eigen;
 #include "AcornRay.hh"
 #include "AcornSurface.hh"
 
-void SetVar(char *that, const char *name, int from_type, std::map<const char *, VarMap> *vtable, void *value) {
+void SetVar(char *that, const char *name, int from_type, CStrVarMapMap *vtable, void *value) {
 
     if ( vtable->count(name) != 1 ) {
 	fprintf(stderr, "acorn: no such parameter : %s\n", name);
@@ -40,19 +40,13 @@ void SetVar(char *that, const char *name, int from_type, std::map<const char *, 
     }
 }
 
-struct cstrcmp {
-    bool operator()(const char *a, const char *b) const {
-	return strcmp(a, b) < 0;
-    }
-};
+typedef std::map<const char*, AcornSurface *(*)(), cstrcmp> CStrSurfaceMap;
 
-#define CStrMap std::map<const char*, AcornSurface *(*)(), cstrcmp>
+static CStrSurfaceMap *Surfaces = NULL;
 
-static std::map<const char*, AcornSurface *(*)(), cstrcmp> *Surfaces = NULL;
+CStrSurfaceMap *AcornLoadSurfaces() {
 
-std::map<const char*, AcornSurface *(*)(), cstrcmp> *AcornLoadSurfaces() {
-
-    std::map<const char*, AcornSurface *(*)(), cstrcmp> *constructors = new std::map<const char*, AcornSurface *(*)(), cstrcmp>;
+    CStrSurfaceMap *constructors = new CStrSurfaceMap;
     std::string surfdir;
 
     if ( std::getenv("ACORN_SURFACES") ) {
@@ -82,20 +76,14 @@ std::map<const char*, AcornSurface *(*)(), cstrcmp> *AcornLoadSurfaces() {
     for (size_t i = 0; i < filelist.gl_pathc; i++) {
 
 
-	fprintf(stderr, "load : %s\n", filelist.gl_pathv[i]);
-
-	fprintf(stderr, "open\n");
-
 	void *lib 		= dlopen(filelist.gl_pathv[i], RTLD_NOW);
-	fprintf(stderr, "opened\n");
+
 	if ( !lib ) {
 	    fprintf(stderr, "Cannot load surface lib: %s : %s\n", filelist.gl_pathv[i], dlerror());
 	    continue;
 	}
 
-	fprintf(stderr, "sym\n");
 	AcornSurface *(*fun)()  = (AcornSurface *(*)()) dlsym(lib, "AcornSurfConstructor");
-	fprintf(stderr, "symed\n");
 
 	if ( !fun ) {
 	    fprintf(stderr, "Cannot load surface sym: %s : %s\n", filelist.gl_pathv[i], dlerror());
@@ -112,9 +100,7 @@ std::map<const char*, AcornSurface *(*)(), cstrcmp> *AcornLoadSurfaces() {
 
 	*strrchr(here, '.') = '\0';
 
-	fprintf(stderr, "loaded : %s\n", here);
-	
-	(*constructors)[strdup(here)] = NULL;
+	(*constructors)[strdup(here)] = fun;
     }
     globfree(&filelist);
 
@@ -127,12 +113,23 @@ AcornSurface *AcornSurfaceConstructor(const char *type) {
 	Surfaces = AcornLoadSurfaces();
     } 
 
-fprintf(stderr, "AcornSurfaceConstructor %d\n", Surfaces->size());
 
     if ( Surfaces->count(type) != 1 ) {
 	fprintf(stderr, "No surface of type : %s\n", type);
 	return NULL;
     }
 
-    return Surfaces->at(type)();
+    AcornSurface *surf = Surfaces->at(type)();
+
+    surf->type 		= type;
+    surf->name 		= "";
+    surf->aper_type 	= "";
+    surf->aper_min 	= 0.0;
+    surf->aper_max 	= 0.0;
+    surf->aper_xoff 	= 0.0;
+    surf->aper_yoff 	= 0.0;
+    surf->annote 	= 0;
+
+    return surf;
 }
+
