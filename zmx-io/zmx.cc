@@ -9,22 +9,19 @@
 #include <string>
 #include <vector>
 #include <stack>
+
 #include <map>
 
-#include "../AcornUtil.hh"
+#include "../Acorn.hh"
 
 #include "../AcornRay.hh"
 #include "../AcornSurface.hh"
 
 
 
-AcornSurface *AcornSurfGrpNonSeqConstructor()   { return (AcornSurface *) new AcornSurfGrp(AcornNonSequential); }
-AcornSurface *AcornSurfGrpConstructor()   	{ return (AcornSurface *) new AcornSurfGrp(AcornSequential); }
-
 
     std::map<const char*, AcornSurface *(*)(void)> AcornSurfaces = {
 	{ "NONSEQCO", 	&AcornSurfGrpNonSeqConstructor	 } ,
-	{ "coordbrk", 	&AcornSurfaceCoordBrkConstructor }
     };
 
     static std::map<std::string, const char*> ZMXSurfaceMap = {
@@ -157,7 +154,7 @@ class ZMX  {
     Keyword zmx_evenasph (std::vector<char*> argv) {
 	int eight = 8;
 
-	//surf.setvar("nterms", 1, (void *) &eight);
+	//surf.setparam("nterms", 1, (void *) &eight);
     }
 
     Keyword ZVAN (std::vector<char*> argv) {}
@@ -193,8 +190,8 @@ class ZMX  {
 
     Keyword TYPE (std::vector<char*> argv) {
 
-	char *type = argv[1];
-	char *comm = argv[2];
+	const char *type = argv[1];
+	const char *comm = argv[2];
 
 	if ( !strcmp(type, "USERSURF") ) {
 	    type = argv[2];
@@ -207,14 +204,14 @@ class ZMX  {
 	    exit(1);
 	} 
 
-	surfaces->surf.push_back(AcornSurfaces[type]());
-	current = model->surfaces.surf.back();
+	surfaces->surfaces.push_back(AcornSurfaces[type]());
+	current = model->surfaces.surfaces.back();
 
-	current->setparam(this, 1, "comment", comm);
+	current->setparam("comment", comm);
 
 	if ( !strcmp(type, "NONSEQCO") ) {
 	    surf_stack.push((AcornSurface *)&model->surfaces);
-	    surfaces = (AcornSurfGrp *)(model->surfaces.surf.back());
+	    surfaces = (AcornSurfGrp *)(model->surfaces.surfaces.back());
 	    return;
   	}
      }
@@ -223,11 +220,11 @@ class ZMX  {
 	double curv = atof(argv[1]);
 
 	if ( grouptype == AcornSequential && curv != 0.0 ) {
-	    current->setvar("R", 1.0/curv);
+	    current->setparam("R", 1.0/curv);
 	}
      }
-     Keyword CONI (std::vector<char*> argv) { current->setvar("K",  atof(argv[1])); 	 }
-     Keyword COMM (std::vector<char*> argv) { current->setvar("comment", argv[1]); }
+     Keyword CONI (std::vector<char*> argv) { current->setparam("K",  atof(argv[1])); 	 }
+     Keyword COMM (std::vector<char*> argv) { current->setparam("comment", argv[1]); }
 
     Keyword PARM (std::vector<char*> argv) {
 	 int n		= atoi(argv[1]);
@@ -235,10 +232,10 @@ class ZMX  {
 
 	if ( grouptype == AcornSequential ) {
 	    if ( ZMXParmMap.count(current->type) == 1 && ZMXParmMap[current->type].count(n) == 1 ) {
-	        current->setvar(ZMXParmMap[current->type][n].c_str(), value);
+	        current->setparam(ZMXParmMap[current->type][n].c_str(), value);
 	    }
 	} else {
-	     current->setvar("p$n", value);
+	     current->setparam("p$n", value);
 	}
     }
 

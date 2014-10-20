@@ -47,7 +47,12 @@ typedef std::string string;
 
 typedef void (*SagittaFunc)(struct AcornSurface *s, double x, double y, double *dz, double *dx, double *dy);
 
+#include <Eigen/Dense>
+
+using namespace Eigen;
+
 #include "AcornRay.hh"
+#include "AcornUtil.hh"
 #include "AcornSurface.hh"
 #include "AcornGlass.hh"
 #include "AcornSurfGrp.hh"
