@@ -2,10 +2,19 @@
 CXX=/usr/local/bin/g++
 CXX=/usr/bin/g++
 
-zmx.o : zmx.cc
-	$(CXX) -std=c++0x $<
+INC= -I/Users/john/include -I/home/john/include -I/home/jroll/include
 
-zmx.C : FORCE
+agf.o : agf.cc
+	$(CXX) $(INC) -std=c++0x $<
+
+agf.cc : FORCE
+	grep Keyword agf.cc | grep -v define | awk '{ print comma, "{ \""$$2"\", &AGF::"$$2" }"; comma="," }' > agf.mtable
+
+zmx.o : zmx.cc
+	$(CXX) $(INC) -std=c++0x $<
+
+
+zmx.cc : FORCE
 	grep Keyword zmx.C | grep -v define | awk '{ print comma, "{ \""$$2"\", &ZMX::"$$2" }"; comma="," }' > zmx.mtable
 
 FORCE:

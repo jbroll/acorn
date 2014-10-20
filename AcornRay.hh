@@ -1,6 +1,10 @@
 #ifndef AcornRay_HH
 #define AcornRay_HH
 
+#include <Eigen/Dense>
+
+using namespace Eigen;
+
 #define X	0
 #define Y	1
 #define Z	2

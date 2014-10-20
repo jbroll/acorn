@@ -1,117 +1,116 @@
-# Zemax UDA file.
-#
-# 
-# CC Updated '12.04.24
-# NM APL1 1 517696 1.517277 69.563209 0 2 0
-# GC 
-# ED 0.000000000E+000 0.000000000E+000 0.000000000E+000 0.000000000E+000 0 0
-# CD 2.276240300E+000 -9.687464700E-003 9.233037800E-003 3.894085300E-004 -3.801873300E-005 2.069322500E-006 0.000000000E+000 0.000000000E+000 0.000000000E+000 0.000000000E+000
-# TD 0.000000000E+000 0.000000000E+000 0.000000000E+000 0.000000000E+000 0.000000000E+000 0.000000000E+000 2.500000000E+001
-# OD -1.00000 -1.00000 -1.00000 -1.00000 -1.00000 -1.00000
-# LD 3.34000000E-001 2.32500000E+000
-# IT 3.34000E-001 1.00000E+000 2.50000E+001
+//# Zemax AGF file.
+//#
+//# 
+//# CC Updated '12.04.24
+//# NM APL1 1 517696 1.517277 69.563209 0 2 0
+//# GC 
+//# ED 0.000000000E+000 0.000000000E+000 0.000000000E+000 0.000000000E+000 0 0
+//# CD 2.276240300E+000 -9.687464700E-003 9.233037800E-003 3.894085300E-004 -3.801873300E-005 2.069322500E-006 0.000000000E+000 0.000000000E+000 0.000000000E+000 0.000000000E+000
+//# TD 0.000000000E+000 0.000000000E+000 0.000000000E+000 0.000000000E+000 0.000000000E+000 0.000000000E+000 2.500000000E+001
+//# OD -1.00000 -1.00000 -1.00000 -1.00000 -1.00000 -1.00000
+//# LD 3.34000000E-001 2.32500000E+000
+//# IT 3.34000E-001 1.00000E+000 2.50000E+001
 
-
-struct AcornGlass {
-    Param string	comment;
-    Param string	name;
-    Param int		formula;
-    Param double	MIL;
-    Param double	Nd;
-    Param double	Vd;
-    Param int		exclude
-    Param int		status
-    Param double	TCE;
-    Param double	TCE100300;
-    Param double	density;
-    Param double	dPgF;
-    Param int		ignthermal
-    Param double	D0;
-    Param double	D1;
-    Param double	D2;
-    Param double	E0;
-    Param double	E1;
-    Param double	Ltk;
-    Param double	temp;
-    Param double	ymin;
-    Param double	ymax;
-
-    double	c[10];
-};
+#include "../AcornGlass.hh"
 
 arec::typedef ::acorn::GlassCat {
     char*	name
     char*	catalog
-    char*	glass
+
+    vector<AcornGlass> glass;
+
+    AcornGlassCat(char *filename) {
+	AGF agf();
+
+	return agf::Read(filename);
+    }
 };
 
 
 class AGF {
-    variable glass current CC
-    accessor glass
+    static std::map<std::string, void (ZMX::*)(std::vector<char*>)> mtable;
 
-    constructor { type args } {
-	procs CC NM GC ED CD TD OD LD IT
+  public:
+    vector<AcornGlass> glass;
 
-	set glass [acorn::Glass create [namespace current]::glass 0]
+    char *CC
 
-	switch $type {
-	    source { eval [string map { $ \\$ ; \\; [ \\[ } [cat [lindex $args 0]]] } 
-	    string { eval {*}$args }
+    void invoke(const char *method, std::vector<char*> argv) {
+	if ( mtable.count(method) == 1 ) {
+	    (this->*mtable[method])(argv);
+	} else {
+	     fprintf(stderr, "unknown method ZMX::%s\n", method);
 	}
     }
-    method CC { args } { set CC $args }
-
-    method NM { name formula MIL Nd Vd exclude status args } {
-	set current [$glass length]
-	$glass set $current name $name formula $formula MIL $MIL Nd $Nd Vd $Vd exclude $exclude status $status
-    }
-    method GC { args } { $glass set $current comment [join $args] }
-    method ED { TCE TCE100300 density dPgF ignthermal args } {
-	$glass set $current TCE $TCE TCE100300 $TCE100300 density $density dPgF $dPgF ignthermal $ignthermal
-    }
-    method CD { args } {
-	set i 0
-	foreach c $args { $glass set $current c$i $c; incr i }
-    }
-    method TD { D0 D1 D2 E0 E1 Ltk temp  } {
-	$glass set $current D0 $D0 D1 $D1 D2 $D2 E0 $E0 E1 $E1 Ltk $Ltk temp $temp
-    }
-    method OD { args } {}
-    method LD { ymin ymax  } {
-	$glass set $current ymin $ymin ymax $ymax
-    }
-    method IT { args } {}
-}
 
 
-proc glass-loader { pathlist } {
-    ::acorn::GlassCat create GlassCats 0
+    AcornCat *Read(string filename) {
+	AcronGlassCat catalog = new AcornGlassCat();
 
-    foreach path $pathlist {
-	foreach catalog [glob $pathlist/*.agf] {
-	    set agf [AGF create agf[incr ::AGF] source $catalog]
+	std::vector<char*> list = split(&cat(filename)[0], "\n");
 
-	    GlassCats set end+1 name [file rootname $catalog] catalog $catalog glass $agf
+        for ( auto &i : list ) {
+	    std::vector<char*> line = split(i, " \t");
+
+	    invoke(line[0], line);
+        }
+
+	return model;
+    }
+
+    Keyword CC (std::vector<char*> argv) {
+	CC = argv[1];
+    }
+
+    Keyword NM (std::vector<char*> argv) {
+	glass.emplace_back();
+
+	glass.back.name 	=      argv[1];
+	glass.back.formula 	= stoi(argv[2]);
+	glass.back.MIL 		= stod(argv[3]);
+	glass.back.Nd		= stod(argv[4]);
+	glass.back.Vd 		= stod(argv[5]);
+	glass.back.exclude 	=      argv[6];
+	glass.back.status 	=      argv[7];
+    }
+
+    Keyword GC (std::vector<char*> argv) {
+	glass.back.comment 	=      argv[1];
+    }
+    Keyword ED (std::vector<char*> argv) {
+	glass.back.TCE 		= stod(argv[1]);
+	glass.back.TCE100300 	= stod(argv[2]);
+	glass.back.density 	= stod(argv[3]);
+	glass.back.dPgf 	= stod(argv[4]);
+	glass.back.ignthermal 	= stod(argv[5]);
+    }
+
+    Keyword CD (std::vector<char*> argv) {
+	for ( i = 0; i < argv.size(); i++ ) {
+	    glass.back.c[i]	= stod(argv[1]);
 	}
-     }
+    }
+    Keyword TD (std::vector<char*> argv) {
+	glass.back.D0 		= stod(argv[1]);
+	glass.back.D1 		= stod(argv[2]);
+	glass.back.D2 		= stod(argv[3]);
+	glass.back.E0 		= stod(argv[4]);
+	glass.back.E1 		= stod(argv[5]);
+	glass.back.Ltk 		= stod(argv[6]);
+	glass.back.temp 	= stod(argv[7]);
+    }
 
-     set ::Glass() 0
-     set ::Glass({}) 0
-     set ::Glass({{}}) 0
-     set ::Glass({{{}}}) 0
-     set ::Glass((null)) 0
+    Keyword OD (std::vector<char*> argv) {}
 
-     set ::Glass(MIRROR) -1
+    Keyword LD (std::vector<char*> argv) {
+	glass.back.ymin 	= stod(argv[1]);
+	glass.back.ymax 	= stod(argv[2]);
+    }
 
-     foreach cat [GlassCats get glass] {
-
-         set i -1
-         foreach name [[$cat glass] get name] {
-	     set ::Glass([lindex $name 0]) [[$cat glass] getptr [incr i]]
-	 }
-     }
+    Keyword IT (std::vector<char*> argv) {}
 }
 
-proc glass-lookup { glass } {	return $::Glass($glass) }
+std::map<std::string, void (AGF::*)(std::vector<char*>)> AGF::mtable = {
+#	include "agf.mtable"
+};
 

@@ -11,10 +11,12 @@
 #include <stack>
 #include <map>
 
-#include "../AcornUtil.hh"
+#include "../Acorn.hh"
 
 #include "../AcornRay.hh"
 #include "../AcornSurface.hh"
+
+#include "./util.hh"
 
 
 
@@ -120,6 +122,13 @@ class ZMX  {
 
     AcornRay aray[1];
 
+    void invoke(const char *method, std::vector<char*> argv) {
+	if ( mtable.count(method) == 1 ) {
+	    (this->*mtable[method])(argv);
+	} else {
+	     fprintf(stderr, "unknown method ZMX::%s\n", method);
+	}
+    }
 
     AcornModel *Read(string filename) {
 	model 	  = new AcornModel();
@@ -141,13 +150,6 @@ class ZMX  {
 	return model;
     }
 
-    void invoke(const char *method, std::vector<char*> argv) {
-	if ( mtable.count(method) == 1 ) {
-	    (this->*mtable[method])(argv);
-	} else {
-	     fprintf(stderr, "unknown method ZMX::%s\n", method);
-	}
-    }
 
     Keyword zmx_simple   (std::vector<char*> argv) {};
     Keyword zmx_coordbrk (std::vector<char*> argv) {};
@@ -157,7 +159,7 @@ class ZMX  {
     Keyword zmx_evenasph (std::vector<char*> argv) {
 	int eight = 8;
 
-	//surf.setvar("nterms", 1, (void *) &eight);
+	//surf.setparam("nterms", 1, (void *) &eight);
     }
 
     Keyword ZVAN (std::vector<char*> argv) {}
@@ -223,11 +225,11 @@ class ZMX  {
 	double curv = atof(argv[1]);
 
 	if ( grouptype == AcornSequential && curv != 0.0 ) {
-	    current->setvar("R", 1.0/curv);
+	    current->setparam("R", 1.0/curv);
 	}
      }
-     Keyword CONI (std::vector<char*> argv) { current->setvar("K",  atof(argv[1])); 	 }
-     Keyword COMM (std::vector<char*> argv) { current->setvar("comment", argv[1]); }
+     Keyword CONI (std::vector<char*> argv) { current->setparam("K",  atof(argv[1])); 	 }
+     Keyword COMM (std::vector<char*> argv) { current->setparam("comment", argv[1]); }
 
     Keyword PARM (std::vector<char*> argv) {
 	 int n		= atoi(argv[1]);
@@ -235,10 +237,10 @@ class ZMX  {
 
 	if ( grouptype == AcornSequential ) {
 	    if ( ZMXParmMap.count(current->type) == 1 && ZMXParmMap[current->type].count(n) == 1 ) {
-	        current->setvar(ZMXParmMap[current->type][n].c_str(), value);
+	        current->setparam(ZMXParmMap[current->type][n].c_str(), value);
 	    }
 	} else {
-	     current->setvar("p$n", value);
+	     current->setparam("p$n", value);
 	}
     }
 
