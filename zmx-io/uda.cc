@@ -1,0 +1,97 @@
+//# Zemax UDA file.
+//#
+//# 
+//# ARC cx cy angle n
+//# BRK
+//# CIR cx cy radius n
+//# ELI cx cy rx ry angle n
+//# LIN x y n
+//# x y
+//# POL cx cy radius n angle
+//# REC cx cy w h angle
+//# ! Comment
+
+arec::typedef ::acorn::Polygon {
+    double	x;
+    double	y;
+    double	z;
+}
+
+#include "../Acorn.hh"
+#include "invoker.hh"
+
+# The UDA file is read in and reduced to a polygon definition
+#
+class UDA {
+    INVOKER(UDA)
+
+    variable polygon inpath break
+    accessor polygon
+
+    constructor { type args } {
+	procs ARC BRK CIR ELI LIN POL REC !
+	namespace unknown { my unknown }
+
+	set polygon [acorn::Polygon create [namespace current]::polygon]
+	set inpath  -1
+	set break    1
+
+	switch $type {
+	    source { source [lindex $args 0] } 
+	    string { eval {*}$args }
+	}
+	BRK
+    }
+
+    method rpoly { cx cy radius n } {
+	BRK
+	foreach { x y } [rp cx cy radius n] {
+	    $polygon set end+1 x $x y $y
+	}
+    }
+
+    method CIR { cx cy r { n 64 } } 		{ rpoly $cx $cy $r $n }
+    method ELI { cx cy rx ry rot { n {} }  }	{}
+    method REC { cx cy w h rot } {}
+    method POL { cx cy radius n rot } {}
+
+    method ARC { cx cy angle { n {} } } {
+	if { $inpath == -1 } { set inpath [$polygon length] }
+    }
+    method LIN { x y { n {} } } 		{
+	if { $inpath == -1 } { set inpath [$polygon length] }
+
+	$polygon set end+1 x $x y $y 
+    }
+    method BRK {} 				{
+	if { $inpath != -1 } { LIN {*}[$polygon get $inpath x y] }
+
+	if { $break } { $polygon set end+1 x 0  y 0 }
+	set inpath -1
+	set break   0
+    }
+    method !   { args } {}
+
+    method unknown { args } {
+	set args [string map { , {} } $args]
+
+	switch -regexp -- [lindex $args 0] {
+	    [-+0-9]* {
+		set x [lindex $args 0]
+		set y [lindex $args 1]
+
+		if { $inpath != -1 } { lassign [$polygon get $inpath x y] x0 y0 }
+
+		if { ( $x == 0 && $y == 0 ) || ( $inpath >= 0 && $x == $x0 && $y == $y0 ) } {
+		    BRK
+		} else {
+		    LIN {*}$args
+		}
+	    }
+	}
+    }
+}
+
+#UDA create m1aper source m1aper1e.uda
+#puts [[m1aper polygon] 0 end get]
+

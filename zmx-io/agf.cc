@@ -12,24 +12,14 @@
 //# IT 3.34000E-001 1.00000E+000 2.50000E+001
 
 #include "../Acorn.hh"
+#include "invoker.hh"
 
 
 class AGF {
-    static std::map<std::string, void (AGF::*)(std::vector<char*>)> mtable;
+    INVOKER(AGF)
 
-  public:
     std::vector<AcornGlass> *glass;
-
     char *cc;
-
-    void invoke(const char *method, std::vector<char*> argv) {
-	if ( mtable.count(method) == 1 ) {
-	    (this->*mtable[method])(argv);
-	} else {
-	     fprintf(stderr, "unknown method AGF::%s\n", method);
-	}
-    }
-
 
 
     Keyword CC (std::vector<char*> argv) {
