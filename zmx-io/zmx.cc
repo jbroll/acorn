@@ -6,27 +6,13 @@
 #include <iostream>
 #include <fstream>
 
-#include <string>
-#include <vector>
 #include <stack>
-#include <map>
 
 #include "../Acorn.hh"
-
-#include "../AcornRay.hh"
-#include "../AcornSurface.hh"
-
-#include "./util.hh"
-
-
-
-AcornSurface *AcornSurfGrpNonSeqConstructor()   { return (AcornSurface *) new AcornSurfGrp(AcornNonSequential); }
-AcornSurface *AcornSurfGrpConstructor()   	{ return (AcornSurface *) new AcornSurfGrp(AcornSequential); }
 
 
     std::map<const char*, AcornSurface *(*)(void)> AcornSurfaces = {
 	{ "NONSEQCO", 	&AcornSurfGrpNonSeqConstructor	 } ,
-	{ "coordbrk", 	&AcornSurfaceCoordBrkConstructor }
     };
 
     static std::map<std::string, const char*> ZMXSurfaceMap = {
@@ -87,7 +73,6 @@ AcornSurface *AcornSurfGrpConstructor()   	{ return (AcornSurface *) new AcornSu
     };
 
 class ZMX  { 
-
     static std::map<std::string, void (ZMX::*)(std::vector<char*>)> mtable;
 
   public:
@@ -195,8 +180,8 @@ class ZMX  {
 
     Keyword TYPE (std::vector<char*> argv) {
 
-	char *type = argv[1];
-	char *comm = argv[2];
+	const char *type = argv[1];
+	const char *comm = argv[2];
 
 	if ( !strcmp(type, "USERSURF") ) {
 	    type = argv[2];
@@ -209,14 +194,14 @@ class ZMX  {
 	    exit(1);
 	} 
 
-	surfaces->surf.push_back(AcornSurfaces[type]());
-	current = model->surfaces.surf.back();
+	surfaces->surfaces.push_back(AcornSurfaces[type]());
+	current = model->surfaces.surfaces.back();
 
-	current->setparam(this, 1, "comment", comm);
+	current->setparam("comment", comm);
 
 	if ( !strcmp(type, "NONSEQCO") ) {
 	    surf_stack.push((AcornSurface *)&model->surfaces);
-	    surfaces = (AcornSurfGrp *)(model->surfaces.surf.back());
+	    surfaces = (AcornSurfGrp *)(model->surfaces.surfaces.back());
 	    return;
   	}
      }

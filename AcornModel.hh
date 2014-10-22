@@ -66,7 +66,7 @@ class AcornModel {
 	    
 
 	return this;
-    }
+    };
 
 
     AcornModel *trace(AcornRay *rays, char *surfs=NULL, int threads=0, AcornRay *xray=NULL, size_t ray_size=sizeof(AcornRay)) {

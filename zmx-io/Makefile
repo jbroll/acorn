@@ -4,6 +4,8 @@ CXX=/usr/bin/g++
 
 INC= -I/Users/john/include -I/home/john/include -I/home/jroll/include
 
+all : zmx.o agf.o
+
 agf.o : agf.cc
 	$(CXX) $(INC) -std=c++0x $<
 
@@ -13,8 +15,7 @@ agf.cc : FORCE
 zmx.o : zmx.cc
 	$(CXX) $(INC) -std=c++0x $<
 
-
 zmx.cc : FORCE
-	grep Keyword zmx.C | grep -v define | awk '{ print comma, "{ \""$$2"\", &ZMX::"$$2" }"; comma="," }' > zmx.mtable
+	grep Keyword zmx.cc | grep -v define | awk '{ print comma, "{ \""$$2"\", &ZMX::"$$2" }"; comma="," }' > zmx.mtable
 
 FORCE:

@@ -26,4 +26,8 @@ struct AcornSurfGrp {
     }
 
 };
+
+AcornSurface *AcornSurfGrpNonSeqConstructor();
+AcornSurface *AcornSurfGrpConstructor();
+
 #endif

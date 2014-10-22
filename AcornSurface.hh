@@ -3,13 +3,22 @@
 
 #include <map>
 #include "Acorn.hh"
-#include "AcornGlass.hh"
 
 typedef std::map<const char*, VarMap, cstrcmp> CStrVarMapMap;
 
 void SetVar(char *that, const char *name, int from_type, CStrVarMapMap *vtable, void *value);
 
+#define ACORN_SETPARAM_TABLE	\
+        CStrVarMapMap *vtable;
+
+#define ACORN_SETPARAM_METHODS																\
+	AcornSurface* setparam(const char *name, int    value) { SetVar((char *) this, name, Type_int   , vtable, (void *) &value); return this; }	\
+	AcornSurface* setparam(const char *name, double value) { SetVar((char *) this, name, Type_double, vtable, (void *) &value); return this; }	\
+	AcornSurface* setparam(const char *name, string value) { SetVar((char *) this, name, Type_string, vtable, (void *) &value); return this; }	\
+	//AcornSurface* setparam(const char *name, char  *value) { SetVar((char *) this, name, Type_string, vtable,          &value); return this; }	\
+	
 #define ACORN_SURFACE 								\
+	ACORN_SETPARAM_TABLE							\
 	Param string type;							\
 	Param string name;							\
 	Param double semi;							\
@@ -24,7 +33,6 @@ void SetVar(char *that, const char *name, int from_type, CStrVarMapMap *vtable, 
 	double	   *indicies;							\
 	string	   *glass;							\
 										\
-        CStrVarMapMap *vtable;							\
 										\
 	int (*traverse)(struct AcornModel *m, AcornSurface *s, AcornRay &rays);	\
 	int (*initials)(struct AcornModel *m, AcornSurface *s);			\
@@ -32,9 +40,7 @@ void SetVar(char *that, const char *name, int from_type, CStrVarMapMap *vtable, 
 struct AcornSurface {
 	ACORN_SURFACE
 
-	AcornSurface* setparam(const char *name, int    value) { SetVar((char *) this, name, Type_int   , vtable, (void *) &value); return this; }
-	AcornSurface* setparam(const char *name, double value) { SetVar((char *) this, name, Type_double, vtable, (void *) &value); return this; }
-	AcornSurface* setparam(const char *name, string value) { SetVar((char *) this, name, Type_string, vtable, (void *) &value); return this; }
+	ACORN_SETPARAM_METHODS
 };
 
 

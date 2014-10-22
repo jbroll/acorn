@@ -1,8 +1,13 @@
 
 *.o
+*.a
 *.so
 
 *.acorn
+
+*.mtable
+*.vtable
+*.pyc
 
 zernike/zernike.c
 zernike/zernike.tab

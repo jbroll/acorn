@@ -3,7 +3,7 @@
 
 #include "Acorn.hh"
 
-class AcornGlass {
+struct AcornGlass {
     Param string	comment;
     Param string	name;
     Param int		formula;
