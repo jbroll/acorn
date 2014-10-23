@@ -127,6 +127,8 @@ class ZMX  {
 	std::vector<char*> list = split(&cat(filename)[0], "\n");
 
         for ( auto &i : list ) {
+	    if ( i[0] == '!' || i[0] == '#' ) { continue; }		// Allow comments
+
 	    std::vector<char*> line = split(i, " \t");
 
 	    invoke(line[0], line);
