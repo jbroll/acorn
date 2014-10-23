@@ -135,6 +135,7 @@ class UDA {
     }
 };
 
+#define MyClass UDA
 std::map<std::string, void (UDA::*)(std::vector<char*>)> UDA::mtable = {
 #	include "uda.mtable"
 };

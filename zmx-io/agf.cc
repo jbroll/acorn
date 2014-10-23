@@ -91,6 +91,7 @@ class AGF {
     }
 };
 
+#define MyClass AGF
 std::map<std::string, void (AGF::*)(std::vector<char*>)> AGF::mtable = {
 #	include "agf.mtable"
 };

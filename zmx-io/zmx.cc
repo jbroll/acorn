@@ -345,6 +345,7 @@ class ZMX  {
     Keyword VDYN (std::vector<char*> argv) {}
 };
 
+#define MyClass ZMX
 std::map<std::string, void (ZMX::*)(std::vector<char*>)> ZMX::mtable = {
 #	include "zmx.mtable"
 };
