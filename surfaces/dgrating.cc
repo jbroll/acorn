@@ -27,6 +27,8 @@ struct AcornSurfaceDGrating {
     AcornSurfaceDGrating();
 };
 
+#define MyClass AcornSurfaceDGrating
+
 static CStrVarMapMap VTable = {
 #	include "dgrating.vtable"
 };

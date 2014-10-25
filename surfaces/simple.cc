@@ -27,6 +27,8 @@ struct AcornSurfaceSimple {
     AcornSurfaceSimple();
 };
 
+#define MyClass AcornSurfaceSimple
+
 //static std::map<const char *, VarMap> VTable = {
 static CStrVarMapMap VTable = {
 #	include "simple.vtable"

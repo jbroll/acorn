@@ -27,6 +27,8 @@ struct AcornSurfaceLensArrayHex {
     AcornSurfaceLensArrayHex();
 };
 
+#define MyClass AcornSurfaceLensArrayHex
+
 static CStrVarMapMap VTable = {
 #	include "lens-array-hex.vtable"
 };

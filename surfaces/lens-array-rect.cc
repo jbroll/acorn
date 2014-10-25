@@ -27,6 +27,8 @@ struct AcornSurfaceLensArrayRect {
     AcornSurfaceLensArrayRect();
 };
 
+#define MyClass AcornSurfaceLensArrayRect
+
 static CStrVarMapMap VTable = {
 #	include "lens-array-rect.vtable"
 };

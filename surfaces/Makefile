@@ -10,7 +10,7 @@ INC= -I/Users/john/include -I/home/john/include -I/home/jroll/include
 JLIBS= -L/Users/john/lib   -L/data/mmti/lib     -L/home/jroll/lib
 
 CFLAGS=$(INC) -msse -fPIC -O3 $(BITS) 
-CXXFLAGS= -std=c++0x -msse -fPIC -O3
+CXXFLAGS=$(INC) -std=c++0x -msse -fPIC -O3
 
 SRC	= acorn.cpp acorn.h aperture.cpp glass/glass.c glass/acorn-glass.cpp tpool/tpool.c
 
@@ -33,102 +33,25 @@ ACORN_UTIL = acorn-utils.h
 
 all: $(SURFS)
 
-simple.vtable : simple.cc ../AcornSurface.hh
-	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceSimple, "$$3") } }" ; comma="," }' >  $@
-	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceSimple, "$$3") } }" ; comma="," }' >> $@
-	
 
-lib/$(ARCH)/simple.so : simple.cc simple.vtable ../Acorn.hh $(ACORN_UTIL) 
+%.vtable : %.cc
+	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(MyClass, "$$3") } }" ; comma="," }' >  $@
+	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(MyClass, "$$3") } }" ; comma="," }' >> $@
+	
+lib/$(ARCH)/%.so : %.cc
 	@mkdir -p lib/$(ARCH)
 	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
 
 
-coordbrk.vtable : coordbrk.cc ../AcornSurface.hh
-	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceCoordBrk, "$$3") } }" ; comma="," }' >  $@
-	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceCoordBrk, "$$3") } }" ; comma="," }' >> $@
-	
-
+lib/$(ARCH)/simple.so   : simple.cc   simple.vtable   ../Acorn.hh $(ACORN_UTIL) 
 lib/$(ARCH)/coordbrk.so : coordbrk.cc coordbrk.vtable ../Acorn.hh $(ACORN_UTIL) 
-	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
-
-
-tilted.vtable : tilted.cc ../AcornSurface.hh
-	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceTilted, "$$3") } }" ; comma="," }' >  $@
-	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceTilted, "$$3") } }" ; comma="," }' >> $@
-	
-
-lib/$(ARCH)/tilted.so : tilted.cc tilted.vtable ../Acorn.hh $(ACORN_UTIL) 
-	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
-
-
-zernike.vtable : zernike.cc ../AcornSurface.hh
-	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceZernike, "$$3") } }" ; comma="," }' >  $@
-	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceZernike, "$$3") } }" ; comma="," }' >> $@
-	
-
-lib/$(ARCH)/zernike.so : zernike.cc zernike.vtable ../Acorn.hh $(ACORN_UTIL) 
-	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@ ../zernike/zernike.a
-
-
-
-zernikz.vtable : zernikz.cc ../AcornSurface.hh
-	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceZernike, "$$3") } }" ; comma="," }' >  $@
-	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceZernike, "$$3") } }" ; comma="," }' >> $@
-	
-
-lib/$(ARCH)/zernikz.so : zernikz.cc zernikz.vtable ../Acorn.hh $(ACORN_UTIL) 
-	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@ ../zernike/zernike.a
-
-
-lens-array-rect.vtable : lens-array-rect.cc ../AcornSurface.hh
-	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceLensArrayRect, "$$3") } }" ; comma="," }' >  $@
-	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceLensArrayRect, "$$3") } }" ; comma="," }' >> $@
-	
+lib/$(ARCH)/tilted.so   : tilted.cc   tilted.vtable   ../Acorn.hh $(ACORN_UTIL) 
+lib/$(ARCH)/zernike.so  : zernike.cc  zernike.vtable  ../Acorn.hh $(ACORN_UTIL) 
+lib/$(ARCH)/zernikz.so  : zernikz.cc  zernikz.vtable  ../Acorn.hh $(ACORN_UTIL) 
+lib/$(ARCH)/evenasph.so : evenasph.cc evenasph.vtable ../Acorn.hh $(ACORN_UTIL) 
+lib/$(ARCH)/dgrating.so : dgrating.cc dgrating.vtable ../Acorn.hh $(ACORN_UTIL) 
+lib/$(ARCH)/QE.so 	: QE.cc       QE.vtable       ../Acorn.hh $(ACORN_UTIL) 
 
 lib/$(ARCH)/lens-array-rect.so : lens-array-rect.cc lens-array-rect.vtable ../Acorn.hh $(ACORN_UTIL) 
-	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
-
-
-lens-array-hex.vtable : lens-array-hex.cc ../AcornSurface.hh
-	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceLensArrayHex, "$$3") } }" ; comma="," }' >  $@
-	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceLensArrayHex, "$$3") } }" ; comma="," }' >> $@
-	
-
-lib/$(ARCH)/lens-array-hex.so : lens-array-hex.cc lens-array-hex.vtable ../Acorn.hh $(ACORN_UTIL) 
-	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
-
-
-evenasph.vtable : evenasph.cc ../AcornSurface.hh
-	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceEvenASphere, "$$3") } }" ; comma="," }' >  $@
-	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceEvenASphere, "$$3") } }" ; comma="," }' >> $@
-	
-
-lib/$(ARCH)/evenasph.so : evenasph.cc evenasph.vtable ../Acorn.hh $(ACORN_UTIL) 
-	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
-
-
-dgrating.vtable : dgrating.cc ../AcornSurface.hh
-	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceDGrating, "$$3") } }" ; comma="," }' >  $@
-	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceDGrating, "$$3") } }" ; comma="," }' >> $@
-	
-
-lib/$(ARCH)/dgrating.so : dgrating.cc dgrating.vtable ../Acorn.hh $(ACORN_UTIL) 
-	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
-
-QE.vtable : QE.cc ../AcornSurface.hh
-	grep Param   ../AcornSurface.hh | grep -v define | awk -v comma=" " '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceQE, "$$3") } }" ; comma="," }' >  $@
-	grep Param                   $< | grep -v define | awk -v comma=,   '{ gsub(";", ""); print comma, "{  \""$$3"\", { Type_"$$2", offsetof(AcornSurfaceQE, "$$3") } }" ; comma="," }' >> $@
-	
-
-lib/$(ARCH)/QE.so : QE.cc QE.vtable ../Acorn.hh $(ACORN_UTIL) 
-	@mkdir -p lib/$(ARCH)
-	$(CXX) $(CXXFLAGS) -shared $(INC) $< -o $@
+lib/$(ARCH)/lens-array-hex.so  : lens-array-hex.cc  lens-array-hex.vtable  ../Acorn.hh $(ACORN_UTIL) 
 

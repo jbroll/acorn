@@ -37,6 +37,8 @@ struct AcornSurfaceEvenASphere {
     AcornSurfaceEvenASphere();
 };
 
+#define MyClass AcornSurfaceEvenASphere
+
 static CStrVarMapMap VTable = {
 #	include "evenasph.vtable"
 };

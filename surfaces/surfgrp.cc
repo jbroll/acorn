@@ -10,6 +10,8 @@ AcornSurfGrp *AcornSurfGrpConstructor(void) {
     return surf;
 }
 
+#define MyClass AcornSurfGrp
+
 static CStrVarMapMap VTable = {
 #	include "AcornSurfGrp.vtable"
 };

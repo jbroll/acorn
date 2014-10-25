@@ -41,6 +41,8 @@ struct AcornSurfaceZernike {
     AcornSurfaceZernike();
 };
 
+#define MyClass AcornSurfaceZernike
+
 static CStrVarMapMap VTable = {
 #	include "zernike.vtable"
 };

@@ -45,6 +45,8 @@ struct AcornSurfaceQE {
     AcornSurfaceQE();
 };
 
+#define MyClass AcornSurfaceQE
+
 static CStrVarMapMap VTable = {
 #	include "QE.vtable"
 };

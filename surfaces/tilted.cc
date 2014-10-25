@@ -25,6 +25,8 @@ struct AcornSurfaceTilted {
     AcornSurfaceTilted();
 };
 
+#define MyClass AcornSurfaceTilted
+
 static CStrVarMapMap VTable = {
 #	include "tilted.vtable"
 };

@@ -23,6 +23,8 @@ struct AcornSurfaceCoordBrk {
     AcornSurfaceCoordBrk();
 };
 
+#define MyClass AcornSurfaceCoordBrk
+
 static CStrVarMapMap VTable = {
 #	include "coordbrk.vtable"
 };
